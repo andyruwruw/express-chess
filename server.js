@@ -12,36 +12,20 @@ app.use(bodyParser.urlencoded({
 const mongoose = require('mongoose');
 
 // connect to the database
-mongoose.connect('mongodb://localhost:27017/museum', {
+mongoose.connect('mongodb://localhost:27017/chess', {
   useNewUrlParser: true
 });
 
 app.listen(3000, () => console.log('Server listening on port 3000!'));
 
-const multer = require('multer')
-const upload = multer({
-	dest: '/var/www/lab4.andrewdanielyoung.com/images/',
-	limits: {
-		fileSize: 10000000
-	}
+const pieceSchema = new mongoose.Schema({
+	white: {K: "", Q: ["", "", ""],  R: ["", ""], B: ["", ""], KN: ["", ""], P: ["", "", "", "", "", "", "", ""]},
+	black: {K: "", Q: ["", "", ""],  R: ["", ""], B: ["", ""], KN: ["", ""], P: ["", "", "", "", "", "", "", ""]},
+	turnNum: 0,
 });
 
-const itemSchema = new mongoose.Schema({
-	title: String,
-	path: String,
-	description: String,
-});
+const board = mongoose.model('Item', pieceSchema);
 
-const Item = mongoose.model('Item', itemSchema);
-
-app.post('/api/photos', upload.single('photo'), async (req, res) => {
-	if (!req.file) {
-		return res.sendStatus(400);
-	}
-	res.send({
-		path: "/images/" + req.file.filename
-	});
-});
 
 app.post('/api/items', async (req, res) => {
 	const item = new Item({

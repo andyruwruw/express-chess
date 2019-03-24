@@ -1,172 +1,33 @@
-body {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 16px;
-  background: #fff;
-  padding: 0px;
-  margin: 0px;
+
+.white
+{
+  background-color: rgb(231, 203, 165);
 }
 
-/* Header */
-.header {
-  display: flex;
-  padding: 20px 100px 0px 100px;
-  background-color: rgb(143, 223, 156);
-  color: #fff;
+.black
+{
+  background-color: rgb(158, 100, 61);
 }
 
-.title {
-  margin-top: 10px;
-}
-
-.title h1, .title h2 {
-  margin: 0px;
-}
-
-.title h1 {
-  border-top: 1px solid #000;
-}
-
-/* Footer */
-.footer {
+.block
+{
+  display: block;
+  width: 50px;
   height: 50px;
-  padding: 20px 100px 0px 100px;
 }
-
-.footer a {
-  color: #000;
-  text-align: center;
-  font-size: 150%;
-  font-weight: bold;
-  display: block;
-  margin: 0 auto;
-}
-
-/* Content */
-.content {
-  padding: 20px 100px 0px 100px;
-}
-
-.image h2 {
-  display: block;
-  width: 100%;
-  text-align: center;
-  text-transform: capitalize;
-  font-weight: bold;
-  font-size: 125%;
-  height: 30px;
-}
-.image p
+.container
 {
-  display: block;
-  width: 100%;
-  text-align: center;
-  font-style: italic;
-}
-
-/* Admin */
-.heading {
   display: flex;
-  margin-bottom: 20px;
-  margin-top: 20px;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
 }
 
-.heading h2 {
-  margin: 0px;
-  margin-left: 10px;
-}
 
-.add, .edit {
-  display: flex;
-}
 
-.circle {
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  padding: 8px;
-  background: #333;
-  color: #fff;
-  text-align: center;
-}
 
-/* Form */
-input, textarea, select, button {
-  
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1em;
-  
-}
 
-.upload input 
-{
-  display: block;
-  margin: 0 auto;
-}
-
-p
-{
-  display: block;
-  text-align: center;
-  width: 100%;
-}
-
-.form {
-  margin-right: 50px;
-}
-
-/* Uploaded images */
-.upload h2 {
-  display: block;
-  text-align: center;
-  margin: 0 auto;
-}
-
-.upload img {
-  max-width: 300px;
-}
-
-/* Suggestions */
-.suggestions {
-  width: 200px;
-  border: 1px solid #ccc;
-}
-
-.suggestion {
-  min-height: 20px;
-}
-
-.suggestion:hover {
-  background-color: rgb(72, 121, 70);
-  color: #fff;
-}
-
-/* Masonry */
-html {
-  box-sizing: border-box;
-}
-
-*,
-*:before,
-*:after {
-  box-sizing: inherit;
-}
-
-.image-gallery {
-  column-gap: 1.5em;
-}
-
-.image {
-  margin: 0 0 1.5em;
-  display: inline-block;
-  width: 100%;
-  background: rgba(68, 68, 68, 0.075);
-  border: 1px solid rgba(0, 0, 0, 0.075);
-  padding: 10px;
-}
-
-.image img {
-  width: 100%;
-}
 
 /* Masonry on large screens */
 @media only screen and (min-width: 1024px) {
