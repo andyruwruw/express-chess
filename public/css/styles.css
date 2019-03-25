@@ -1,0 +1,138 @@
+
+.white
+{
+  background-color: rgb(231, 203, 165);
+}
+
+.black
+{
+  background-color: rgb(158, 100, 61);
+}
+
+.block
+{
+  display: block;
+  width: 50px;
+  height: 50px;
+  background-size: cover;
+}
+.container
+{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.bb
+{
+  background-image: url("../images/bb.png");
+}
+.bk
+{
+  background-image: url("../images/bk.png");
+}
+.bn
+{
+  background-image: url("../images/bn.png");
+}
+.bp
+{
+  background-image: url("../images/bp.png");
+}
+.bq
+{
+  background-image: url("../images/bq.png");
+}
+.br
+{
+  background-image: url("../images/br.png");
+}
+.wb
+{
+  background-image: url("../images/wb.png");
+}
+.wk
+{
+  background-image: url("../images/wk.png");
+}
+.wn
+{
+  background-image: url("../images/wn.png");
+}
+.wp
+{
+  background-image: url("../images/wp.png");
+}
+.wq
+{
+  background-image: url("../images/wq.png");
+}
+.wr
+{
+  background-image: url("../images/wr.png");
+}
+.empty
+{
+  background-image: rgba(0,0,0,0);
+}
+.possible
+{
+  background-color: rgb(188, 228, 255);
+}
+.possiblekill
+{
+  background-color: rgb(255, 188, 188);
+}
+.selected
+{
+  background-color: rgb(129, 205, 255);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Masonry on large screens */
+@media only screen and (min-width: 1024px) {
+  .image-gallery {
+    column-count: 4;
+  }
+}
+
+/* Masonry on medium-sized screens */
+@media only screen and (max-width: 1023px) and (min-width: 768px) {
+  .image-gallery {
+    column-count: 3;
+  }
+}
+
+/* Masonry on small screens */
+@media only screen and (max-width: 767px) and (min-width: 540px) {
+  .image-gallery {
+    column-count: 2;
+  }
+}
+
