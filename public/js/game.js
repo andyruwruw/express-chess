@@ -1,23 +1,36 @@
 var app = new Vue({
   el: '#app',
   data: {
-		position: {w: {k: ["1-5"], q: ["1-4", "##", "##"],  r: ["1-1", "1-8"], b: ["1-3", "1-6"], n: ["1-2", "1-7"], p: ["2-1", "2-2", "2-3", "2-4", "2-5", "2-6", "2-7", "2-8"]},
-				   b: {k: ["8-5"], q: ["8-4", "##", "##"],  r: ["8-1", "8-8"], b: ["8-3", "8-6"], n: ["8-2", "8-7"], p: ["7-1", "7-2", "7-3", "7-4", "7-5", "7-6", "7-7", "7-8"]},
-				   turnNum: 0},
-		board: [["wr1", "wn1", "wb1", "wq1", "wk",  "wb2", "wn2", "wr2"], 
-				["wp1", "wp2", "wp3", "wp4", "wp5", "wp6", "wp7", "wp8"],
-				["",    "",    "",    "",    "",    "",    "",    ""   ], 
-				["",    "",    "",    "",    "",    "",    "",    ""   ], 
-				["",    "",    "",    "",    "",    "",    "",    ""   ], 
-				["",    "",    "",    "",    "",    "",    "",    ""   ], 
-				["bp1", "bp2", "bp3", "bp4", "bp5", "bp6", "bp7", "bp8"],
-				["br1", "bn1", "bb1", "bq1", "bk",  "bb2", "bn2", "br2"] ],
-		selected: {piece: "", position: ""},
-		displayedTurn: 0,
-		playerTurn: 1,
-		moveMade: 0,
-		player: {score: 0, color: "w", opponent: 'b'},
-		points: {p: 1, n: 3, b: 3, r: 5, q: 9},
+	PLAYER_INFO: {color: "w", opponent: 'b'},
+	PIECE_WORTH: {p: 1, n: 3, b: 3, r: 5, q: 9},
+	sharedData: {
+		turnNum: 0,
+		scores: {w: 0, b: 0},
+		position: [
+			{key: "w", array: [
+			{key: "k", num: 1, row: 1, col: 5}, {key: "q", num: 1, row: 1, col: 4}, {key: "r", num: 1, row: 1, col: 1}, {key: "r", num: 2, row: 1, col: 8},  
+			{key: "b", num: 1, row: 1, col: 3}, {key: "b", num: 2, row: 1, col: 6}, {key: "n", num: 1, row: 1, col: 2}, {key: "n", num: 2, row: 1, col: 7}, 
+			{key: "p", num: 1, row: 2, col: 1}, {key: "p", num: 2, row: 2, col: 2}, {key: "p", num: 3, row: 2, col: 3}, {key: "p", num: 4, row: 2, col: 4}, 
+			{key: "p", num: 5, row: 2, col: 5}, {key: "p", num: 6, row: 2, col: 6}, {key: "p", num: 7, row: 2, col: 7}, {key: "p", num: 8, row: 2, col: 8},]}, 
+
+			{key: "b", array: [
+			{key: "k", num: 1, row: 8, col: 5}, {key: "q", num: 1, row: 8, col: 4}, {key: "r", num: 1, row: 8, col: 1}, {key: "r", num: 2, row: 8, col: 8},  
+			{key: "b", num: 1, row: 8, col: 3}, {key: "b", num: 2, row: 8, col: 6}, {key: "n", num: 1, row: 8, col: 2}, {key: "n", num: 2, row: 8, col: 7}, 
+			{key: "p", num: 1, row: 7, col: 1}, {key: "p", num: 2, row: 7, col: 2}, {key: "p", num: 3, row: 7, col: 3}, {key: "p", num: 4, row: 7, col: 4}, 
+			{key: "p", num: 5, row: 7, col: 5}, {key: "p", num: 6, row: 7, col: 6}, {key: "p", num: 7, row: 7, col: 7}, {key: "p", num: 8, row: 7, col: 8},]}],
+	},
+	board: [["wr1", "wn1", "wb1", "wq1", "wk",  "wb2", "wn2", "wr2"], 
+			["wp1", "wp2", "wp3", "wp4", "wp5", "wp6", "wp7", "wp8"],
+			["",    "",    "",    "",    "",    "",    "",    ""   ], 
+			["",    "",    "",    "",    "",    "",    "",    ""   ], 
+			["",    "",    "",    "",    "",    "",    "",    ""   ], 
+			["",    "",    "",    "",    "",    "",    "",    ""   ], 
+			["bp1", "bp2", "bp3", "bp4", "bp5", "bp6", "bp7", "bp8"],
+			["br1", "bn1", "bb1", "bq1", "bk",  "bb2", "bn2", "br2"] ],
+	selected: {piece: "", position: {},
+	displayedTurn: 0,
+	playerTurn: 1,
+	moveMade: 0,
   },
   methods: {
 // ------------------------------------------------------------------REFRESH GAME FUNCTIONS------------------------------------------------------------------
@@ -25,7 +38,7 @@ var app = new Vue({
 		{
 			await this.getBoard()
 			{
-				if (this.position.turnNum > this.displayedTurn)
+				if (this.sharedData.turnNum > this.displayedTurn)
 				{
 					refreshBoard();
 				}
@@ -34,6 +47,15 @@ var app = new Vue({
 		refreshBoard()
 		{
 			console.log("Refreshing Page");
+			for (var i = 0; i < this.sharedData.position.length; i++)
+			{
+				for (var j = 0; j < this.sharedData.position[i].array.length; j++)
+				{
+					let position = {row: this.sharedData.position[i].array[j].row, col: this.sharedData.position[i].array[j].col}
+					let placePiece = this.sharedData.position[i].key + this.sharedData.position[i].array[j].key + this.sharedData.position[i].array[j].num;
+					this.board[position.row - 1][position.col - 1] = placePiece;
+				}
+			}
 			for (var i = 7; i >= 0 ; i--)												// Runs through each block.
 			{
 				for (var j = 0; j < 8; j++)
@@ -72,14 +94,19 @@ var app = new Vue({
 				console.log(error);
 			}
 		},
-		updateData(position, newPosition)
+		updateData(block, newPosition)
 		{
 			//this.highlightOptions(this.selected.position);
-			var id = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+			var id = this.board[parseInt(block.charAt(0), 10) - 1][parseInt(block.charAt(2), 10) - 1];
 			var color = id.charAt(0);
 			var type = id.charAt(1);
 			var num = parseInt(id.charAt(2), 10);
-			this.position[color][type][num - 1] = newPosition;
+			colorIndex = 0;
+			if (this.PLAYER_INFO.color == "b")
+			{
+				colorIndex = 1;
+			}
+			this.sharedData.position[colorIndex].array = newPosition;
 		},
 		async upload() {
 			if (this.moveMade)
@@ -168,7 +195,12 @@ var app = new Vue({
 				this.selected.position = block;	
 			}
 		},
-
+		killPiece(block)
+		{
+			this.position[this.player.opponent][(this.board[parseInt(block.charAt(0), 10) - 1]
+			[parseInt(block.charAt(2), 10) - 1]).charAt(1)][(this.board[parseInt(block.charAt(0), 10) - 1]
+			[parseInt(block.charAt(2), 10) - 1]).charAt(2)] = "##";
+		},
 // ------------------------------------------------------------------PIECE ACTIONS AND LOGIC------------------------------------------------------------------
 		kingAction(position, actionBlock)
 		{
@@ -186,8 +218,9 @@ var app = new Vue({
 				else if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
 				{
 					console.log("Going for the kill");
-					this.updateData(position, actionBlock);
 					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
+					this.updateData(position, actionBlock);
+					this.updateData(actionBlock, "##");
 					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
 					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
@@ -208,9 +241,10 @@ var app = new Vue({
 				}
 				else if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
 				{
-					this.updateData(position, actionBlock);
 					console.log("Going for the kill");
 					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
+					this.updateData(position, actionBlock);
+					this.updateData(actionBlock, "##");
 					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
 					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
@@ -230,8 +264,9 @@ var app = new Vue({
 				}
 				else if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
 				{
-					this.updateData(position, actionBlock);
 					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
+					this.updateData(position, actionBlock);
+					this.updateData(actionBlock, "##");
 					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
 					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
@@ -251,8 +286,9 @@ var app = new Vue({
 				}
 				else if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
 				{
-					this.updateData(position, actionBlock);
 					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
+					this.updateData(position, actionBlock);
+					this.updateData(actionBlock, "##");
 					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
 					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
@@ -276,8 +312,9 @@ var app = new Vue({
 				else if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
 				{
 					console.log("Going for the kill");
-					this.updateData(position, actionBlock);
 					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
+					this.updateData(position, actionBlock);
+					this.updateData(actionBlock, "##");
 					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
 					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
@@ -302,16 +339,32 @@ var app = new Vue({
 				this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 			}
 			else if ((parseInt(actionBlock.charAt(0), 10) - parseInt(position.charAt(0), 10) == colorDirection) && 
-			(Math.abs(parseInt(actionBlock.charAt(0), 10) - parseInt(position.charAt(0), 10)) == 1) &&
+			(Math.abs(parseInt(actionBlock.charAt(2), 10) - parseInt(position.charAt(2), 10)) == 1) &&
 			((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]) != "") &&
 			this.isSafe(this.position[this.player.color].k[0]))
 			{
 				if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
 				{
-					this.updateData(position, actionBlock);
 					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.updateData(position, actionBlock);
+					this.updateData(actionBlock, "##");
+					if (colorDirection == 1 && parseInt(actionBlock.charAt(0), 10) == 8)
+					{
+						var newQueen = this.player.color + "q" + this.position[this.player.color].q.length;
+						this.position[this.player.color].q.push(actionBlock);
+						this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = newQueen;
+						this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					}
+					else if (colorDirection == -1 && parseInt(actionBlock.charAt(0), 10) == 1)
+					{
+						this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+						this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					}
+					else
+					{
+						this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+						this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					}
 				}
 			}
 		},
@@ -411,6 +464,7 @@ var app = new Vue({
 			if (Math.abs(parseInt(this.position[this.player.opponent].k[0].charAt(0), 10) - parseInt(block.charAt(0), 10)) <= 1 &&
 			Math.abs(parseInt(this.position[this.player.opponent].k[0].charAt(2), 10) - parseInt(block.charAt(2), 10)) <= 1)
 			{
+				console.log("King too close to other King!");
 				return false;
 			}
 
@@ -425,6 +479,7 @@ var app = new Vue({
 				Math.abs(parseInt(this.position[this.player.opponent].q[piece].charAt(2), 10) - parseInt(block.charAt(2), 10)))) &&
 				 this.isClearPath(this.position[this.player.opponent].q[piece], block))
 				{
+					console.log("King too close to other Queen!");
 					return false;
 				}
 			}
@@ -463,6 +518,7 @@ var app = new Vue({
 				else if (parseInt(this.position[this.player.opponent].p[piece].charAt(0), 10) - parseInt(block.charAt(0), 10) == colorDirection &&
 				Math.abs(parseInt(this.position[this.player.opponent].p[piece].charAt(2), 10) - parseInt(block.charAt(2), 10)) == 1)
 				{
+					console.log("King too close to other Pawn!");
 					return false;
 				}
 			}
