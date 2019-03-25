@@ -4,33 +4,25 @@ var app = new Vue({
 	PLAYER_INFO: {color: "w", opponent: 'b'},
 	PIECE_WORTH: {p: 1, n: 3, b: 3, r: 5, q: 9},
 	sharedData: {
+		playerNum: 2,
 		turnNum: 0,
 		scores: {w: 0, b: 0},
-		position: [
-			{key: "w", array: [
-			{key: "k", num: 1, row: 1, col: 5}, {key: "q", num: 1, row: 1, col: 4}, {key: "r", num: 1, row: 1, col: 1}, {key: "r", num: 2, row: 1, col: 8},  
-			{key: "b", num: 1, row: 1, col: 3}, {key: "b", num: 2, row: 1, col: 6}, {key: "n", num: 1, row: 1, col: 2}, {key: "n", num: 2, row: 1, col: 7}, 
-			{key: "p", num: 1, row: 2, col: 1}, {key: "p", num: 2, row: 2, col: 2}, {key: "p", num: 3, row: 2, col: 3}, {key: "p", num: 4, row: 2, col: 4}, 
-			{key: "p", num: 5, row: 2, col: 5}, {key: "p", num: 6, row: 2, col: 6}, {key: "p", num: 7, row: 2, col: 7}, {key: "p", num: 8, row: 2, col: 8},]}, 
-
-			{key: "b", array: [
-			{key: "k", num: 1, row: 8, col: 5}, {key: "q", num: 1, row: 8, col: 4}, {key: "r", num: 1, row: 8, col: 1}, {key: "r", num: 2, row: 8, col: 8},  
-			{key: "b", num: 1, row: 8, col: 3}, {key: "b", num: 2, row: 8, col: 6}, {key: "n", num: 1, row: 8, col: 2}, {key: "n", num: 2, row: 8, col: 7}, 
-			{key: "p", num: 1, row: 7, col: 1}, {key: "p", num: 2, row: 7, col: 2}, {key: "p", num: 3, row: 7, col: 3}, {key: "p", num: 4, row: 7, col: 4}, 
-			{key: "p", num: 5, row: 7, col: 5}, {key: "p", num: 6, row: 7, col: 6}, {key: "p", num: 7, row: 7, col: 7}, {key: "p", num: 8, row: 7, col: 8},]}],
+		board: [["wr1", "wn1", "wb1", "wq1", "wk",  "wb2", "wn2", "wr2"], 
+		["wp1", "wp2", "wp3", "wp4", "wp5", "wp6", "wp7", "wp8"],
+		["",    "",    "",    "",    "",    "",    "",    ""   ], 
+		["",    "",    "",    "",    "",    "",    "",    ""   ], 
+		["",    "",    "",    "",    "",    "",    "",    ""   ], 
+		["",    "",    "",    "",    "",    "",    "",    ""   ], 
+		["bp1", "bp2", "bp3", "bp4", "bp5", "bp6", "bp7", "bp8"],
+		["br1", "bn1", "bb1", "bq1", "bk",  "bb2", "bn2", "br2"]],
+		yourTeam: 'w',
 	},
-	board: [["wr1", "wn1", "wb1", "wq1", "wk",  "wb2", "wn2", "wr2"], 
-			["wp1", "wp2", "wp3", "wp4", "wp5", "wp6", "wp7", "wp8"],
-			["",    "",    "",    "",    "",    "",    "",    ""   ], 
-			["",    "",    "",    "",    "",    "",    "",    ""   ], 
-			["",    "",    "",    "",    "",    "",    "",    ""   ], 
-			["",    "",    "",    "",    "",    "",    "",    ""   ], 
-			["bp1", "bp2", "bp3", "bp4", "bp5", "bp6", "bp7", "bp8"],
-			["br1", "bn1", "bb1", "bq1", "bk",  "bb2", "bn2", "br2"] ],
-	selected: {piece: "", position: {},
+
+	selected: {piece: "", position: ""},
 	displayedTurn: 0,
 	playerTurn: 1,
 	moveMade: 0,
+	queenNum: 1,
   },
   methods: {
 // ------------------------------------------------------------------REFRESH GAME FUNCTIONS------------------------------------------------------------------
@@ -46,26 +38,20 @@ var app = new Vue({
 		},
 		refreshBoard()
 		{
-			console.log("Refreshing Page");
-			for (var i = 0; i < this.sharedData.position.length; i++)
-			{
-				for (var j = 0; j < this.sharedData.position[i].array.length; j++)
-				{
-					let position = {row: this.sharedData.position[i].array[j].row, col: this.sharedData.position[i].array[j].col}
-					let placePiece = this.sharedData.position[i].key + this.sharedData.position[i].array[j].key + this.sharedData.position[i].array[j].num;
-					this.board[position.row - 1][position.col - 1] = placePiece;
-				}
-			}
-			for (var i = 7; i >= 0 ; i--)												// Runs through each block.
+			for (var i = 0; i < 8 ; i++)												// Runs through each block.
 			{
 				for (var j = 0; j < 8; j++)
 				{
 					var element = document.getElementById((i + 1) + "-" + (j + 1)); 	// Gets each block by ID
-					if (this.board[i][j] != "")											// If it has a piece, it adds piece class
+					if (this.sharedData.board[i][j] != "")											// If it has a piece, it adds piece class
 					{
-						element.classList.add(this.board[i][j].substring(0, 2));
+						if (element.classList.contains("empty"))
+						{
+							element.classList.remove("empty");
+						}
+						element.classList.add(this.sharedData.board[i][j].substring(0, 2));
 					}
-					else if (this.board[i][j] == "")									// If it doens't have a piece
+					else if (this.sharedData.board[i][j] == "")									// If it doens't have a piece
 					{
 						let colors = ["w", "b"];
 						let pieces = ["q", "k", "n", "b", "r", "p"];
@@ -88,42 +74,84 @@ var app = new Vue({
 		async getBoard() {
 			try {
 				let response = await axios.get("/api/pieces");
-				this.position = response.data;
+				this.sharedData = response.data;
+				this.moveMade = 1;
+				this.displayedTurn = sharedData.turnNum;
 				return true;
 			} catch (error) {
 				console.log(error);
 			}
 		},
-		updateData(block, newPosition)
-		{
-			//this.highlightOptions(this.selected.position);
-			var id = this.board[parseInt(block.charAt(0), 10) - 1][parseInt(block.charAt(2), 10) - 1];
-			var color = id.charAt(0);
-			var type = id.charAt(1);
-			var num = parseInt(id.charAt(2), 10);
-			colorIndex = 0;
-			if (this.PLAYER_INFO.color == "b")
-			{
-				colorIndex = 1;
-			}
-			this.sharedData.position[colorIndex].array = newPosition;
-		},
 		async upload() {
 			if (this.moveMade)
 			{
 				this.moveMade = 0;
-				this.position.turnNum += 1;
+				this.sharedData.turnNum += 1;
+				this.displayedTurn += 1;
 				try {
-					let upload = await axios.post('/api/pieces', position);
+					let upload = await axios.post('/api/pieces', sharedData);
 				} catch (error) {
 					console.log(error);
 				}
 			}
 		},
+		async checkOppMove()
+		{
+			if (!this.moveMade)
+			{
+				var temp;
+				try {
+					let response = await axios.get("/api/pieces");
+					temp = response.data;
+					if (temp.turnNum > displayedTurn)
+					{
+						this.getBoard();
+					}
+				} catch (error) {
+					console.log(error);
+				}
+			}
+		},
+		async setUpGame()
+		{
+			try {
+				let response = await axios.get("/api/pieces");
+				temp = response.data;
+				if (temp.playerNum == 2)
+				{
+					this.PLAYER_INFO.color = temp.yourTeam;
+					if (this.PLAYER_INFO.color == "w")
+					{
+						this.moveMade = 1;
+						this.PLAYER_INFO.opponent = "b";
+					}
+					else
+					{
+						this.moveMade = 0;
+						this.PLAYER_INFO.opponent = "w";
+					}
+				}
+				else
+				{
+					if (temp.playerNum == 0)
+					{
+						temp.playerNum == 1;
+					}
+					try {
+						let upload = await axios.post('/api/pieces', temp);
+					} catch (error) {
+						console.log(error);
+					}
+				}
+			} catch (error) {
+				console.log(error);
+			}
+			setInterval(checkOppMove, 50);
+		},
 // ------------------------------------------------------------------SELECTION FUNCTION------------------------------------------------------------------
 		selectPiece(block)
 		{
-			if (this.playerTurn)
+			if (this.moveMade)
 			{
 				if (this.selected.piece == "")
 				{
@@ -133,7 +161,7 @@ var app = new Vue({
 						//this.highlightOptions(block);																					// Set selected to whatever's at that space
 						console.log("Selected: " + this.selected.piece + " on " + this.selected.position);								// Also store that place
 					}
-					else if (this.board[(parseInt(block.charAt(0), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)] == "")
+					else if (this.sharedData.board[(parseInt(block.charAt(0), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)] == "")
 					{
 						return 0;
 					}
@@ -144,7 +172,7 @@ var app = new Vue({
 				}
 				else
 				{
-					if (this.selected.piece == this.board[(parseInt(block.charAt(0), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)])
+					if (this.selected.piece == this.sharedData.board[(parseInt(block.charAt(0), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)])
 					{
 						this.selectedToggle(this.selected.position);
 						console.log("Unselected " + this.selected.position);
@@ -172,7 +200,6 @@ var app = new Vue({
 								this.pawnAction(this.selected.position, block);
 								break;
 						}
-						console.log("Move: " + this.selected.piece + " to " + block);
 						this.selectedToggle(this.selected.position);
 						this.refreshBoard();
 					}
@@ -191,14 +218,14 @@ var app = new Vue({
 			else
 			{
 				element.classList.add("selected");
-				this.selected.piece = this.board[(parseInt(block.charAt(0), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)]; 	
+				this.selected.piece = this.sharedData.board[(parseInt(block.charAt(0), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)]; 	
 				this.selected.position = block;	
 			}
 		},
 		killPiece(block)
 		{
-			this.position[this.player.opponent][(this.board[parseInt(block.charAt(0), 10) - 1]
-			[parseInt(block.charAt(2), 10) - 1]).charAt(1)][(this.board[parseInt(block.charAt(0), 10) - 1]
+			this.position[this.PLAYER_INFO.opponent][(this.sharedData.board[parseInt(block.charAt(0), 10) - 1]
+			[parseInt(block.charAt(2), 10) - 1]).charAt(1)][(this.sharedData.board[parseInt(block.charAt(0), 10) - 1]
 			[parseInt(block.charAt(2), 10) - 1]).charAt(2)] = "##";
 		},
 // ------------------------------------------------------------------PIECE ACTIONS AND LOGIC------------------------------------------------------------------
@@ -207,22 +234,19 @@ var app = new Vue({
 			if ((Math.abs(parseInt(actionBlock.charAt(0), 10) - parseInt(position.charAt(0), 10)) <= 1) &&
 			(Math.abs(parseInt(actionBlock.charAt(2), 10) - parseInt(position.charAt(2), 10)) <= 1) &&
 			 this.isClearPath(position, actionBlock) &&
-			 this.isSafe(actionBlock))
+			 this.isSafe(1, actionBlock))
 			{
-				if (this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "")
+				if (this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "")
 				{
-					this.updateData(position, actionBlock);
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+					this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
-				else if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
+				else if ((this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.PLAYER_INFO.color)
 				{
 					console.log("Going for the kill");
-					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
-					this.updateData(position, actionBlock);
-					this.updateData(actionBlock, "##");
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.sharedData.scores[this.PLAYER_INFO.color] += this.PIECE_WORTH[this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
+					this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+					this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
 			}
 		},
@@ -231,22 +255,19 @@ var app = new Vue({
 			if (((actionBlock.charAt(0) == position.charAt(0) || actionBlock.charAt(2) == position.charAt(2)) || 
 			(Math.abs(parseInt(actionBlock.charAt(0), 10) - parseInt(position.charAt(0), 10)) == Math.abs(parseInt(actionBlock.charAt(2), 10) - parseInt(position.charAt(2), 10)))) &&
 			 this.isClearPath(position, actionBlock) &&
-			 this.isSafe(this.position[this.player.color].k[0]))
+			 this.isSafe(0, actionBlock))
 			{
-				if (this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "")
+				if (this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "")
 				{
-					this.updateData(position, actionBlock);
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+					this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
-				else if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
+				else if ((this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.PLAYER_INFO.color)
 				{
 					console.log("Going for the kill");
-					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
-					this.updateData(position, actionBlock);
-					this.updateData(actionBlock, "##");
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.sharedData.scores[this.PLAYER_INFO.color] += this.PIECE_WORTH[this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
+					this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+					this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
 			}
 		},
@@ -254,21 +275,18 @@ var app = new Vue({
 		{
 			if ((actionBlock.charAt(0) == position.charAt(0) || actionBlock.charAt(2) == position.charAt(2)) &&
 			 this.isClearPath(position, actionBlock) &&
-			 this.isSafe(this.position[this.player.color].k[0]))
+			 this.isSafe(0, actionBlock))
 			{
-				if (this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "")
+				if (this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "")
 				{
-					this.updateData(position, actionBlock);
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+					this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
-				else if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
+				else if ((this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.PLAYER_INFO.color)
 				{
-					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
-					this.updateData(position, actionBlock);
-					this.updateData(actionBlock, "##");
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.sharedData.scores[this.PLAYER_INFO.color] += this.PIECE_WORTH[this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
+					this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+					this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
 			}
 		},
@@ -276,21 +294,18 @@ var app = new Vue({
 		{
 			if ((Math.abs(parseInt(actionBlock.charAt(0)) - parseInt(position.charAt(0), 10)) == Math.abs(parseInt(actionBlock.charAt(2), 10) - parseInt(position.charAt(2), 10))) &&
 			 this.isClearPath(position, actionBlock) &&
-			 this.isSafe(this.position[this.player.color].k[0]))
+			 this.isSafe(0, actionBlock))
 			{
-				if (this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "")
+				if (this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "")
 				{
-					this.updateData(position, actionBlock);
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+					this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
-				else if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
+				else if ((this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.PLAYER_INFO.color)
 				{
-					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
-					this.updateData(position, actionBlock);
-					this.updateData(actionBlock, "##");
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.sharedData.scores[this.PLAYER_INFO.color] += this.PIECE_WORTH[this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
+					this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+					this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
 			}
 		},
@@ -300,70 +315,64 @@ var app = new Vue({
 			(Math.abs(parseInt(actionBlock.charAt(2), 10) - parseInt(position.charAt(2), 10)) == 1)) ||
 			((Math.abs(parseInt(actionBlock.charAt(0), 10) - parseInt(position.charAt(0), 10)) == 1) &&
 			(Math.abs(parseInt(actionBlock.charAt(2), 10) - parseInt(position.charAt(2), 10)) == 2))) &&
-			this.isSafe(this.position[this.player.color].k[0]))
+			this.isSafe(0, actionBlock))
 			{
 				
-				if (this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "")
+				if (this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "")
 				{
-					this.updateData(position, actionBlock);
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+					this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
-				else if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
+				else if ((this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.PLAYER_INFO.color)
 				{
 					console.log("Going for the kill");
-					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
-					this.updateData(position, actionBlock);
-					this.updateData(actionBlock, "##");
-					this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-					this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+					this.sharedData.scores[this.PLAYER_INFO.color] += this.PIECE_WORTH[this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
+					this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+					this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 				}
 			}
 		},
 		pawnAction(position, actionBlock)
 		{
-			console.log("Attempting to move pawn. " + parseInt(actionBlock.charAt(0), 10) + " " + parseInt(position.charAt(0), 10));
 			colorDirection = 1;
-			if (this.player.color == 'b')
+			if (this.PLAYER_INFO.color == 'b')
 			{
 				colorDirection = -1;
 			}
 
 			if ((parseInt(actionBlock.charAt(0), 10) - parseInt(position.charAt(0), 10) == colorDirection) && 
 			(Math.abs(parseInt(actionBlock.charAt(2), 10) - parseInt(position.charAt(2), 10)) == 0) &&
-			this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "" &&
-			this.isSafe(this.position[this.player.color].k[0]))
+			this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] == "" &&
+			this.isSafe(0, actionBlock))
 			{
-				this.updateData(position, actionBlock);
-				this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.selected.piece;
-				this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+				this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.selected.piece;
+				this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 			}
 			else if ((parseInt(actionBlock.charAt(0), 10) - parseInt(position.charAt(0), 10) == colorDirection) && 
 			(Math.abs(parseInt(actionBlock.charAt(2), 10) - parseInt(position.charAt(2), 10)) == 1) &&
-			((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]) != "") &&
-			this.isSafe(this.position[this.player.color].k[0]))
+			((this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]) != "") &&
+			this.isSafe(0, actionBlock))
 			{
-				if ((this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.player.color)
+				if ((this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1]).charAt(0) != this.PLAYER_INFO.color)
 				{
-					this.player.score += this.points[this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
-					this.updateData(position, actionBlock);
-					this.updateData(actionBlock, "##");
+					this.sharedData.scores[this.PLAYER_INFO.color] += this.PIECE_WORTH[this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1].charAt(1)];
 					if (colorDirection == 1 && parseInt(actionBlock.charAt(0), 10) == 8)
 					{
-						var newQueen = this.player.color + "q" + this.position[this.player.color].q.length;
-						this.position[this.player.color].q.push(actionBlock);
-						this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = newQueen;
-						this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+						this.queenNum += 1;
+						var newQueen = this.PLAYER_INFO.color + "q" + this.queenNum;
+						this.position[this.PLAYER_INFO.color].q.push(actionBlock);
+						this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = newQueen;
+						this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 					}
 					else if (colorDirection == -1 && parseInt(actionBlock.charAt(0), 10) == 1)
 					{
-						this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-						this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+						this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+						this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 					}
 					else
 					{
-						this.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
-						this.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
+						this.sharedData.board[parseInt(actionBlock.charAt(0), 10) - 1][parseInt(actionBlock.charAt(2), 10) - 1] = this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1];
+						this.sharedData.board[parseInt(position.charAt(0), 10) - 1][parseInt(position.charAt(2), 10) - 1] = "";
 					}
 				}
 			}
@@ -393,14 +402,14 @@ var app = new Vue({
 				{
 					for (var i = 1; i <= Math.abs(distanceY); i++)
 					{
-						if (i == Math.abs(distanceY) && (this.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]) != "")
+						if (i == Math.abs(distanceY) && (this.sharedData.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]) != "")
 						{
-							if ((this.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]).charAt(0) != this.player.color)
+							if ((this.sharedData.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]).charAt(0) != this.PLAYER_INFO.color)
 							{
 								return true;
 							}
 						}
-						else if (this.board[(parseInt(start.charAt(0), 10) + i * negativeY) - 1][(parseInt(start.charAt(2), 10)) - 1] != "")
+						else if (this.sharedData.board[(parseInt(start.charAt(0), 10) + i * negativeY) - 1][(parseInt(start.charAt(2), 10)) - 1] != "")
 						{
 							return false;
 						}
@@ -410,14 +419,14 @@ var app = new Vue({
 				{
 					for (var i = 1; i <= Math.abs(distanceX); i++)
 					{
-						if (i == Math.abs(distanceX) && (this.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]) != "")
+						if (i == Math.abs(distanceX) && (this.sharedData.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]) != "")
 						{
-							if ((this.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]).charAt(0) != this.player.color)
+							if ((this.sharedData.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]).charAt(0) != this.PLAYER_INFO.color)
 							{
 								return true;
 							}
 						}
-						else if (this.board[(parseInt(start.charAt(0), 10)) - 1][(parseInt(start.charAt(2), 10) + i * negativeX) - 1] != "")
+						else if (this.sharedData.board[(parseInt(start.charAt(0), 10)) - 1][(parseInt(start.charAt(2), 10) + i * negativeX) - 1] != "")
 						{
 							return false;
 						}
@@ -429,14 +438,14 @@ var app = new Vue({
 			{
 				for (var i = 1; i <= Math.abs(distanceX); i++)
 				{
-					if (i == Math.abs(distanceX) && (this.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]) != "")
+					if (i == Math.abs(distanceX) && (this.sharedData.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]) != "")
 					{
-						if ((this.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]).charAt(0) != this.player.color)
+						if ((this.sharedData.board[parseInt(end.charAt(0), 10) - 1][parseInt(end.charAt(2), 10) - 1]).charAt(0) != this.PLAYER_INFO.color)
 						{
 							return true;
 						}
 					}
-					else if (this.board[(parseInt(start.charAt(0), 10) + i * negativeY) - 1][(parseInt(start.charAt(2), 10) + i * negativeX) - 1] != "")
+					else if (this.sharedData.board[(parseInt(start.charAt(0), 10) + i * negativeY) - 1][(parseInt(start.charAt(2), 10) + i * negativeX) - 1] != "")
 					{
 						return false;
 					}
@@ -448,96 +457,101 @@ var app = new Vue({
 				console.log("Invalid Path: Cannot check for collisions");
 			}
 		},
+
 		isMyPiece(block)
 		{
-			if (((this.board[(parseInt(block.charAt(0), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)]).charAt(0)) == this.player.color)
+			if (((this.sharedData.board[(parseInt(block.charAt(0), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)]).charAt(0)) == this.PLAYER_INFO.color)
 			{
 				return true;
 			}
 			return false;
 		},
-		isSafe(block)
-		{
-			//position: {w: {k: ["1-5"], q: ["1-4", "##", "##"],  r: ["1-1", "1-8"], b: ["1-3", "1-6"], n: ["1-2", "1-7"], p: ["2-1", "2-2", "2-3", "2-4", "2-5", "2-6", "2-7", "2-8"]},
-			//			b: {k: ["8-5"], q: ["8-4", "##", "##"],  r: ["8-1", "8-8"], b: ["8-3", "8-6"], n: ["8-2", "8-7"], p: ["7-1", "7-2", "7-3", "7-4", "7-5", "7-6", "7-7", "7-8"]},
-			//			turnNum: 0},
-			if (Math.abs(parseInt(this.position[this.player.opponent].k[0].charAt(0), 10) - parseInt(block.charAt(0), 10)) <= 1 &&
-			Math.abs(parseInt(this.position[this.player.opponent].k[0].charAt(2), 10) - parseInt(block.charAt(2), 10)) <= 1)
-			{
-				console.log("King too close to other King!");
-				return false;
-			}
 
-			for (piece in this.position[this.player.opponent].q)
+		isSafe(isKing, block)
+		{
+			var kingPosition = {row: (parseInt(block.charAt(0), 10) - 1), col: (parseInt(block.charAt(2), 10) - 1)};
+			var enemyPositions = [];
+			for (var i = 0; i < 8; i++)
 			{
-				if (this.position[this.player.opponent].q[piece].charAt(0) == '#')
+				for (var j = 0; j < 8; j++)
 				{
-					continue;
+					if (this.sharedData.board[i][j].charAt(0) == this.PLAYER_INFO.opponent)
+					{
+						enemyPositions.push({piece: this.sharedData.board[i][j].charAt(1), row: i, col: j});
+					}
+					else if (this.sharedData.board[i][j].substring(0,2) == this.PLAYER_INFO.color + "k" && !isKing)
+					{
+						kingPosition.row = i;
+						kingPosition.col = j;
+					}
 				}
-				else if (((this.position[this.player.opponent].q[piece].charAt(0) == block.charAt(0) || this.position[this.player.opponent].q[piece].charAt(2) == block.charAt(2)) || 
-				(Math.abs(parseInt(this.position[this.player.opponent].q[piece].charAt(0), 10) - parseInt(block.charAt(0), 10)) == 
-				Math.abs(parseInt(this.position[this.player.opponent].q[piece].charAt(2), 10) - parseInt(block.charAt(2), 10)))) &&
-				 this.isClearPath(this.position[this.player.opponent].q[piece], block))
+			}
+			var kingBlock = (kingPosition.row + 1).toString() + "-" + (kingPosition.col + 1).toString();
+			for (var i = 0; i < enemyPositions.length; i++)
+			{
+				var enemyBlock = (enemyPositions[i].row + 1).toString() + "-" + (enemyPositions[i].col + 1).toString();
+				console.log(enemyBlock);
+				if (enemyPositions[i].piece == 'k' && 
+				(Math.abs(enemyPositions[i].row - kingPosition.row) <= 1 && 
+				Math.abs(enemyPositions[i].col - kingPosition.col) <= 1)
+				)
+				{
+					console.log("King too close to other King!");
+					return false;
+				}
+				else if (enemyPositions[i].piece == 'q' &&
+				((enemyPositions[i].row == kingPosition.row || enemyPositions[i].col == kingPosition.col) ||
+				(Math.abs(enemyPositions[i].row - kingPosition.row) == Math.abs(enemyPositions[i].col - kingPosition.col))) &&
+				this.isClearPath(enemyBlock, kingBlock))
 				{
 					console.log("King too close to other Queen!");
 					return false;
 				}
-			}
-			for (piece in this.position[this.player.opponent].r)
-			{
-				if (this.position[this.player.opponent].r[piece].charAt(0) == '#')
+				else if (enemyPositions[i].piece == 'r' &&
+				(enemyPositions[i].row == kingPosition.row || enemyPositions[i].col == kingPosition.col) &&
+				this.isClearPath(enemyBlock, kingBlock))
 				{
-					continue;
-				}
-			}
-			for (piece in this.position[this.player.opponent].b)
-			{
-				if (this.position[this.player.opponent].b[piece].charAt(0) == '#')
-				{
-					continue;
-				}
-			}
-			for (piece in this.position[this.player.opponent].n)
-			{
-				if (this.position[this.player.opponent].n[piece].charAt(0) == '#')
-				{
-					continue;
-				}
-			}
-			for (piece in this.position[this.player.opponent].p)
-			{
-				colorDirection = 1;
-				if (this.player.color == 'b')
-				{
-					colorDirection = -1;
-				}
-				if (this.position[this.player.opponent].p[piece].charAt(0) == '#')
-				{
-					continue;
-				}
-				else if (parseInt(this.position[this.player.opponent].p[piece].charAt(0), 10) - parseInt(block.charAt(0), 10) == colorDirection &&
-				Math.abs(parseInt(this.position[this.player.opponent].p[piece].charAt(2), 10) - parseInt(block.charAt(2), 10)) == 1)
-				{
-					console.log("King too close to other Pawn!");
+					console.log("King too close to rook!");
 					return false;
 				}
+				else if (enemyPositions[i].piece == 'b' &&
+				(Math.abs(enemyPositions[i].row - kingPosition.row) == Math.abs(enemyPositions[i].col - kingPosition.col)) &&
+				this.isClearPath(enemyBlock, kingBlock))
+				{
+					console.log("King too close to bishop!");
+					return false;
+				}
+				else if (enemyPositions[i].piece == 'n' &&
+				(((Math.abs(enemyPositions[i].row - kingPosition.row) == 1) && (Math.abs(enemyPositions[i].col - kingPosition.col) == 2)) ||
+				((Math.abs(enemyPositions[i].row - kingPosition.row) == 2) && (Math.abs(enemyPositions[i].col - kingPosition.col) == 1))))
+				{
+					console.log("King too close to knight!");
+					return false;
+				}
+				else if (enemyPositions[i].piece == 'p' &&
+				((Math.abs(enemyPositions[i].row - kingPosition.row) == 1) && (Math.abs(enemyPositions[i].col - kingPosition.col) == 1)))
+				{
+					console.log("King too close to pawn!");
+					return false;
+				}
+				console.log("THE KING IS SAFE");
 			}
 			return true;
 		},
 		highlightOptions(block)
 		{
-			switch ((this.board[(parseInt(block.charAt(2), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)]).charAt(1))
+			switch ((this.sharedData.board[(parseInt(block.charAt(2), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)]).charAt(1))
 			{
 				case "k":
 					for (var i = -1; i < 2; i++)
 					{
 						for (var j = -1; j < 2; j++)
 						{
-							if ((this.board[(parseInt(block.charAt(2), 10) - 1 + i)][(parseInt(block.charAt(2), 10) - 1 + j)]) == (this.player.color + "k"))
+							if ((this.sharedData.board[(parseInt(block.charAt(2), 10) - 1 + i)][(parseInt(block.charAt(2), 10) - 1 + j)]) == (this.PLAYER_INFO.color + "k"))
 							{
 								continue;
 							}
-							else if ((this.board[(parseInt(block.charAt(2), 10) - 1 + i)][(parseInt(block.charAt(2), 10) - 1 + j)]) == "")
+							else if ((this.sharedData.board[(parseInt(block.charAt(2), 10) - 1 + i)][(parseInt(block.charAt(2), 10) - 1 + j)]) == "")
 							{
 								var id = (parseInt(block.charAt(2), 10) + i).toString() + "-" + (parseInt(block.charAt(2), 10) + j).toString();
 								var element = document.getElementById(id);
@@ -550,7 +564,7 @@ var app = new Vue({
 									element.classList.add("possible");
 								}
 							}
-							else if ((this.board[(parseInt(block.charAt(2), 10) - 1 + i)][(parseInt(block.charAt(2), 10) - 1 + j)]).charAt(0) != this.player.color)
+							else if ((this.sharedData.board[(parseInt(block.charAt(2), 10) - 1 + i)][(parseInt(block.charAt(2), 10) - 1 + j)]).charAt(0) != this.PLAYER_INFO.color)
 							{
 								var id = (parseInt(block.charAt(2), 10) + i).toString() + "-" + (parseInt(block.charAt(2), 10) + j).toString();
 								var element = document.getElementById(id);
@@ -577,9 +591,10 @@ var app = new Vue({
 				case "p":
 					break;
 			}
-		}
+		},
   },
   created() {
+	this.setupGame();
 	this.refreshBoard();
-  }
+  },
 });
