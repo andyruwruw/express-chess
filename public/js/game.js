@@ -3,6 +3,7 @@ var app = new Vue({
   data: {
 	matchMaker: 
 	{
+		_id: "",
 		roomNum: 0,
 		playerNum: 1,
 	},
@@ -14,6 +15,7 @@ var app = new Vue({
 
 	PLAYER_INFO: {color: "w", opponent: 'b'},
 	sharedData: {
+		_id: "",
 		room: {num: 1, turnNum: 0, currTeam: 'w', scores: {w: 0, b: 0}},
 		board: [
 		["wr1", "wn1", "wb1", "wq1", "wk",  "wb2", "wn2", "wr2"], 
@@ -27,7 +29,7 @@ var app = new Vue({
 		action: {selection: {row: -1, col: -1}, move: {row: -1, col: -1}},
 	},
 	displayedTurn: 0,
-	playerTurn: 1,
+	playerTurn: 0,
 	moveMade: 0,
 	queenNum: 1,
   },
@@ -35,13 +37,20 @@ var app = new Vue({
 // ------------------------------------------------------------------REFRESH GAME FUNCTIONS------------------------------------------------------------------
 	async checkData() 									// Interval Checks Depending on Variables
 	{
+		
 		if (this.findingMatch && !this.matchFound && !this.matchMade)
 		{
 			this.checkMatch();
 		}
-		if (this.startGame && !this.playerTurn)
+		if (this.startGame)
 		{
-			this.checkOpponentTurn();
+			if (!this.playerTurn)
+			{
+				console.log("Checking in with Server");
+				this.checkOpponentTurn();
+			}
+			console.log("Refreshing Page");
+			this.refreshBoard();
 		}
 	},
 
@@ -104,22 +113,32 @@ var app = new Vue({
 				{
 					if (matches[match].playerNum == 1)
 					{
-						this.matchMaker = matches[match];
+						this.matchMaker._id = matches[match]._id;
+						this.matchMaker.roomNum = matches[match].roomNum;
+						this.matchMaker.playerNum = matches[match].playerNum;
+						this.sharedData._id = matches[match].gameId;
 						this.matchFound = 1;
 						this.findingMatch = 0;
 						this.respondToMatch();
+						this.interval = setInterval(this.checkData, 3000);
 					}
 					else
 					{
 						matchNum += 1;
 					}
-				}	
+				}
+				if (!this.matchFound)
+				{
+					this.findingMatch = 1;
+					this.createMatch(matchNum + 1);
+					this.interval = setInterval(this.checkData, 3000);
+				}
 			}	
 			else
 			{
 				this.findingMatch = 1;
 				this.createMatch(matchNum + 1);
-				this.interval = setInterval(checkData, 3000);
+				this.interval = setInterval(this.checkData, 3000);
 			}
 		} catch (error) {
 			console.log(error);
@@ -128,11 +147,17 @@ var app = new Vue({
 
 	async createMatch(matchNum) {
 		try {
+			var gameId = this.makeid(10);
+			this.sharedData._id = gameId;
 			let match = await axios.post('/api/queue', {
-				roomNum: matchNum,
+				_id: gameId,
 				playerNum: 1,
+				gameId: gameId
 				});
-			this.matchMaker = match;
+			this.matchMaker._id = match.data._id;
+			this.matchMaker.roomNum = match.data.roomNum;
+			this.matchMaker.playerNum = match.data.playerNum;
+			this.sharedData.roomNum = match.data.roomNum;
 		} catch (error) {
 			console.log(error);
 		}
@@ -140,13 +165,22 @@ var app = new Vue({
 
 	async checkMatch() {
 		try {
-			let response = await axios.get("/api/items/" + this.matchMaker._id);
-			this.matchMaker = response.data;
+			let match = await axios.get("/api/queue/" + this.matchMaker._id);
+			this.matchMaker._id = match.data._id;
+			this.matchMaker.roomNum = match.data.roomNum;
+			this.matchMaker.playerNum = match.data.playerNum;
 			if (this.matchMaker.playerNum > 1)
 			{
+
+				this.setUpGame();
 				this.matchMade = 1;
 				this.findingMatch = 0;
-				this.setUpGame();
+				try
+				{
+					let response = await axios.delete("/api/queue/" + this.matchMaker._id);
+				} catch (error) {
+				  console.log(error);
+				}
 			}
 			return true;
 		} catch (error) {
@@ -156,14 +190,14 @@ var app = new Vue({
 
 	async respondToMatch() {
 		try {
-			let response = await axios.put("/api/items/" + this.matchMaker._id, {
-				playerNum: 2,
-			});
-
 			this.matchFound = 1;
 			this.PLAYER_INFO.color = 'b';
 			this.PLAYER_INFO.opponent = 'w';
 			this.startGame = 1;
+			this.setUpBoard(false);
+			let response = await axios.put("/api/queue/" + this.matchMaker._id, {
+				playerNum: 2
+			});
 			return true;
 		} catch (error) {
 			console.log(error);
@@ -172,9 +206,21 @@ var app = new Vue({
 // ------------------------------------------------------------------EXPRESS FUNCTIONS------------------------------------------------------------------
 	async getBoard() {
 		try {
-			let response = await axios.get("/api/pieces/" + this.sharedData._id,);
-			var temp = response.data;
-			this.sharedData = temp;
+			let response = await axios.get("/api/match/" + this.sharedData._id);
+			var temp = response;
+			this.sharedData.room.turnNum = temp.room.turnNum;
+			this.sharedData.room.scores.w = temp.room.scores.w;
+			this.sharedData.room.scores.b = temp.room.scores.b;
+			this.sharedData.board[0] = temp.board[0];
+			this.sharedData.board[1] = temp.board[1];
+			this.sharedData.board[2] = temp.board[2];
+			this.sharedData.board[3] = temp.board[3];
+			this.sharedData.board[4] = temp.board[4];
+			this.sharedData.board[5] = temp.board[5];
+			this.sharedData.board[6] = temp.board[6];
+			this.sharedData.board[7] = temp.board[7];
+			this.displayedTurn = temp.room.turnNum;
+			this.refreshBoard();
 			return true;
 		} catch (error) {
 			console.log(error);
@@ -183,11 +229,22 @@ var app = new Vue({
 
 	async upload() {
 		try {
-			let response = await axios.post('/api/pieces', sharedData);
-			var temp = response.data;
-			if (temp.turnNum > this.displayedTurn)
+			var block = (this.sharedData.action.selection.row).toString() + "-" + (this.sharedData.action.selection.col).toString();
+			var element = document.getElementById(block);
+			if (element.classList.contains("selected"))
 			{
+				element.classList.remove("selected");
+			}
+			
+			let response = await axios.put("/api/match/" + this.sharedData._id, this.sharedData);
+			var temp = response.data;
+
+			if (temp.room.turnNum > this.displayedTurn)
+			{
+				console.log("Valid Move");
 				this.playerTurn = 0;
+				this.getBoard();
+				this.refreshBoard();
 			}
 		} catch (error) {
 			console.log(error);
@@ -197,12 +254,14 @@ var app = new Vue({
 	async checkOppMove()
 	{
 		try {
-			let response = await axios.get("/api/pieces");
+			let response = await axios.get("/api/match/" + this.sharedData._id);
 			var temp = response.data;
-			if (temp.turnNum > this.displayedTurn)
+			if (temp.room.turnNum > this.displayedTurn)
 			{
+				console.log("Move Made");
 				this.playerTurn = 1;
 				this.getBoard();
+				this.refreshBoard();
 			}
 		} catch (error) {
 			console.log(error);
@@ -213,15 +272,95 @@ var app = new Vue({
 	{
 		try {
 			this.sharedData.room.num = this.matchMaker.roomNum;
-			let upload = await axios.post('/api/pieces', sharedData);
+			this.sharedData._id = this.matchMaker._id;
+			let upload = await axios.post('/api/match', this.sharedData);
 			this.startGame = 1;
+			this.setUpBoard(true);
+			this.playerTurn = 1;
 		} catch (error) {
 			console.log(error);
 		}
 	},
+
+	setUpBoard(creator)
+	{
+		if (creator)
+		{
+			var color = "white";
+			var stringadd = "";
+			for (var i = 8; i > 0; i--)
+			{
+				if (color == "black")
+				{
+					color = "white";
+				}
+				else
+				{
+					color = "black";
+				}
+				stringadd += "<div class=\"container\">";
+				for (var j = 0; j < 8; j++)
+				{
+					if (color == "black")
+					{
+						color = "white";
+					}
+					else
+					{
+						color = "black";
+					}
+					stringadd += "<div @click=\"selectPiece(\'" + (i) + "-" + (j + 1) + "\')\" class=\"block " + color + "\" id=\"" + (i) + "-" + (j + 1) + "\"></div>"
+				}
+				stringadd += "</div>";
+			}
+			document.getElementById("board").innerHTML = stringadd;
+		}
+		else
+		{
+			var color = "white";
+			var stringadd = "";
+			for (var i = 1; i <= 8; i++)
+			{
+				if (color == "black")
+				{
+					color = "white";
+				}
+				else
+				{
+					color = "black";
+				}
+				stringadd += "<div class=\"container\">";
+				for (var j = 0; j < 8; j++)
+				{
+					if (color == "black")
+					{
+						color = "white";
+					}
+					else
+					{
+						color = "black";
+					}
+					stringadd += "<div @click=\"selectPiece(\'" + (i) + "-" + (j + 1) + "\')\" class=\"block " + color + "\" id=\"" + (i) + "-" + (j + 1) + "\"></div>"
+				}
+				stringadd += "</div>";
+			}
+			document.getElementById("board").innerHTML = stringadd;
+		}
+	},
+
+	makeid(length) {
+		var text = "";
+		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+		for (var i = 0; i < length; i++)
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+		return text;
+	},
 // ------------------------------------------------------------------SELECTION FUNCTION------------------------------------------------------------------
 	selectPiece(block)
 	{
+		console.log(block);
 		if (this.playerTurn)
 		{
 			if (this.sharedData.action.selection.row == -1 && this.sharedData.action.selection.col == -1)
@@ -242,14 +381,14 @@ var app = new Vue({
 			}
 			else
 			{
-				if (this.sharedData.action.selection.row == parseInt(block.charAt(0), 10) && this.sharedData.action.selection.col == parseInt(block.charAt(1), 10))
+				if (this.sharedData.action.selection.row == parseInt(block.charAt(0), 10) && this.sharedData.action.selection.col == parseInt(block.charAt(2), 10))
 				{
 					this.selectedToggle(block);
 				}
 				else		// If a unit is selected
 				{
 					this.sharedData.action.move.row = parseInt(block.charAt(0), 10);
-					this.sharedData.action.move.col = parseInt(block.charAt(1), 10);
+					this.sharedData.action.move.col = parseInt(block.charAt(2), 10);
 					this.upload();
 				}
 			}	
@@ -269,7 +408,7 @@ var app = new Vue({
 		{
 			element.classList.add("selected");
 			this.sharedData.action.selection.row = parseInt(block.charAt(0), 10);
-			this.sharedData.action.selection.col = parseInt(block.charAt(1), 10);
+			this.sharedData.action.selection.col = parseInt(block.charAt(2), 10);
 		}
 	},
 
@@ -338,7 +477,23 @@ var app = new Vue({
 	},
   },
   created() {
-	this.setupGame();
-	this.refreshBoard();
   },
+  computed:
+  {
+	buttonText()
+	{
+		if (this.findingMatch == 0)
+		{
+			return "Find a Match";
+		}
+		else if (this.matchFound || this.matchMade)
+		{
+			return "Opponent Found";
+		}
+		else
+		{
+			return "Searching";
+		}
+	},
+  }
 });

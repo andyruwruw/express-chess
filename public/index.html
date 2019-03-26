@@ -14,18 +14,23 @@
       <h1>Express Chess</h1>
     </div>
   </div>
-
-  <div id="home">
-    <button>{{buttonText}}</button>
+  <div id="app">
+    <div v-if="!startGame">
+      <div id="home">
+        <button @click="checkAvailableMatches">{{buttonText}}</button>
+      </div>
+    </div>
+    <div id="board">
+    
+    </div>
   </div>
-	
+
   <div class="footer">
-    <a href="https://github.com/andyruwruw/Express-Chess.git" id="git">Git Repository</a>
-  </div>
-
+      <a href="https://github.com/andyruwruw/Express-Chess.git" id="git">Git Repository</a>
+    </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.7/vue.js" integrity="sha256-g+Q8DFAmG5+eyRPSydX0LY4TfjsL11XSDrIGerbbEdA=" crossorigin="anonymous"></script>
-  <script src="js/home.js"></script>
+  <script src="js/game.js"></script>
 </body>
 
 </html>
