@@ -1,9 +1,20 @@
 var app = new Vue({
   el: '#app',
   data: {
+	matchMaker: 
+	{
+		roomNum: 0,
+		playerNum: 1,
+	},
+	findingMatch: 0,
+	matchFound: 0,
+	matchMade: 0,
+	interval: 0,
+	startGame: 0,
+
 	PLAYER_INFO: {color: "w", opponent: 'b'},
 	sharedData: {
-		room: {num: 2, turnNum: 0, currTeam: 'w', scores: {w: 0, b: 0}},
+		room: {num: 1, turnNum: 0, currTeam: 'w', scores: {w: 0, b: 0}},
 		board: [
 		["wr1", "wn1", "wb1", "wq1", "wk",  "wb2", "wn2", "wr2"], 
 		["wp1", "wp2", "wp3", "wp4", "wp5", "wp6", "wp7", "wp8"],
@@ -22,6 +33,18 @@ var app = new Vue({
   },
   methods: {
 // ------------------------------------------------------------------REFRESH GAME FUNCTIONS------------------------------------------------------------------
+	async checkData() 									// Interval Checks Depending on Variables
+	{
+		if (this.findingMatch && !this.matchFound && !this.matchMade)
+		{
+			this.checkMatch();
+		}
+		if (this.startGame && !this.playerTurn)
+		{
+			this.checkOpponentTurn();
+		}
+	},
+
 	async checkOpponentTurn()
 	{
 		await this.getBoard()
@@ -29,9 +52,11 @@ var app = new Vue({
 			if (this.sharedData.turnNum > this.displayedTurn)
 			{
 				refreshBoard();
+				this.displayedTurn = this.sharedData.turnNum;
 			}
 		}
 	},
+
 	refreshBoard()
 	{
 		for (var i = 0; i < 8 ; i++)												// Runs through each block.
@@ -67,87 +92,137 @@ var app = new Vue({
 		}
 	},
 // ------------------------------------------------------------------EXPRESS FUNCTIONS------------------------------------------------------------------
-	async getBoard() {
+	
+	async checkAvailableMatches() {
 		try {
-			let response = await axios.get("/api/pieces");
-			this.sharedData = response.data;
-			this.moveMade = 1;
-			this.displayedTurn = sharedData.turnNum;
+			let response = await axios.get("/api/queue");
+			var matches = response.data;
+			var matchNum = 0;
+			if (matches.length > 0)
+			{
+				for (match in matches)
+				{
+					if (matches[match].playerNum == 1)
+					{
+						this.matchMaker = matches[match];
+						this.matchFound = 1;
+						this.findingMatch = 0;
+						this.respondToMatch();
+					}
+					else
+					{
+						matchNum += 1;
+					}
+				}	
+			}	
+			else
+			{
+				this.findingMatch = 1;
+				this.createMatch(matchNum + 1);
+				this.interval = setInterval(checkData, 3000);
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	},
+
+	async createMatch(matchNum) {
+		try {
+			let match = await axios.post('/api/queue', {
+				roomNum: matchNum,
+				playerNum: 1,
+				});
+			this.matchMaker = match;
+		} catch (error) {
+			console.log(error);
+		}
+	},
+
+	async checkMatch() {
+		try {
+			let response = await axios.get("/api/items/" + this.matchMaker._id);
+			this.matchMaker = response.data;
+			if (this.matchMaker.playerNum > 1)
+			{
+				this.matchMade = 1;
+				this.findingMatch = 0;
+				this.setUpGame();
+			}
 			return true;
 		} catch (error) {
 			console.log(error);
 		}
 	},
-	async upload() {
-		if (this.moveMade)
-		{
-			this.moveMade = 0;
-			this.sharedData.turnNum += 1;
-			this.displayedTurn += 1;
-			try {
-				let upload = await axios.post('/api/pieces', sharedData);
-			} catch (error) {
-				console.log(error);
-			}
-		}
-	},
-	async checkOppMove()
-	{
-		if (!this.moveMade)
-		{
-			var temp;
-			try {
-				let response = await axios.get("/api/pieces");
-				temp = response.data;
-				if (temp.turnNum > displayedTurn)
-				{
-					this.getBoard();
-				}
-			} catch (error) {
-				console.log(error);
-			}
-		}
-	},
-	async setUpGame()
-	{
+
+	async respondToMatch() {
 		try {
-			let response = await axios.get("/api/pieces");
-			temp = response.data;
-			if (temp.playerNum == 2)
+			let response = await axios.put("/api/items/" + this.matchMaker._id, {
+				playerNum: 2,
+			});
+
+			this.matchFound = 1;
+			this.PLAYER_INFO.color = 'b';
+			this.PLAYER_INFO.opponent = 'w';
+			this.startGame = 1;
+			return true;
+		} catch (error) {
+			console.log(error);
+		}
+	},
+// ------------------------------------------------------------------EXPRESS FUNCTIONS------------------------------------------------------------------
+	async getBoard() {
+		try {
+			let response = await axios.get("/api/pieces/" + this.sharedData._id,);
+			var temp = response.data;
+			this.sharedData = temp;
+			return true;
+		} catch (error) {
+			console.log(error);
+		}
+	},
+
+	async upload() {
+		try {
+			let response = await axios.post('/api/pieces', sharedData);
+			var temp = response.data;
+			if (temp.turnNum > this.displayedTurn)
 			{
-				this.PLAYER_INFO.color = temp.yourTeam;
-				if (this.PLAYER_INFO.color == "w")
-				{
-					this.moveMade = 1;
-					this.PLAYER_INFO.opponent = "b";
-				}
-				else
-				{
-					this.moveMade = 0;
-					this.PLAYER_INFO.opponent = "w";
-				}
-			}
-			else
-			{
-				if (temp.playerNum == 0)
-				{
-					temp.playerNum == 1;
-				}
-				try {
-					let upload = await axios.post('/api/pieces', temp);
-				} catch (error) {
-					console.log(error);
-				}
+				this.playerTurn = 0;
 			}
 		} catch (error) {
 			console.log(error);
 		}
-		setInterval(checkOppMove, 50);
+	},
+
+	async checkOppMove()
+	{
+		try {
+			let response = await axios.get("/api/pieces");
+			var temp = response.data;
+			if (temp.turnNum > this.displayedTurn)
+			{
+				this.playerTurn = 1;
+				this.getBoard();
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	},
+
+	async setUpGame()
+	{
+		try {
+			this.sharedData.room.num = this.matchMaker.roomNum;
+			let upload = await axios.post('/api/pieces', sharedData);
+			this.startGame = 1;
+		} catch (error) {
+			console.log(error);
+		}
 	},
 // ------------------------------------------------------------------SELECTION FUNCTION------------------------------------------------------------------
 	selectPiece(block)
 	{
-		if (this.moveMade)
+		if (this.playerTurn)
 		{
 			if (this.sharedData.action.selection.row == -1 && this.sharedData.action.selection.col == -1)
 			{
@@ -175,6 +250,7 @@ var app = new Vue({
 				{
 					this.sharedData.action.move.row = parseInt(block.charAt(0), 10);
 					this.sharedData.action.move.col = parseInt(block.charAt(1), 10);
+					this.upload();
 				}
 			}	
 		}
@@ -196,7 +272,7 @@ var app = new Vue({
 			this.sharedData.action.selection.col = parseInt(block.charAt(1), 10);
 		}
 	},
-	
+
 	isMyPiece(block)
 	{
 		if (((this.sharedData.board[(parseInt(block.charAt(0), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)]).charAt(0)) == this.PLAYER_INFO.color)

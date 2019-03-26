@@ -58,7 +58,7 @@ app.put('/api/queue/:idNum', async (req, res) => { // EDIT A ROOM TO SET A GAME
 		});
 		room.playerNum = req.body.playerNum;
 		await room.save();
-    res.send('Room Successfully Updated');
+    res.send(room);
   } catch (error) {
     console.log(error);
     res.sendStatus('Failed to Join Room');
@@ -73,7 +73,7 @@ app.post('/api/queue', async (req, res) => { // IF NO MATCH FOUND, POST ONE
 	});
 	try {
 		await room.save();
-		res.send('Awaiting Opponent');
+		res.send(room);
 	} catch (error) {
 		console.log(error);
 		res.send('Failure to Save Match');
@@ -87,11 +87,11 @@ app.get('/api/queue/:idNum', async (req, res) => { // Check your room for new pl
 		});
 		if (room.playerNum > 1)
 		{
-			res.send('Opponent Found');
+			res.send(room);
 		}
 		else
 		{
-			res.send('Still Awaiting Opponent');
+			res.send(room);
 		}
   } catch (error) {
     console.log(error);
@@ -189,7 +189,52 @@ app.get('/api/match/:idNum', async (req, res) => { 	// Check for Updates
 	}
 });
 
+// ----------------------------------In Game Chat----------------------------------
 
+const chatSchema = new mongoose.Schema({
+	chats: []
+});
+
+const Chat = mongoose.model('Chat', chatSchema);
+
+app.post('/api/chat', async (req, res) => {   // Create a new Chat
+const chat = new Chat({
+	chats: [],
+});
+try {
+	await chat.save();
+	res.send(chat);
+} catch (error) {
+	res.send("Failed to create chat.");
+}
+});
+
+app.put('/api/chat/:idNum', async (req, res) => { // Player Send a message
+	try {
+		let chat = await Chat.findOne({
+      _id: req.params.idNum
+		});
+		chat.chats.push({text: req.body.text, username: req.body.username});
+		await chat.save();
+		res.send(chat);
+  } catch (error) {
+    res.send('Failed to Send Chat')
+  }
+});
+
+app.get('/api/chat/:idNum', async (req, res) => { 	// Check for Chat Updates
+	try {
+		let chat = await Chat.findOne({
+      _id: req.params.idNum
+		});
+		res.send(chat);
+	} catch (error) {
+		res.send('Cannot Find Chat')
+	}
+});
+
+
+// ----------------------------------Game Logic----------------------------------
 
 function validMove(match, action)
 {
