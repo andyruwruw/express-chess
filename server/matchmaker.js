@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const matchMakingSchema = new mongoose.Schema({
+	_id: String,
 	roomNum: Number,
 	playerNum: Number,
 	gameId: String
@@ -52,6 +53,7 @@ router.put('/:idNum', async (req, res) => { // EDIT A ROOM TO SET A GAME
 
 router.post('/', async (req, res) => { // IF NO MATCH FOUND, POST ONE
 	const room = new Match({
+		_id: req.body._id,
 		roomNum: req.body.roomNum,
 		playerNum: req.body.playerNum,
 		gameId: req.body.gameId

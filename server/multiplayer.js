@@ -44,46 +44,58 @@ const match = new Board({
 
 router.put('/:idNum', async (req, res) => { // Player Updates their Move
     try {
+        var newroom = {};
+        var newboard = [];
         var changeData = 0;
-        Board.findById(req.params.idNum, async (err, game) => {
-            var desiredAction = req.body.action
-            let currTurn = req.body.room.turnNum;
-            if (validMove(game, desiredAction))
+        var desiredAction = {};
+        newroom = req.body.room;
+        newboard = req.body.board;
+        desiredAction = req.body.action;
+        var movingpiece = req.body.board[desiredAction.selection.row - 1][desiredAction.selection.col - 1];
+        let currTurn = req.body.room.turnNum;
+        if (validMove(req.body, desiredAction))
+        {
+            changeData = 1;
+            if (newboard[desiredAction.move.row - 1][desiredAction.move.col - 1] != "")
             {
-                changeData = 1;
-            }
-        });  
-        if (changeData = 1)
-        {
-            console.log("Saving Match");
-            try {
-            Board.findById(req.params.idNum, async (err, game) => {
-                if (game.board[req.body.action.move.row - 1][req.body.action.move.col - 1] != "")
+                const PIECE_WORTH = {p: 1, n: 3, b: 3, r: 5, q: 9};
+                if ((newboard[desiredAction.move.row - 1][desiredAction.move.col - 1]).charAt(0) == 'w')
                 {
-                    const PIECE_WORTH = {p: 1, n: 3, b: 3, r: 5, q: 9};
-                    if ((game.board[req.body.action.move.row - 1][req.body.action.move.col - 1]).charAt(0) == 'w')
-                    {
-                        game.room.scores.w += PIECE_WORTH[(game.board[req.body.action.move.row - 1][req.body.action.move.col - 1]).charAt(1)];
-                    }
-                    else
-                    {
-                        game.room.scores.b += PIECE_WORTH[(game.board[req.body.action.move.row - 1][req.body.action.move.col - 1]).charAt(1)];
-                    }
+                    newroom.scores.b += PIECE_WORTH[(newboard[desiredAction.move.row - 1][desiredAction.move.col - 1]).charAt(1)];
                 }
-                game.board[req.body.action.move.row - 1][req.body.action.move.col - 1] = game.board[req.body.action.selection.row - 1][req.body.action.selection.col - 1];
-                game.board[req.body.action.selection.row - 1][req.body.action.selection.col - 1] = "";
-                game.room.turnNum += 1;
-                await game.save();
-                res.json(game);
-            });
-            } catch (error) {
-            console.log(error);
-            res.sendStatus(500);
+                else
+                {
+                    newroom.scores.w += PIECE_WORTH[(newboard[desiredAction.move.row - 1][desiredAction.move.col - 1]).charAt(1)];
+                }
             }
-        }
-        else
-        {
-            res.send("Invalid Move");
+            console.log("Saving Match");
+            newboard[desiredAction.move.row - 1][desiredAction.move.col - 1] = movingpiece;
+            newboard[desiredAction.selection.row - 1][desiredAction.selection.col - 1] = "";
+            newroom.turnNum += 1;
+            console.log("HERES THE NEW BOARD");
+            console.log(newboard);
+            if (changeData == 1)
+            {
+                try {
+                    let data = await Board.updateOne({
+                        _id: req.params.idNum
+                    },
+                    {
+                        $push : {
+                            board : {
+                                $each: [newboard[0], newboard[1], newboard[2], newboard[3], newboard[4], newboard[5], newboard[6], newboard[7]],
+                                $slice: -8
+                            }
+                        }
+                    });
+                    console.log(data);
+                    res.send(data);
+                    
+                } catch (error) {
+                console.log(error);
+                res.sendStatus(500);
+                }
+            }
         }
     } catch (error) {
     console.log(error);
@@ -94,7 +106,7 @@ router.put('/:idNum', async (req, res) => { // Player Updates their Move
 router.get('/:idNum', async (req, res) => { 	// Check for Updates
 try {
     let match = await Board.findOne({
-  _id: req.params.idNum
+    _id: req.params.idNum
     });
     res.send(match);
 } catch (error) {

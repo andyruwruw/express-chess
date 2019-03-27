@@ -6,12 +6,14 @@ var app = new Vue({
 		_id: "",
 		roomNum: 0,
 		playerNum: 1,
+		gameId: "",
 	},
 	findingMatch: 0,
 	matchFound: 0,
 	matchMade: 0,
 	interval: 0,
 	startGame: 0,
+	gameSharedId: "",
 
 	PLAYER_INFO: {color: "w", opponent: 'b'},
 	sharedData: {
@@ -116,7 +118,8 @@ var app = new Vue({
 						this.matchMaker._id = matches[match]._id;
 						this.matchMaker.roomNum = matches[match].roomNum;
 						this.matchMaker.playerNum = matches[match].playerNum;
-						this.sharedData._id = matches[match].gameId;
+						this.matchMaker.gameId = matches[match].gameId;
+						this.gameSharedId = matches[match].gameId;
 						this.matchFound = 1;
 						this.findingMatch = 0;
 						this.respondToMatch();
@@ -147,12 +150,13 @@ var app = new Vue({
 
 	async createMatch(matchNum) {
 		try {
-			var gameId = this.makeid(10);
-			this.sharedData._id = gameId;
+			this.gameSharedId = this.makeid(10);
+			this.sharedData._id = this.gameSharedId;
 			let match = await axios.post('/api/queue', {
-				_id: gameId,
+				_id: this.gameSharedId,
+				roomNum: 0,
 				playerNum: 1,
-				gameId: gameId
+				gameId: this.gameSharedId
 				});
 			this.matchMaker._id = match.data._id;
 			this.matchMaker.roomNum = match.data.roomNum;
@@ -165,13 +169,10 @@ var app = new Vue({
 
 	async checkMatch() {
 		try {
-			let match = await axios.get("/api/queue/" + this.matchMaker._id);
-			this.matchMaker._id = match.data._id;
-			this.matchMaker.roomNum = match.data.roomNum;
+			let match = await axios.get("/api/queue/" + this.gameSharedId);
 			this.matchMaker.playerNum = match.data.playerNum;
 			if (this.matchMaker.playerNum > 1)
 			{
-
 				this.setUpGame();
 				this.matchMade = 1;
 				this.findingMatch = 0;
@@ -194,7 +195,6 @@ var app = new Vue({
 			this.PLAYER_INFO.color = 'b';
 			this.PLAYER_INFO.opponent = 'w';
 			this.startGame = 1;
-			this.setUpBoard(false);
 			let response = await axios.put("/api/queue/" + this.matchMaker._id, {
 				playerNum: 2
 			});
@@ -206,21 +206,20 @@ var app = new Vue({
 // ------------------------------------------------------------------EXPRESS FUNCTIONS------------------------------------------------------------------
 	async getBoard() {
 		try {
-			let response = await axios.get("/api/match/" + this.sharedData._id);
-			var temp = response;
-			this.sharedData.room.turnNum = temp.room.turnNum;
-			this.sharedData.room.scores.w = temp.room.scores.w;
-			this.sharedData.room.scores.b = temp.room.scores.b;
-			this.sharedData.board[0] = temp.board[0];
-			this.sharedData.board[1] = temp.board[1];
-			this.sharedData.board[2] = temp.board[2];
-			this.sharedData.board[3] = temp.board[3];
-			this.sharedData.board[4] = temp.board[4];
-			this.sharedData.board[5] = temp.board[5];
-			this.sharedData.board[6] = temp.board[6];
-			this.sharedData.board[7] = temp.board[7];
-			this.displayedTurn = temp.room.turnNum;
-			this.refreshBoard();
+			let response = await axios.get("/api/match/" + this.gameSharedId);
+			console.log("NEW BOARD");
+			console.log(response);
+				this.sharedData.room.turnNum = response.data.room.turnNum;
+				this.sharedData.room.scores.w = response.data.room.scores.w;
+				this.sharedData.room.scores.b = response.data.room.scores.b;
+				this.sharedData.board[0] = response.data.board[0];
+				this.sharedData.board[1] = response.data.board[1];
+				this.sharedData.board[2] = response.data.board[2];
+				this.sharedData.board[3] = response.data.board[3];
+				this.sharedData.board[4] = response.data.board[4];
+				this.sharedData.board[5] = response.data.board[5];
+				this.sharedData.board[6] = response.data.board[6];
+				this.sharedData.board[7] = response.data.board[7];
 			return true;
 		} catch (error) {
 			console.log(error);
@@ -235,17 +234,35 @@ var app = new Vue({
 			{
 				element.classList.remove("selected");
 			}
+			let response = await axios.put("/api/match/" + this.gameSharedId, this.sharedData);
+			console.log(response.data);
+			if (response.data.nModified == 1)
+			{
+				this.getBoard();
+			}
 			
-			let response = await axios.put("/api/match/" + this.sharedData._id, this.sharedData);
-			var temp = response.data;
-
-			if (temp.room.turnNum > this.displayedTurn)
+			/*
+			console.log(this.displayedTurn);
+			if (response.data.room.turnNum > this.displayedTurn)
 			{
 				console.log("Valid Move");
 				this.playerTurn = 0;
-				this.getBoard();
+				this.sharedData.room.turnNum = response.data.room.turnNum;
+				this.sharedData.room.scores.w = response.data.room.scores.w;
+				this.sharedData.room.scores.b = response.data.room.scores.b;
+				this.sharedData.board[0] = response.data.board[0];
+				this.sharedData.board[1] = response.data.board[1];
+				this.sharedData.board[2] = response.data.board[2];
+				this.sharedData.board[3] = response.data.board[3];
+				this.sharedData.board[4] = response.data.board[4];
+				this.sharedData.board[5] = response.data.board[5];
+				this.sharedData.board[6] = response.data.board[6];
+				this.sharedData.board[7] = response.data.board[7];
+				this.displayedTurn = response.data.room.turnNum;
+			this.refreshBoard();
 				this.refreshBoard();
 			}
+			*/
 		} catch (error) {
 			console.log(error);
 		}
@@ -254,9 +271,8 @@ var app = new Vue({
 	async checkOppMove()
 	{
 		try {
-			let response = await axios.get("/api/match/" + this.sharedData._id);
-			var temp = response.data;
-			if (temp.room.turnNum > this.displayedTurn)
+			let response = await axios.get("/api/match/" + this.gameSharedId);
+			if (response.data.room.turnNum > this.displayedTurn)
 			{
 				console.log("Move Made");
 				this.playerTurn = 1;
@@ -272,83 +288,18 @@ var app = new Vue({
 	{
 		try {
 			this.sharedData.room.num = this.matchMaker.roomNum;
-			this.sharedData._id = this.matchMaker._id;
+			this.sharedData._id = this.gameSharedId;
 			let upload = await axios.post('/api/match', this.sharedData);
 			this.startGame = 1;
-			this.setUpBoard(true);
 			this.playerTurn = 1;
 		} catch (error) {
 			console.log(error);
 		}
 	},
 
-	setUpBoard(creator)
-	{
-		if (creator)
-		{
-			var color = "white";
-			var stringadd = "";
-			for (var i = 8; i > 0; i--)
-			{
-				if (color == "black")
-				{
-					color = "white";
-				}
-				else
-				{
-					color = "black";
-				}
-				stringadd += "<div class=\"container\">";
-				for (var j = 0; j < 8; j++)
-				{
-					if (color == "black")
-					{
-						color = "white";
-					}
-					else
-					{
-						color = "black";
-					}
-					stringadd += "<div @click=\"selectPiece(\'" + (i) + "-" + (j + 1) + "\')\" class=\"block " + color + "\" id=\"" + (i) + "-" + (j + 1) + "\"></div>"
-				}
-				stringadd += "</div>";
-			}
-			document.getElementById("board").innerHTML = stringadd;
-		}
-		else
-		{
-			var color = "white";
-			var stringadd = "";
-			for (var i = 1; i <= 8; i++)
-			{
-				if (color == "black")
-				{
-					color = "white";
-				}
-				else
-				{
-					color = "black";
-				}
-				stringadd += "<div class=\"container\">";
-				for (var j = 0; j < 8; j++)
-				{
-					if (color == "black")
-					{
-						color = "white";
-					}
-					else
-					{
-						color = "black";
-					}
-					stringadd += "<div @click=\"selectPiece(\'" + (i) + "-" + (j + 1) + "\')\" class=\"block " + color + "\" id=\"" + (i) + "-" + (j + 1) + "\"></div>"
-				}
-				stringadd += "</div>";
-			}
-			document.getElementById("board").innerHTML = stringadd;
-		}
-	},
 
-	makeid(length) {
+	makeid(length) 
+	{
 		var text = "";
 		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
