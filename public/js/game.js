@@ -387,7 +387,7 @@ var app = new Vue({
 			}
 			else 
 			{
-				if (!(element.classList.contains("oppselected"))) element.classList.remove("oppselected");
+				if ((element.classList.contains("oppselected"))) element.classList.remove("oppselected");
 			}
 		}	
 		if (this.playerTurn)
