@@ -19,6 +19,9 @@ mongoose.connect('mongodb://localhost:27017/chess', {
 const matchmaker = require("./matchmaker.js");
 app.use("/api/queue", matchmaker);
 
+const selected = require("./selected.js");
+app.use("/api/selected", selected);
+
 const multiplayer = require("./multiplayer.js");
 app.use("/api/match", multiplayer);
 

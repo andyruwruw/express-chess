@@ -52,28 +52,24 @@ router.put('/:idNum', async (req, res) => { // Player Updates their Move
         newboard = req.body.board;
         desiredAction = req.body.action;
         var movingpiece = req.body.board[desiredAction.selection.row - 1][desiredAction.selection.col - 1];
-        let currTurn = req.body.room.turnNum;
+        var landingBlock = req.body.board[desiredAction.move.row - 1][desiredAction.move.col - 1];
+        console.log("Game \"" + req.params.idNum + "\": Requesting Move");
         if (validMove(req.body, desiredAction))
         {
+            console.log("Game \"" + req.params.idNum + "\": Valid Move");
             changeData = 1;
-            if (newboard[desiredAction.move.row - 1][desiredAction.move.col - 1] != "")
+            if (landingBlock != "")
             {
                 const PIECE_WORTH = {p: 1, n: 3, b: 3, r: 5, q: 9};
-                if ((newboard[desiredAction.move.row - 1][desiredAction.move.col - 1]).charAt(0) == 'w')
-                {
-                    newroom.scores.b += PIECE_WORTH[(newboard[desiredAction.move.row - 1][desiredAction.move.col - 1]).charAt(1)];
-                }
-                else
-                {
-                    newroom.scores.w += PIECE_WORTH[(newboard[desiredAction.move.row - 1][desiredAction.move.col - 1]).charAt(1)];
-                }
+                if (landingBlock.charAt(0) == 'w')
+                newroom.scores.b += PIECE_WORTH[landingBlock.charAt(1)];
+                else newroom.scores.w += PIECE_WORTH[landingBlock.charAt(1)];
             }
-            console.log("Saving Match");
+            console.log("Game \"" + req.params.idNum + "\": Saving Match");
             newboard[desiredAction.move.row - 1][desiredAction.move.col - 1] = movingpiece;
             newboard[desiredAction.selection.row - 1][desiredAction.selection.col - 1] = "";
+            newboard = newQueen(newboard);
             newroom.turnNum += 1;
-            console.log("HERES THE NEW BOARD");
-            console.log(newboard);
             if (changeData == 1)
             {
                 try {
@@ -81,6 +77,9 @@ router.put('/:idNum', async (req, res) => { // Player Updates their Move
                         _id: req.params.idNum
                     },
                     {
+                        $inc: { "room.turnNum": 1 },
+                        $set: { "action.selection.row": -1, "action.selection.col": -1, "action.move.row": -1, "action.move.col": -1,
+                                "room.scores.w": newroom.scores.w, "room.scores.b": newroom.scores.b},
                         $push : {
                             board : {
                                 $each: [newboard[0], newboard[1], newboard[2], newboard[3], newboard[4], newboard[5], newboard[6], newboard[7]],
@@ -88,14 +87,19 @@ router.put('/:idNum', async (req, res) => { // Player Updates their Move
                             }
                         }
                     });
-                    console.log(data);
                     res.send(data);
-                    
                 } catch (error) {
                 console.log(error);
                 res.sendStatus(500);
                 }
             }
+        }
+        else
+        {
+            var endGameW = checkForCheckMate(req.body.board, 'w');
+            var endGameB = checkForCheckMate(req.body.board, 'b');
+            var returnObject = {data: {_id: "Invalid_Move", nModified : 0, gameOverW: endGameW, gameOverB: endGameB}};
+            res.send(returnObject);
         }
     } catch (error) {
     console.log(error);
@@ -116,447 +120,308 @@ try {
 
 module.exports = router;
 
-
-// =============================================================================================
-
-
+// GAME LOGIC =============================================================================================
+// If the move is valid, returns true.
 function validMove(match, action)
 {
-	if ((match.board[action.selection.row - 1][action.selection.col - 1]).charAt(1) == 'k')
-	{
-		if (kingAction(action.selection, action.move, match.board))
-		{
-			return true;
-		}
-	}
-	else if (match.board[action.selection.row - 1][action.selection.col - 1].charAt(1) == 'q')
-	{
-		if (queenAction(action.selection, action.move, match.board))
-		{
-			return true;
-		}
-	}
-	else if (match.board[action.selection.row - 1][action.selection.col - 1].charAt(1) == 'b')
-	{
-		if (bishopAction(action.selection, action.move, match.board))
-		{
-			return true;
-		}
-	}
-	else if (match.board[action.selection.row - 1][action.selection.col - 1].charAt(1) == 'r')
-	{
-		if (rookAction(action.selection, action.move, match.board))
-		{
-			return true;
-		}
-	}
-	else if (match.board[action.selection.row - 1][action.selection.col - 1].charAt(1) == 'n')
-	{
-		if (knightAction(action.selection, action.move, match.board))
-		{
-			return true;
-		}
-	}
-	else if (match.board[action.selection.row - 1][action.selection.col - 1].charAt(1) == 'p')
-	{
-		if (pawnAction(action.selection, action.move, match.board))
-		{
-            console.log("Good move");
-			return true;
-		}
-	}
+    // If the Player Tries to Move His Piece onto another one of his Pieces.
+    if ((match.board[action.move.row - 1][action.move.col - 1]) != "")
+        if ((match.board[action.selection.row - 1][action.selection.col - 1]).charAt(0) == (match.board[action.move.row - 1][action.move.col - 1]).charAt(0))
+            return false; 
+    // Get Selected Piece Type
+    var color = (match.board[action.selection.row - 1][action.selection.col - 1]).charAt(0); 
+    var char = (match.board[action.selection.row - 1][action.selection.col - 1]).charAt(1); 
+    // For Each Piece, if it is a valid move, return true.
+    switch (char)   
+    {
+        case 'k':
+            if (kingAction(action.selection, action.move, match.board, color)) return true;
+            break;
+        case 'q':
+            if (queenAction(action.selection, action.move, match.board, color)) return true;
+            break;
+        case 'r':
+            if (rookAction(action.selection, action.move, match.board, color)) return true;
+            break;
+        case 'b':
+            if (bishopAction(action.selection, action.move, match.board, color)) return true;
+            break;
+        case 'n':
+            if (knightAction(action.selection, action.move, match.board, color)) return true;
+            break;
+        case 'p':
+            if (pawnAction(action.selection, action.move, match.board, color)) return true;
+            break;
+    }
 };
-
-function kingAction(position, actionBlock, board)
+// Checks the Validity of a KING Move
+function kingAction(position, actionBlock, board, color)
 {
+    console.log("Processing King Logic");
+    // If the move square is Adjacent.
 	if ((Math.abs(actionBlock.row - position.row) <= 1) &&
 	(Math.abs(actionBlock.col - position.col) <= 1) &&
-	 isClearPath(position, actionBlock, board) &&
-	 isSafe(1, actionBlock, board))
+	 isClearPath(position, actionBlock, board))
 	{
-		if (board[actionBlock.row - 1][actionBlock.col - 1] == "")
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else if ((board[actionBlock.row - 1][actionBlock.col - 1]).charAt(0) != PLAYER_INFO.color)
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+        // Moves the piece and checks that the King is Safe.
+        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
+        board[position.row - 1][position.col - 1] = "";
+        if (isSafe(1, actionBlock, board, color)) return true;
+        return false;
 	}
 };
-
-function queenAction(position, actionBlock, board)
+// Checks the Validity of a QUEEN Move
+function queenAction(position, actionBlock, board, color)
 {
-	if (((actionBlock.charAt(0) == position.charAt(0) || actionBlock.charAt(2) == position.charAt(2)) || 
+    console.log("Processing Queen Logic");
+    // If the move is DIAGONAL, HORIZONTAL or VERTICAL
+	if (((actionBlock.row == position.row || actionBlock.col == position.col) || 
 	(Math.abs(actionBlock.row - position.row) == Math.abs(actionBlock.col - position.col))) &&
-	 isClearPath(position, actionBlock, board) &&
-	 isSafe(0, position, board))
+	 isClearPath(position, actionBlock, board))
 	{
-		if (board[actionBlock.row - 1][actionBlock.col - 1] == "")
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else if ((board[actionBlock.row - 1][actionBlock.col - 1]).charAt(0) != PLAYER_INFO.color)
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+        // Moves the piece and checks that the King is Safe.
+        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
+        board[position.row - 1][position.col - 1] = "";
+        if (isSafe(0, actionBlock, board, color)) return true;
+        return false;
 	}
 };
-
-function rookAction(position, actionBlock, board)
+// Checks the Validity of a ROOK Move
+function rookAction(position, actionBlock, board, color)
 {
-	if ((actionBlock.charAt(0) == position.charAt(0) || actionBlock.charAt(2) == position.charAt(2)) &&
-	 isClearPath(position, actionBlock, board) &&
-	 isSafe(0, position, board))
+    console.log("Processing Rook Logic");
+    // If the move is HORIZONTAL or VERTICAL
+	if ((actionBlock.row == position.row || actionBlock.col == position.col) &&
+	 isClearPath(position, actionBlock, board))
 	{
-		if (board[actionBlock.row - 1][actionBlock.col - 1] == "")
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else if ((board[actionBlock.row - 1][actionBlock.col - 1]).charAt(0) != PLAYER_INFO.color)
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+        // Moves the piece and checks that the King is Safe.
+        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
+        board[position.row - 1][position.col - 1] = "";
+        if (isSafe(0, actionBlock, board, color)) return true;
+		return false;
 	}
 };
-
-function bishopAction(position, actionBlock, board)
+// Checks the Validity of a BISHOP Move
+function bishopAction(position, actionBlock, board, color)
 {
-	if ((Math.abs(parseInt(actionBlock.charAt(0)) - position.row) == Math.abs(actionBlock.col - position.col)) &&
-	 isClearPath(position, actionBlock, board) &&
-	 isSafe(0, position, board))
+    console.log("Processing Bishop Logic");
+    // If the move is DIAGONAL
+	if ((Math.abs(actionBlock.row - position.row) == Math.abs(actionBlock.col - position.col)) &&
+	 isClearPath(position, actionBlock, board))
 	{
-		if (board[actionBlock.row - 1][actionBlock.col - 1] == "")
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else if ((board[actionBlock.row - 1][actionBlock.col - 1]).charAt(0) != PLAYER_INFO.color)
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+        // Moves the piece and checks that the King is Safe.
+        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
+        board[position.row - 1][position.col - 1] = "";
+        if (isSafe(0, actionBlock, board, color)) return true;
+        return false;
 	}
 };
-
-function knightAction(position, actionBlock, board)
+// Checks the Validity of a KNIGHT Move
+function knightAction(position, actionBlock, board, color)
 {
+    console.log("Processing Knight Logic");
+    // If the move is a 2 - 1 ratio.
 	if ((((Math.abs(actionBlock.row - position.row) == 2) &&
 	(Math.abs(actionBlock.col - position.col) == 1)) ||
 	((Math.abs(actionBlock.row - position.row) == 1) &&
-	(Math.abs(actionBlock.col - position.col) == 2))) &&
-	isSafe(0, position, board))
+	(Math.abs(actionBlock.col - position.col) == 2))))
 	{
-		
-		if (board[actionBlock.row - 1][actionBlock.col - 1] == "")
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else if ((board[actionBlock.row - 1][actionBlock.col - 1]).charAt(0) != PLAYER_INFO.color)
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+        // Moves the piece and checks that the King is Safe.
+        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
+        board[position.row - 1][position.col - 1] = "";
+        if (isSafe(0, actionBlock, board, color)) return true;
+        return false;
 	}
 };
-
-function pawnAction(position, actionBlock, board)
+// Checks the Validity of a BISHOP Move
+function pawnAction(position, actionBlock, board, color)
 {
-	colorDirection = 1;
-	if ((board[position.row - 1][position.col - 1]).charAt(0) == 'b')
-	{
-		colorDirection = -1;
-	}
-
-	if ((actionBlock.row - position.row == colorDirection) && 
+    console.log("Processing Pawn Logic");
+    // Setting Direction for Color
+	var colorDirection = 1;
+    if ((board[position.row - 1][position.col - 1]).charAt(0) == 'b') colorDirection = -1;
+    // Allows Double on First Move
+    var doubleMove = 0;
+    if ((colorDirection == 1 && position.row == 2) || (colorDirection == -1 && position.row == 7)) doubleMove = 1;
+    // If the move is forward and empty.
+    if (((actionBlock.row - position.row == colorDirection) ||
+     (doubleMove && (actionBlock.row - position.row == (colorDirection * 2)))) && 
 	(Math.abs(actionBlock.col - position.col) == 0) &&
-	board[actionBlock.row - 1][actionBlock.col - 1] == "" &&
-	isSafe(0, position, board))
+	board[actionBlock.row - 1][actionBlock.col - 1] == "")
 	{
+        // Moves the piece and checks that the King is Safe.
 		board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
 		board[position.row - 1][position.col - 1] = "";
-		if (isSafe(0, actionBlock, board))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
+		if (isSafe(0, actionBlock, board, color)) return true;
+		return false;
+    }
+    // If move is DIAGONAL 1, FORWARD 1, and KILLS
 	else if ((actionBlock.row - position.row == colorDirection) && 
 	(Math.abs(actionBlock.col - position.col) == 1) &&
-	((board[actionBlock.row - 1][actionBlock.col - 1]) != "") &&
-	isSafe(0, position, board))
+	((board[actionBlock.row - 1][actionBlock.col - 1]) != ""))
 	{
-		if ((board[actionBlock.row - 1][actionBlock.col - 1]).charAt(0) != (board[position.row - 1][position.col - 1]).charAt(0))
-		{
-			board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-			board[position.row - 1][position.col - 1] = "";
-			if (isSafe(0, actionBlock, board))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+        // Moves the piece and checks that the King is Safe.
+        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
+        board[position.row - 1][position.col - 1] = "";
+        if (isSafe(0, actionBlock, board, color)) return true;
+        return false;
 	}
 };
 
 function newQueen(board)
 {
+    console.log("Checking for New Queens.");
 	for (var i = 0; i < 8; i++)
 	{
-		var piece = board[7][i];
-		if (piece.charAt(1) == 'p' && piece.charAt(0) == 'w')
-		{
-			board[7][i] = "wq";
-		}
-		var piece = board[0][i];
-		if (piece.charAt(1) == 'p' && piece.charAt(0) == 'b')
-		{
-			board[7][i] = "bq";
-		}
+        var piece = board[7][i];
+        if (piece != "")
+            if (piece.charAt(1) == 'p' && piece.charAt(0) == 'w') board[7][i] = "wq";
+        piece = board[0][i];
+        if (piece != "")
+		    if (piece.charAt(1) == 'p' && piece.charAt(0) == 'b') board[0][i] = "bq";
 	}
 	return board;
 };
 
 function isClearPath(position, actionBlock, board)
 {
-	distanceY = actionBlock.row - position.row;
-	distanceX = actionBlock.col - position.col;
-	negativeX = 1;
-	negativeY = 1;
-
-	if (distanceX < 0)
-	{
-		negativeX = -1;
-	}
-	if (distanceY < 0)
-	{
-		negativeY = -1;
-	}
-	
-	if (distanceX == 0 || distanceY == 0)
-	{
-		if (distanceX == 0)
-		{
-			for (var i = 1; i <= Math.abs(distanceY); i++)
-			{
-				if (i == Math.abs(distanceY) && (board[actionBlock.row - 1][actionBlock.col - 1]) != "")
-				{
-					if ((board[actionBlock.row - 1][actionBlock.col - 1]).charAt(0) != (board[position.row - 1][position.col - 1]).charAt(0))
-					{
-						return true;
-					}
-				}
-				else if (board[(position.row + i * negativeY) - 1][(position.col) - 1] != "")
-				{
-					return false;
-				}
-			}
-		}
-		else if (distanceY == 0)
-		{
-			for (var i = 1; i <= Math.abs(distanceX); i++)
-			{
-				if (i == Math.abs(distanceX) && (board[actionBlock.row - 1][actionBlock.col - 1]) != "")
-				{
-					if ((board[actionBlock.row - 1][actionBlock.col - 1]).charAt(0) != (board[position.row - 1][position.col - 1]).charAt(0))
-					{
-						return true;
-					}
-				}
-				else if (board[(position.row) - 1][(position.col + i * negativeX) - 1] != "")
-				{
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	else if (Math.abs(distanceX) == Math.abs(distanceY))
-	{
-		for (var i = 1; i <= Math.abs(distanceX); i++)
-		{
-			if (i == Math.abs(distanceX) && (board[actionBlock.row - 1][actionBlock.col - 1]) != "")
-			{
-				if ((board[actionBlock.row - 1][actionBlock.col - 1]).charAt(0) != (board[position.row - 1][position.col - 1]).charAt(0))
-				{
-					return true;
-				}
-			}
-			else if (board[(position.row + i * negativeY) - 1][(position.col + i * negativeX) - 1] != "")
-			{
-				return false;
-			}
-		}
-		return true;	
-	}
-	else
-	{
-		return false;
-	}
+    console.log("Processing Path...");
+    var distanceX = actionBlock.col - position.col;
+    var distanceY = actionBlock.row - position.row;
+    if (Math.abs(distanceX) <= 1 && Math.abs(distanceY) <= 1) return true;
+    var directionX = 0;
+    var directionY = 0;
+    if (distanceX != 0)
+    {
+        if (distanceX < 0) directionX = -1;
+        else directionX = 1;
+    }
+    if (distanceY != 0)
+    {
+        if (distanceY < 0) directionY = -1;
+        else directionY = 1;
+    }
+    var testBlock = {row: (position.row + directionY), col: (position.col + directionX)};
+    var distance = 0;
+    if (Math.abs(distanceY) > Math.abs(distanceX)) distance = Math.abs(distanceY) - 1;
+    else distance = Math.abs(distanceX) - 1;
+    for (var i = 0; i < distance; i++)
+    {
+        if (board[testBlock.row - 1][testBlock.col - 1] != "") {console.log("Path is Blocked."); return false;}
+        testBlock.row += directionY;
+        testBlock.col += directionX;
+    }
+    console.log("Valid Path.");
+    return true;
 };
 
-function isSafe(isKing, block, board)
+function isSafe(isKing, block, board, color)
 {
-	var kingPosition = {row: 0, col: 0};
-    var color = (board[block.row - 1][block.col - 1]).charAt(0);
-	var oppcolor = 'b';
-	if (color == 'b')
-	{
-		oppcolor = 'w';
-	}
+    console.log("Processing King Safety.");
+    var kingPosition = {row: 0, col: 0};
+    var oppcolor = "";
+    if (color == 'b') oppcolor = 'w'; 
+    else oppcolor = "b";
 	if (isKing)
 	{
-		kingPosition = block;
-	}
-
-	var enemyPositions = [];
-
-	for (var i = 0; i < 8; i++)
-	{
-		for (var j = 0; j < 8; j++)
-		{
-			if (board[i][j].charAt(0) == oppcolor)
-			{
-				enemyPositions.push({piece: board[i][j].charAt(1), row: i, col: j});
-			}
-			else if (board[i][j].charAt(0) == color && board[i][j].charAt(1) == "k" && !isKing)
-			{
-				kingPosition.row = i;
-				kingPosition.col = j;
-			}
-		}
+        kingPosition.row = block.row - 1;
+        kingPosition.col = block.col - 1;
     }
-	for (i in enemyPositions)
-	{
-		if (enemyPositions[i].piece == 'k' && 
-		(Math.abs(enemyPositions[i].row - kingPosition.row) <= 1 && 
-		Math.abs(enemyPositions[i].col - kingPosition.col) <= 1))
-		{
-			return false;
-		}
-		else if (enemyPositions[i].piece == 'q' &&
-		((enemyPositions[i].row == kingPosition.row || enemyPositions[i].col == kingPosition.col) ||
-		(Math.abs(enemyPositions[i].row - kingPosition.row) == Math.abs(enemyPositions[i].col - kingPosition.col))) &&
-		isClearPath(enemyPositions[i], kingPosition))
-		{
-			return false;
-		}
-		else if (enemyPositions[i].piece == 'r' &&
-		(enemyPositions[i].row == kingPosition.row || enemyPositions[i].col == kingPosition.col) &&
-		isClearPath(enemyPositions[i], kingPosition))
-		{
-			return false;
-		}
-		else if (enemyPositions[i].piece == 'b' &&
-		(Math.abs(enemyPositions[i].row - kingPosition.row) == Math.abs(enemyPositions[i].col - kingPosition.col)) &&
-		isClearPath(enemyPositions[i], kingPosition))
-		{
-			return false;
-		}
-		else if (enemyPositions[i].piece == 'n' &&
-		(((Math.abs(enemyPositions[i].row - kingPosition.row) == 1) && (Math.abs(enemyPositions[i].col - kingPosition.col) == 2)) ||
-		((Math.abs(enemyPositions[i].row - kingPosition.row) == 2) && (Math.abs(enemyPositions[i].col - kingPosition.col) == 1))))
-		{
-			return false;
-		}
-		else if (enemyPositions[i].piece == 'p' &&
-		((Math.abs(enemyPositions[i].row - kingPosition.row) == 1) && (Math.abs(enemyPositions[i].col - kingPosition.col) == 1)))
-		{
-			return false;
-		}
-	}
-	return true;
+    else
+    {
+        // Finds the King and Stores Location
+        for (var i = 0; i < 8; i++) { for (var j = 0; j < 8; j++) {
+            if (board[i][j].charAt(0) == color && board[i][j].charAt(1) == "k")
+            { kingPosition.row = i; kingPosition.col = j; }
+        }}
+    }
+    var testBlock = {row: kingPosition.row, col: kingPosition.col};
+    var testDirection = [{row: 1, col: 0}, {row: -1, col: 0}, {row: 0, col: 1}, {row: 0, col: -1},
+                         {row: 1, col: 1}, {row: -1, col: 1}, {row: -1, col: -1}, {row: 1, col: -1}];
+    // For each direction.
+    for (var i = 0; i < testDirection.length; i++)
+    {
+        testBlock = {row: (kingPosition.row + testDirection[i].row), col: (kingPosition.col + testDirection[i].col)};
+        // Ensures we don't check for data past or before the array
+        if (testBlock.row < 0 || testBlock.row > 7 ||
+            testBlock.col < 0 || testBlock.col > 7) continue;
+        if (board[testBlock.row][testBlock.col] != "")
+            if (board[testBlock.row][testBlock.col].charAt(0) == color) continue;
+        var distance = 0;
+        var end = 0;
+        // Extend that direction until you find a piece.
+        while(board[testBlock.row][testBlock.col] == "")
+        {
+            // Ensures we don't check for data past or before the array while moving.
+            if ((testBlock.row + testDirection[i].row) < 0 ||
+            (testBlock.row + testDirection[i].row > 7) ||
+            (testBlock.col + testDirection[i].col < 0) || 
+            (testBlock.col + testDirection[i].col > 7))
+            {
+                end = 1;
+                break;
+            }
+            distance += 1;
+            testBlock.row += testDirection[i].row;
+            testBlock.col += testDirection[i].col;
+        }
+        // If the while loop didn't end by finding the edge, check danger.
+        if (!end)
+        {
+            // If that piece is player color, continue.
+            if (board[testBlock.row][testBlock.col].charAt(0) == color) continue;
+            // If that piece is an enemy QUEEN one, NOT SAFE.
+            else if ((board[testBlock.row][testBlock.col].charAt(1) == "q")) {console.log("King is not Safe."); return false;}
+            // If that piece is an enemy KING one away, NOT SAFE.
+            else if ((board[testBlock.row][testBlock.col].charAt(1) == "k") && distance == 1) {console.log("King is not Safe."); return false;}
+            // If that piece is an enemy ROOK and direction is HORIZONTAL or VERTICAL, NOT SAFE.
+            else if ((board[testBlock.row][testBlock.col].charAt(1) == "r") && (i < 4)) {console.log("King is not Safe."); return false;}
+            // If that piece is an enemy BISHOP and direction is DIAGONAL, NOT SAFE.
+            else if ((board[testBlock.row][testBlock.col].charAt(1) == "b") && (i >= 4)) {console.log("King is not Safe."); return false;}
+            // If that piece is an enemey PAWN and direction is DIAGONAL one away in the right direction, NOT SAFE.
+            else if ((board[testBlock.row][testBlock.col].charAt(1) == "p") &&
+            (((color == 'w') && ((i == 5) || (i == 6))) ||
+            ((color == 'b') && ((i == 4) || (i == 5)))) 
+            && distance == 1) {console.log("King is not Safe."); return false;}
+        }
+    }
+    // Separately check for a knight.
+    var knightTest = [{row: 1, col: 2}, {row: -1, col: 2}, {row: 1, col: -2}, {row: -1, col: -2},
+                      {row: 2, col: 1}, {row: -2, col: 1}, {row: 2, col: -1}, {row: -2, col: -1}];
+    for (test in knightTest)
+    {
+        testBlock = {row: (kingPosition.row + knightTest[test].row), col: (kingPosition.col + knightTest[test].col)};
+        // Ensures we don't check for dat apast or before the array.
+        if (testBlock.row < 0 || testBlock.row > 7 ||
+        testBlock.col < 0 || testBlock.col > 7) continue;
+        // If the block is empty, continue.
+        if (board[testBlock.row][testBlock.col] == "") continue;
+        // If the pices is king color, continue.
+        if (board[testBlock.row][testBlock.col].charAt(0) == color) continue;
+        // If the pices is an enemy knight, NOT SAFE.
+        if ((board[testBlock.row][testBlock.col].charAt(1) == "n")) {console.log("King is not Safe."); return false;}
+    }
+    console.log("King is Safe.");
+    return true;
 };
+
+function checkForCheckMate(board, color)
+{
+    // Is the King Currently Safe?
+    var kingPosition = {row: 0, col: 0};
+    for (var i = 0; i < 8; i++) { for (var j = 0; j < 8; j++) {
+        if (board[i][j].charAt(0) == color && board[i][j].charAt(1) == "k")
+        { kingPosition.row = i; kingPosition.col = j; }
+    }}
+    if (isSafe(1, kingPosition, board, color)) return false;
+    var testDirection = [{row: 1, col: 0}, {row: -1, col: 0}, {row: 0, col: 1}, {row: 0, col: -1},
+        {row: 1, col: 1}, {row: -1, col: 1}, {row: -1, col: -1}, {row: 1, col: -1}];
+    for (var i = 0; i < testDirection.length; i++)
+    {
+        var testBlock = {row: kingPosition.row + testDirection[i].row, col: kingPosition.col + testDirection[i].col};
+        if (testBlock.row < 0 || testBlock.row > 7 ||
+            testBlock.col < 0 || testBlock.col > 7) continue;
+        if (isSafe(1, testBlock, board, color)) return false;
+    }
+    return true;
+}

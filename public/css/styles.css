@@ -14,16 +14,13 @@ body
 {
   color: white;
   font-family: 'Germania One', cursive;
-  margin-top: 20%;
 }
 .header
 {
   display: block;
-  position: fixed;
-  left: 0;
-  top: 0;
   width: 100%;
   height: 60px;
+  margin-bottom: 50px;
 }
 .title
 {
@@ -60,7 +57,6 @@ button
   font-family: 'Germania One', cursive;
   font-size: 200%;
 }
-
 #homeButton
 {
     display: block;
@@ -75,7 +71,122 @@ button
     background-size: cover;
 }
 
+#app
+{
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
 
+#topDiv
+{
+  display: flex;
+  margin: 0 auto;
+  width: 750px;
+  height: 230px;
+  background-color: rgba(95, 88, 156, 0.747);
+  border: 1px solid black;
+  margin-bottom: 50px;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+  align-items: center;
+  text-align: center;
+}
+.sideDiv
+{
+  display: block;
+  margin-left: 75px;
+  margin-right: 75px;
+  width: 375px;
+  height: 520px;
+  background-color: rgba(95, 88, 156, 0.747);
+  border: 1px solid black;
+}
+.third
+{
+  display: block;
+  width: 30%;
+  height: 90%;
+  background-color: rgba(109, 104, 156, 0.747);
+  border: 1px solid rgba(163, 163, 163, 0.582);
+}
+#selected
+{
+  display: block;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 75px;
+  height: 75px;
+  margin: 0 auto;
+}
+#turn
+{
+  font-size: 300%;
+  margin: 0px;
+}
+h2
+{
+  color: rgb(172, 170, 170);
+}
+h4
+{
+  color: rgb(172, 170, 170);
+  font-size: 110%;
+  padding-top: 5px;
+  margin-bottom: 10px;
+}
+h5
+{
+  color: rgb(172, 170, 170);
+  padding-bottom: 5px;
+  margin-top: 5px;
+}
+p
+{
+  margin: 0px;
+}
+.message
+{
+  margin: 0 auto;
+  display: block;
+  background-color: rgba(122, 119, 155, 0.411);
+  width: 80%;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.form
+{
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 40px;
+  width: 90%;
+}
+#textbox
+{
+  display: block;
+  height: 40px;
+  width: 225px;
+  margin: 0;
+  background-color: rgba(163, 163, 163, 0.541);
+  border: 0px;
+  margin-right: 15px;
+}
+#send
+{
+  display: block;
+  margin: 0px;
+  height: 40px;
+  width: 80px;
+  font-size: 150%;
+  background-color: rgba(114, 104, 207, 0.747);
+}
+#chat
+{
+  position: relative;
+}
 
 
 
@@ -90,8 +201,8 @@ button
 .block
 {
   display: block;
-  width: 50px;
-  height: 50px;
+  width: 65px;
+  height: 65px;
   background-size: cover;
 }
 .container
@@ -101,6 +212,10 @@ button
   flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
+}
+.wrap
+{
+  flex-wrap: wrap !important;
 }
 .bb
 {
@@ -149,6 +264,14 @@ button
 .wr
 {
   background-image: url("../images/wr.png");
+}
+.wt
+{
+  background-image: url("../images/wt.png");
+}
+.bt
+{
+  background-image: url("../images/bt.png");
 }
 .empty
 {
