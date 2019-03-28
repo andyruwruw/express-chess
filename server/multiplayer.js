@@ -13,7 +13,10 @@ const boardSchema = new mongoose.Schema({
     [String,    String,    String,    String,    String,    String,    String,    String   ], 
     [String, String, String, String, String, String, String, String],
     [String, String, String, String, String,  String, String, String]],
-    action: {selection: {row: Number, col: Number}, move: {row: Number, col: Number}}
+    action: {selection: {row: Number, col: Number}, move: {row: Number, col: Number}},
+    dead: [],
+    special: {wkingmv: Number, bkingmv: Number, wWin: Number, bWin: Number, stale: Number, lastAction: 
+        {selection: {row: Number, col: Number}, move: {row: Number, col: Number}}},
 });
 
 const Board = mongoose.model('Board', boardSchema);
@@ -31,7 +34,11 @@ const match = new Board({
     [req.body.board[5][0], req.body.board[5][1], req.body.board[5][2], req.body.board[5][3], req.body.board[5][4],  req.body.board[5][5], req.body.board[5][6], req.body.board[5][7]], 
     [req.body.board[6][0], req.body.board[6][1], req.body.board[6][2], req.body.board[6][3], req.body.board[6][4],  req.body.board[6][5], req.body.board[6][6], req.body.board[6][7]], 
     [req.body.board[7][0], req.body.board[7][1], req.body.board[7][2], req.body.board[7][3], req.body.board[7][4],  req.body.board[7][5], req.body.board[7][6], req.body.board[7][7]]],
-    action: {selection: {row: req.body.action.selection.row, col: req.body.action.selection.col}, move: {row: req.body.action.move.row, col: req.body.action.move.col}}
+    action: {selection: {row: req.body.action.selection.row, col: req.body.action.selection.col}, move: {row: req.body.action.move.row, col: req.body.action.move.col}},
+    dead: req.body.dead,
+    special: {wkingmv: req.body.special.wkingmv, bkingmv: req.body.special.bkingmv, 
+        wWin: req.body.special.wWin, bWin: req.body.special.bWin, stale: req.body.special.stale, 
+        lastAction: {selection: {row: req.body.action.selection.row, col: req.body.action.selection.col}, move: {row: req.body.action.move.row, col: req.body.action.move.col}}},
     });
     try {
         await match.save();
@@ -46,20 +53,30 @@ router.put('/:idNum', async (req, res) => { // Player Updates their Move
     try {
         var newroom = {};
         var newboard = [];
+        var newdead = [];
+        var newGame = {wWin: 0, bWin: 0};
         var changeData = 0;
         var desiredAction = {};
         newroom = req.body.room;
         newboard = req.body.board;
+        newdead = req.body.dead;
         desiredAction = req.body.action;
+        var didWKingMv = req.body.special.wkingmv;
+        var didBKingMv = req.body.special.bkingmv;
         var movingpiece = req.body.board[desiredAction.selection.row - 1][desiredAction.selection.col - 1];
         var landingBlock = req.body.board[desiredAction.move.row - 1][desiredAction.move.col - 1];
         console.log("Game \"" + req.params.idNum + "\": Requesting Move");
-        if (validMove(req.body, desiredAction))
+        if (validMove(req.body, desiredAction, didBKingMv, didWKingMv))
         {
+            if (movingpiece.charAt(1) == "k" && movingpiece.charAt(0) == "w")
+            didWKingMv = 1;
+            if (movingpiece.charAt(1) == "k" && movingpiece.charAt(0) == "b")
+            didBKingMv = 1;
             console.log("Game \"" + req.params.idNum + "\": Valid Move");
             changeData = 1;
             if (landingBlock != "")
             {
+                newdead.push(landingBlock);
                 const PIECE_WORTH = {p: 1, n: 3, b: 3, r: 5, q: 9};
                 if (landingBlock.charAt(0) == 'w')
                 newroom.scores.b += PIECE_WORTH[landingBlock.charAt(1)];
@@ -68,8 +85,31 @@ router.put('/:idNum', async (req, res) => { // Player Updates their Move
             console.log("Game \"" + req.params.idNum + "\": Saving Match");
             newboard[desiredAction.move.row - 1][desiredAction.move.col - 1] = movingpiece;
             newboard[desiredAction.selection.row - 1][desiredAction.selection.col - 1] = "";
+            
+            if (movingpiece.charAt(1) == "k" &&
+            (desiredAction.move.row - desiredAction.selection.row == 0) && 
+            (Math.abs(desiredAction.move.col - desiredAction.selection.col) == 2))
+            {
+                console.log("Castle: Moving Rook as well.");
+                if (desiredAction.move.col - desiredAction.selection.col < 0)
+                {
+                    var rook = newboard[desiredAction.move.row - 1][0];
+                    console.log("Rook: " + rook);
+                    newboard[desiredAction.move.row - 1][0] = "";
+                    newboard[desiredAction.move.row - 1][desiredAction.move.col] = rook;
+                }
+                else if (desiredAction.move.col - desiredAction.selection.col > 0)
+                {
+                    var rook = newboard[desiredAction.move.row - 1][7];
+                    console.log("Rook: " + rook);
+                    newboard[desiredAction.move.row - 1][7] = "";
+                    newboard[desiredAction.move.row - 1][desiredAction.move.col - 2] = rook;
+                }
+            }
             newboard = newQueen(newboard);
             newroom.turnNum += 1;
+            newGame.bWin = checkForCheckMate(req.body.board, 'w');
+            newGame.wWin = checkForCheckMate(req.body.board, 'b');
             if (changeData == 1)
             {
                 try {
@@ -79,7 +119,10 @@ router.put('/:idNum', async (req, res) => { // Player Updates their Move
                     {
                         $inc: { "room.turnNum": 1 },
                         $set: { "action.selection.row": -1, "action.selection.col": -1, "action.move.row": -1, "action.move.col": -1,
-                                "room.scores.w": newroom.scores.w, "room.scores.b": newroom.scores.b},
+                                "room.scores.w": newroom.scores.w, "room.scores.b": newroom.scores.b, "dead": newdead, "special.wkingmv": didWKingMv,
+                                "special.bkingmv": didBKingMv, "special.wWin": newGame.wWin, "special.bWin": newGame.bWin,
+                            "special.lastAction.selection.row": desiredAction.selection.row, "special.lastAction.selection.col": desiredAction.selection.col, 
+                            "special.lastAction.move.row": desiredAction.move.row, "special.lastAction.move.col": desiredAction.move.col},
                         $push : {
                             board : {
                                 $each: [newboard[0], newboard[1], newboard[2], newboard[3], newboard[4], newboard[5], newboard[6], newboard[7]],
@@ -96,9 +139,7 @@ router.put('/:idNum', async (req, res) => { // Player Updates their Move
         }
         else
         {
-            var endGameW = checkForCheckMate(req.body.board, 'w');
-            var endGameB = checkForCheckMate(req.body.board, 'b');
-            var returnObject = {data: {_id: "Invalid_Move", nModified : 0, gameOverW: endGameW, gameOverB: endGameB}};
+            var returnObject = {data: {_id: "Invalid_Move", nModified : 0}};
             res.send(returnObject);
         }
     } catch (error) {
@@ -122,7 +163,7 @@ module.exports = router;
 
 // GAME LOGIC =============================================================================================
 // If the move is valid, returns true.
-function validMove(match, action)
+function validMove(match, action, didBKingMv, didWKingMv)
 {
     // If the Player Tries to Move His Piece onto another one of his Pieces.
     if ((match.board[action.move.row - 1][action.move.col - 1]) != "")
@@ -135,7 +176,7 @@ function validMove(match, action)
     switch (char)   
     {
         case 'k':
-            if (kingAction(action.selection, action.move, match.board, color)) return true;
+            if (kingAction(action.selection, action.move, match.board, color, didBKingMv, didWKingMv)) return true;
             break;
         case 'q':
             if (queenAction(action.selection, action.move, match.board, color)) return true;
@@ -155,7 +196,7 @@ function validMove(match, action)
     }
 };
 // Checks the Validity of a KING Move
-function kingAction(position, actionBlock, board, color)
+function kingAction(position, actionBlock, board, color, didBKingMv, didWKingMv)
 {
     console.log("Processing King Logic");
     // If the move square is Adjacent.
@@ -168,7 +209,17 @@ function kingAction(position, actionBlock, board, color)
         board[position.row - 1][position.col - 1] = "";
         if (isSafe(1, actionBlock, board, color)) return true;
         return false;
-	}
+    }
+    // Logic for Castling
+    if ((Math.abs(actionBlock.row - position.row) == 0) &&
+	(Math.abs(actionBlock.col - position.col) == 2) &&
+     isClearPath(position, actionBlock, board) &&
+     isValidCastle(position, actionBlock, board, color) &&
+     (((color == "w") && (!didWKingMv)) || 
+     ((color == "b") && (!didBKingMv))))
+     {
+        return true;  
+     }
 };
 // Checks the Validity of a QUEEN Move
 function queenAction(position, actionBlock, board, color)
@@ -268,6 +319,7 @@ function pawnAction(position, actionBlock, board, color)
 	}
 };
 
+// Checks far rows for brave pawns to turn to queens.
 function newQueen(board)
 {
     console.log("Checking for New Queens.");
@@ -283,6 +335,41 @@ function newQueen(board)
 	return board;
 };
 
+// Returns true if castle is valid.
+function isValidCastle(position, actionBlock, board, color)
+{
+    console.log("Checking for valid castle...");
+    if (color == "w" && (position.row != 1 || position.col != 5)) {console.log("King not on base row."); return false;}
+    if (color == "b" && (position.row != 8 || position.col != 5)) {console.log("King not on base row."); return false;}
+
+
+    var direction = 1;
+    if (actionBlock.col - position.col < 0) direction = -1;
+    
+    var castleObjects = [{direction: 1, piece: "wr2"}, {direction: -1, piece: "wr1"}];
+    if (color == "b") castleObjects = [{direction: 1, piece: "br2"}, {direction: -1, piece: "br1"}];
+    var index = 0;
+    var end = 8;
+    if (direction == castleObjects[1].direction)  {index = 1; end = 1}
+    testBlock = position.col;
+    for (var i = 0; i < 3; i++)
+    {
+        testBlock = position.col + i * direction;
+        console.log("TESTING: " + testBlock + " Found: " + board[position.row - 1][testBlock - 1]);
+        if (board[position.row - 1][testBlock - 1] != "") if (board[position.row - 1][testBlock - 1].charAt(1) != "k") {console.log("Path not clear for Castle."); return false;}
+        var checkposition = {row: position.row, col: testBlock};
+        if (!isSafe(1, checkposition, board, color)) {console.log("King not safe on path or in check."); return false;}
+    }
+    if (board[position.row - 1][testBlock + 1 * direction - 1] != castleObjects[index].piece)
+    {
+        if (board[position.row - 1][testBlock + 1 * direction - 1] != "") {console.log("Path not clear for Castle."); return false;}
+    }
+    if (board[position.row - 1][end - 1] != castleObjects[index].piece) {console.log("Rook ID Not Correct for Castle."); return false;}
+    console.log("Valid Castle.");
+    return true;
+}
+
+// Returns true if no pieces are in the way.
 function isClearPath(position, actionBlock, board)
 {
     console.log("Processing Path...");

@@ -36,16 +36,16 @@
 
 <body onclick="playMusic();">
   <a href="http://andrewdanielyoung.com/" id="homeButton"> </a>
-  <div class="header">
-    <div class="title">
-      <h1>Express Chess</h1>
-    </div>
-  </div>
   <div id="app">
-    <div v-if="!startGame">
-      <div id="home">
-        <button @click="checkAvailableMatches">{{buttonText}}</button>
+    <div class="header" v-if="startGame">
+      <div class="title">
+        <h1>Express Chess</h1>
       </div>
+    </div>
+    <h1 id="menuTitle" v-if="!startGame">Express Chess</h1>
+    <div id="menuButtons" v-if="!startGame">
+        <button class="add-margin" @click="checkAvailableMatches">{{buttonText}}</button>
+        <button class="add-margin" href="./pages/about.html">ABOUT</button>
     </div>
     <div id="topDiv" class="container" v-if="startGame">
       <div class="third">
@@ -55,8 +55,8 @@
       </div>
       <div class="third">
           <h1>{{winningCalc}}</h1>
-          <h2>White Score: {{sharedData.room.scores.w}}</h2>
-          <h2>Black Score: {{sharedData.room.scores.b}}</h2>
+          <h2 class="less-margin">White Score: {{sharedData.room.scores.w}}</h2>
+          <h2 class="less-margin">Black Score: {{sharedData.room.scores.b}}</h2>
       </div>
       <div class="third">
           <h1>Selected</h1>
@@ -66,7 +66,33 @@
     </div>
     <div class="container wrap" v-if="startGame">
       <div class="sideDiv" id="stats">
-
+        <h2 class="center">Captures</h2>
+        <div class="add-top-margin container">
+          <div class="col">
+            <div class="deadcontainer" id="wDead">
+                <div id="dead-wq" class="dead off wq"></div>
+                <div id="dead-wr" class="dead off wr"></div>
+                <div id="dead-wb" class="dead off wb"></div>
+                <div id="dead-wn" class="dead off wn"></div>
+                <div id="dead-wp" class="dead off wp"></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="deadcontainer" id="bDead">
+                <div id="dead-bq" class="dead off bq"></div>
+                <div id="dead-br" class="dead off br"></div>
+                <div id="dead-bb" class="dead off bb"></div>
+                <div id="dead-bn" class="dead off bn"></div>
+                <div id="dead-bp" class="dead off bp"></div>
+            </div>
+          </div>
+        </div>
+        <h2 class="center add-more-top-margin">From Server</h2>
+        <h3 id="serverMessage">{{serverMessage}}</h3>
+        <div id="bottom" class="container">
+        <h2 class="center">Game ID</h2>
+        <h5 id="gameID">{{sharedData._id}}</h5>
+        </div>
       </div>
       <div id="board" v-if="PLAYER_INFO.color == 'w'">
         <div class="container">
@@ -233,10 +259,14 @@
         </div>
       </div>
       <div class="sideDiv" id="chat">
-        <div class="message" v-for="message in messages">
-          <h4>{{message.usr}}</h4>
+        <h2 class="center">Chat</h2>
+        <div v-if="messagesBool" id="noplayermessages"></div>
+        <div class="message" v-if="!messagesBool" v-for="message in messages">  
+          <div class="messageDetails">
+              <h4>{{message.usr}}</h4>
+              <h5>{{message.time}}</h5>
+          </div>
           <p>{{message.text}}</p>
-          <h5>{{message.time}}</h5>
         </div>
         <div class="form">
           <input v-model="messageText" id="textbox" placeholder="Send Message">

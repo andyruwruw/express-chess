@@ -29,6 +29,8 @@ var app = new Vue({
 		["bp1", "bp2", "bp3", "bp4", "bp5", "bp6", "bp7", "bp8"],
 		["br1", "bn1", "bb1", "bq1", "bk",  "bb2", "bn2", "br2"]],
 		action: {selection: {row: -1, col: -1}, move: {row: -1, col: -1}},
+		dead: [],
+		special: {wkingmv: 0, bkingmv: 0, wWin: 0, bWin: 0, stale: 0, lastAction: {selection: {row: -1, col: -1}, move: {row: -1, col: -1}}},
 	},
 	findingMatch: 0,
 	matchFound: 0,
@@ -44,25 +46,31 @@ var app = new Vue({
 	playerTurn: 0,
 	moveMade: 0,
 	queenNum: 1,
-	messages: [{text: "This is a sample message sent.", usr: "Black", time: "12:13:14 PM"}, {text: "Whats up my dude", usr: "White", time: "12:13:14 PM"}],
+	messages: [],
 	messageText: "",
-
+	messagesBool: 1,
+	settingBoard: 0,
+	serverMessageText: "",
+	oppleft: 10,
   },
   methods: {
 // ------------------------------------------------------------------REFRESH GAME FUNCTIONS------------------------------------------------------------------
 	async checkData() 									// Interval Checks Depending on Variables
 	{
 		this.sharedData._id = this.gameSharedId;
+		if (this.messageText.length > 40) this.messageText = this.messageText.substring(0,40);
 		if (this.findingMatch && !this.matchFound && !this.matchMade) this.checkMatch();
 		if (this.startGame)
 		{
 			
 			if (!this.playerTurn) 
 			{
+				this.serverMessageText = ("Awaiting Opponent...");
 				this.checkOppMove();
 				if (!this.playerTurn) this.getSelection();
 			}
 			this.getChat();
+			if (this.messages.length > 0) this.messagesBool = 0;
 			this.refreshBoard();
 		}
 	},
@@ -100,16 +108,39 @@ var app = new Vue({
 							if (element.classList.contains(colors[k] + pieces[l])) element.classList.remove(colors[k] + pieces[l]);
 						}
 					}
+					this.settingBoard = 0;
 					element.classList.add("empty");									// And adds empty background class.
 				}
+			}
+		}
+	},
+	refreshPiece(oldPos, newPos)
+	{
+		var oldElement = document.getElementById(oldPos.row + "-" + oldPos.col);
+		var newElement = document.getElementById(newPos.row + "-" + newPos.col);
+		let colors = ["w", "b"];
+		let pieces = ["q", "k", "n", "b", "r", "p"];
+		for (var k = 0; k < colors.length; k++)							// It runs through removing any piece classes.
+		{
+			for (var l = 0; l < pieces.length; l++)
+			{
+				if (newElement.classList.contains(colors[k] + pieces[l])) newElement.classList.remove(colors[k] + pieces[l]);
+				if (oldElement.classList.contains(colors[k] + pieces[l])) 
+				{
+					oldElement.classList.remove(colors[k] + pieces[l]);
+					newElement.classList.add(colors[k] + pieces[l]);
+				}
+				
 			}
 		}
 	},
 // ------------------------------------------------------------------GAME SERVER FUNCTIONS------------------------------------------------------------------
 	async getBoard() {
 		try {
-			console.log("Recieving Data From Server...");
 			let response = await axios.get("/api/match/" + this.gameSharedId);
+				this.sharedData.special.wWin = response.data.special.wWin;
+				this.sharedData.special.bWin = response.data.special.bWin;
+				if (this.sharedData.special.wWin || this.sharedData.special.bWin) this.gameOver();
 				this.sharedData.room.turnNum = response.data.room.turnNum;
 				this.sharedData.room.scores.w = response.data.room.scores.w;
 				this.sharedData.room.scores.b = response.data.room.scores.b;
@@ -125,6 +156,11 @@ var app = new Vue({
 				this.sharedData.board[5] = response.data.board[5];
 				this.sharedData.board[6] = response.data.board[6];
 				this.sharedData.board[7] = response.data.board[7];
+				this.sharedData.dead = response.data.dead;
+				this.updateDead();
+				this.sharedData.special.wkingmv = response.data.special.wkingmv;
+				this.sharedData.special.bkingmv = response.data.special.bkingmv;
+				this.refreshBoard();
 			return true;
 		} catch (error) {
 			console.log(error);
@@ -132,6 +168,7 @@ var app = new Vue({
 	},
 	async upload() {
 		try {
+			this.serverMessageText = "Sending Move to Server...";
 			console.log("Sending Move to Server...");
 			var block = (this.sharedData.action.selection.row).toString() + "-" + (this.sharedData.action.selection.col).toString();
 			var element = document.getElementById(block);
@@ -139,7 +176,10 @@ var app = new Vue({
 			let response = await axios.put("/api/match/" + this.gameSharedId, this.sharedData);
 			if (response.data.nModified == 1)
 			{
+				this.serverMessageText = ("Move Approved by Server.");
 				console.log("Move Approved by Server.");
+				this.refreshPiece({row: this.sharedData.action.selection.row, col: this.sharedData.action.selection.col},
+					{row: this.sharedData.action.move.row, col: this.sharedData.action.move.col});
 				this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
 				console.log("Awaiting Opponent's Move.");
 				this.selectImage = this.PLAYER_INFO.opponent + "t";
@@ -151,6 +191,7 @@ var app = new Vue({
 			}
 			else
 			{
+				this.serverMessageText = ("Move Declined by Server. Submit a Valid Move.");
 				console.log("Move Declined by Server.");
 				console.log("Submit a Valid Move.");
 				this.playSound(this.SOUNDS.error.sound, this.SOUNDS.error.volume);
@@ -174,6 +215,10 @@ var app = new Vue({
 			let response = await axios.get("/api/match/" + this.gameSharedId);
 			if (response.data.room.turnNum > this.displayedTurn)
 			{
+				console.log("Last Action: " + response.data.special.lastAction.selection.row + "-" + response.data.special.lastAction.selection.col);
+				var element = document.getElementById(response.data.special.lastAction.selection.row + "-" + response.data.special.lastAction.selection.col);
+				if ((element.classList.contains("oppselected"))) element.classList.remove("oppselected");
+				this.serverMessageText = ("Opponent's Move Approved. Submit a Valid Move!");
 				console.log("Opponent's Move Approved by Server.");
 				console.log("Submit a Valid Move.");
 				this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
@@ -186,6 +231,82 @@ var app = new Vue({
 			console.log(error);
 		}
 	},
+	updateDead()
+	{
+		var wDead = document.getElementById("wDead");
+		var bDead = document.getElementById("bDead");
+		var wDeadString = "";
+		var bDeadString = "";
+		var whiteDead = {p: 0, b: 0, n: 0, r: 0, q: 0};
+		var blackDead = {p: 0, b: 0, n: 0, r: 0, q: 0};
+
+		for (var i = 0; i < this.sharedData.dead.length; i++)
+		{
+			if (this.sharedData.dead[i].charAt(0) == "w") whiteDead[this.sharedData.dead[i].charAt(1)] += 1;
+			if (this.sharedData.dead[i].charAt(0) == "b") blackDead[this.sharedData.dead[i].charAt(1)] += 1;
+		}
+
+		if (whiteDead.p > 0)
+		{
+			var element = document.getElementById("dead-wp");
+			if (element.classList.contains("off")) element.classList.remove("off");
+			if (whiteDead.p > 1) element.innerText = whiteDead.p;
+		}
+		if (whiteDead.b > 0)
+		{
+			var element = document.getElementById("dead-wb");
+			if (element.classList.contains("off")) element.classList.remove("off");
+			if (whiteDead.b > 1) element.innerText = whiteDead.b;
+		}
+		if (whiteDead.n > 0)
+		{
+			var element = document.getElementById("dead-wn");
+			if (element.classList.contains("off")) element.classList.remove("off");
+			if (whiteDead.n > 1) element.innerText = whiteDead.n;
+		}
+		if (whiteDead.r > 0)
+		{
+			var element = document.getElementById("dead-wr");
+			if (element.classList.contains("off")) element.classList.remove("off");
+			if (whiteDead.r > 1) element.innerText = whiteDead.r;
+		}
+		if (whiteDead.q > 0)
+		{
+			var element = document.getElementById("dead-wq");
+			if (element.classList.contains("off")) element.classList.remove("off");
+			if (whiteDead.q > 1) element.innerText = whiteDead.q;
+		}
+		if (blackDead.p > 0)
+		{
+			var element = document.getElementById("dead-bp");
+			if (element.classList.contains("off")) element.classList.remove("off");
+			if (blackDead.p > 1) element.innerText = blackDead.p;
+		}
+		if (blackDead.b > 0)
+		{
+			var element = document.getElementById("dead-bb");
+			if (element.classList.contains("off")) element.classList.remove("off");
+			if (blackDead.b > 1) element.innerText = blackDead.b;
+		}
+		if (blackDead.n > 0)
+		{
+			var element = document.getElementById("dead-bn");
+			if (element.classList.contains("off")) element.classList.remove("off");
+			if (blackDead.n > 1) element.innerText = blackDead.n;
+		}
+		if (blackDead.r > 0)
+		{
+			var element = document.getElementById("dead-br");
+			if (element.classList.contains("off")) element.classList.remove("off");
+			if (blackDead.r > 1) element.innerText = blackDead.r;
+		}
+		if (blackDead.q > 0)
+		{
+			var element = document.getElementById("dead-bq");
+			if (element.classList.contains("off")) element.classList.remove("off");
+			if (blackDead.q > 1) element.innerText = blackDead.q;
+		}
+	},
 // ------------------------------------------------------------------SELECTION FUNCTION------------------------------------------------------------------
 	async selectPiece(block)
 	{
@@ -195,6 +316,7 @@ var app = new Vue({
 			{
 				if (this.isMyPiece(block)) // If no unit is selected
 				{
+					this.serverMessageText = ("Piece Selected.");
 					console.log("Selecting:" + block);
 					this.playSound(this.SOUNDS.select.sound, this.SOUNDS.select.volume);
 					this.selectedToggle(block);	
@@ -205,16 +327,20 @@ var app = new Vue({
 				else if (!this.isMyPiece(block))
 				{
 					this.playSound(this.SOUNDS.error.sound, this.SOUNDS.error.volume);
+					this.serverMessageText = ("You cannot select your opponent's pieces.");
 					console.log("You cannot select your opponent's pieces.");
 				}
 			}
 			else
 			{
-				if (this.sharedData.action.selection.row == parseInt(block.charAt(0), 10) && this.sharedData.action.selection.col == parseInt(block.charAt(2), 10))
+				if ((this.sharedData.board[(parseInt(block.charAt(0), 10) - 1)][(parseInt(block.charAt(2), 10) - 1)]).charAt(0) == this.PLAYER_INFO.color)
 				{
+					this.serverMessageText = ("Piece Unselected.");
+
 					console.log("Unselected - " + block);
 					this.playSound(this.SOUNDS.unselect.sound, this.SOUNDS.unselect.volume);
-					this.selectedToggle(block);
+					var selectedBlock = this.sharedData.action.selection.row + "-" + this.sharedData.action.selection.col;
+					this.selectedToggle(selectedBlock);
 				}
 				else		// If a unit is selected
 				{
@@ -223,6 +349,11 @@ var app = new Vue({
 					this.upload();
 				}
 			}	
+		}
+		else
+		{
+			this.serverMessageText = ("It's not your turn! Wait for your opponent.");
+			this.playSound(this.SOUNDS.error.sound, this.SOUNDS.error.volume);
 		}
 	},
 	async selectedToggle(block)
@@ -235,7 +366,14 @@ var app = new Vue({
 			this.drawSelection();
 			this.sharedData.action.selection.row = parseInt(block.charAt(0), 10);
 			this.sharedData.action.selection.col = parseInt(block.charAt(2), 10);
-			if (!(element.classList.contains("selected"))) element.classList.add("selected");	
+			if (this.playerTurn)
+			{
+				if (!(element.classList.contains("selected"))) element.classList.add("selected");
+			}
+			else
+			{
+				if (!(element.classList.contains("oppselected"))) element.classList.add("oppselected");
+			}
 		}
 		else
 		{
@@ -243,19 +381,31 @@ var app = new Vue({
 			this.drawSelection();
 			this.sharedData.action.selection.row = -1;
 			this.sharedData.action.selection.col = -1;
-			if (element.classList.contains("selected")) element.classList.remove("selected");
+			if (this.playerTurn)
+			{
+				if (element.classList.contains("selected")) element.classList.remove("selected");
+			}
+			else 
+			{
+				if (!(element.classList.contains("oppselected"))) element.classList.remove("oppselected");
+			}
 		}	
+		if (this.playerTurn)
 		this.updateSelection();
 	},
 	async getSelection()
 	{
 		try {
 			let response = await axios.get("/api/selected/" + this.gameSharedId);
+			console.log(response);
 			if (this.selectImage != response.data.selected)
 			{
+				
+				this.serverMessageText = ("Opponent is thinking!");
 				this.selectImage = response.data.selected;
 				this.playSound(this.SOUNDS.select.sound, this.SOUNDS.select.volume);
 				this.drawSelection();
+				this.selectedToggle(response.data.pos.row + "-" + response.data.pos.col);
 			}	
 		} catch (error) {
 			console.log(error);
@@ -268,6 +418,7 @@ var app = new Vue({
 				_id: this.gameSharedId,
 				turn: this.displayedTurn,
 				selected: this.PLAYER_INFO.color + "t",
+				pos: {row: this.sharedData.action.selection.row, col: this.sharedData.action.selection.col}
 			});
 		} catch (error) {
 			console.log(error);
@@ -277,7 +428,8 @@ var app = new Vue({
 	{
 		try {
 			await axios.put("/api/selected/" + this.gameSharedId, {
-				selected: this.selectImage
+				selected: this.selectImage,
+				pos: this.sharedData.action.selection
 			});
 		} catch (error) {
 			console.log(error);
@@ -352,6 +504,10 @@ var app = new Vue({
 			case "p":
 				break;
 		}
+	},
+	gameOver()
+	{
+		this.playerTurn = 0;
 	},
 	// ------------------------------------------------------------------MATCHMAKING FUNCTIONS------------------------------------------------------------------
 	async checkAvailableMatches() {
@@ -456,6 +612,7 @@ var app = new Vue({
 			this.sharedData.room.num = this.matchMaker.roomNum;
 			this.sharedData._id = this.gameSharedId;
 			let upload = await axios.post('/api/match', this.sharedData);
+			this.serverMessageText = ("You're white! It's you're turn first.");
 			this.createSelection();
 			this.createChat();
 			this.startGame = 1;
@@ -476,21 +633,29 @@ var app = new Vue({
 	async getChat()
 	{
 		let chat = await axios.get("/api/chat/" + this.gameSharedId);
-		console.log(chat);
 		this.messages = chat.data.chats;
 	},
 	async sendMesage()
 	{
 		try {
-			var time = Date.now();
-			var timeString = time.toLocaleTimeString();
+			var time = new Date();
+			var hours = time.getHours();
+			var dayTime = " AM";
+			if (hours > 12) 
+			{
+				hours = hours - 12;
+				dayTime = " PM";
+			}
+			var extraZero = "";
+			if (time.getMinutes() < 10) extraZero = "0"
+			var timeString = hours + ":" + extraZero + time.getMinutes() + dayTime;
 			var color = "White";
-			this.messages.push({text: this.messageText, time: timeString, usr: color});
 			if (this.PLAYER_INFO.color == "b") color = "Black";
 			let response = await axios.put("/api/chat/" + this.matchMaker._id, {
 				message: {text: this.messageText, time: timeString, usr: color}
 			});
 			this.messageText = "";
+			this.getChat();
 			return true;
 		} catch (error) {
 			console.log(error);
@@ -522,6 +687,7 @@ var app = new Vue({
 	}
   },
   created() {
+	this.updateDead();
   },
   computed:
   {
@@ -533,21 +699,27 @@ var app = new Vue({
 	},
 	playerTurnCalc()
 	{
+		if (this.sharedData.special.wWin ||
+			this.sharedData.special.bWin ||
+			this.sharedData.special.stale) return "Total Moves";
 		if (this.playerTurn) return "Your Move";
 		else if (this.PLAYER_INFO.color == "w") return "Black's Move";
 		else return "White's Move";
 	},
 	winningCalc()
 	{
+		if (this.sharedData.special.wWin) return "WHITE WINS.";
+		if (this.sharedData.special.bWin) return "BLACK WINS.";
+		if (this.sharedData.special.stale) return "STALEMATE.";
 		const STRINGS = ["Dominating", "Winning", "Smarter", "Better", "Superior", "Destroying"];
 		var returnString = STRINGS[Math.floor(Math.random() * 100 % STRINGS.length)];
 		if (this.sharedData.room.scores.w > this.sharedData.room.scores.b) return "White is " + returnString + "!";
 		if (this.sharedData.room.scores.w == this.sharedData.room.scores.b) return "No One's Ahead."
 		if (this.sharedData.room.scores.w < this.sharedData.room.scores.b) return "Black is " + returnString + "!";
 	},
-	messageCharLim()
+	serverMessage()
 	{
-		if (this.messageText.length > 40) this.messageText = this.messageText.substring(0,40);
+		return this.serverMessageText;
 	}
   }
 });

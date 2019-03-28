@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Germania+One');
-
+@import url('https://fonts.googleapis.com/css?family=Cairo');
 html
 {
   display: block;
@@ -7,8 +7,8 @@ html
   height: 100%;
   background-image: radial-gradient(rgb(46, 46, 75), rgb(8, 7, 17));
   background-size: cover;
-  background-repeat: no-repeat;
-  
+  background-repeat: repeat;
+
 }
 body
 {
@@ -43,20 +43,57 @@ body
   display: block;
   margin: 0 auto;
   text-align: center;
+  color: white;
+  font-weight: lighter;
+  font-size: 150%;
+}
+#menuButtons
+{
+  margin-top: 5%;
 }
 button
 {
   display: block;
-  width: 10%;
-  height: 20%;
+  width: 300px;
+  height: 70px;
   margin: 0 auto;
-  margin-top: 20%;
   background-color: rgba(95, 88, 156, 0.747);
   border: 0px solid rgba(0,0,0,0);
   color: white;
   font-family: 'Germania One', cursive;
-  font-size: 200%;
+  font-size: 250%;
 }
+#menuTitle
+{
+  font-size: 700%;
+  display: block;
+  text-align: center;
+  margin: 0 auto;
+  margin-top: 15%;
+}
+button:hover
+{
+  background-color: rgba(116, 108, 194, 0.747);
+}
+
+#aboutbutton
+{
+  display: block;
+  width: 300px;
+  height: 70px;
+  margin: 0 auto;
+  background-color: rgba(95, 88, 156, 0.747);
+  border: 0px solid rgba(0,0,0,0);
+  color: white;
+  font-family: 'Germania One', cursive;
+  font-size: 250%;
+}
+.add-margin
+{
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
 #homeButton
 {
     display: block;
@@ -69,11 +106,6 @@ button
     padding: 0px;
     background-image: url("https://i.ibb.co/271mvDy/homesymbol-white-00000.png");
     background-size: cover;
-}
-
-#app
-{
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 #topDiv
@@ -89,9 +121,11 @@ button
   justify-content: space-evenly;
   align-items: center;
   text-align: center;
+  border-radius: 20px;
 }
 .sideDiv
 {
+  position: relative;
   display: block;
   margin-left: 75px;
   margin-right: 75px;
@@ -99,6 +133,7 @@ button
   height: 520px;
   background-color: rgba(95, 88, 156, 0.747);
   border: 1px solid black;
+  border-radius: 20px;
 }
 .third
 {
@@ -107,6 +142,14 @@ button
   height: 90%;
   background-color: rgba(109, 104, 156, 0.747);
   border: 1px solid rgba(163, 163, 163, 0.582);
+  border-radius: 20px;
+}
+.deadcontainer
+{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 #selected
 {
@@ -117,6 +160,46 @@ button
   height: 75px;
   margin: 0 auto;
 }
+#gameID
+{
+  font-size: 130%;
+  color: rgb(204, 204, 204);
+  font-family: 'Cairo', sans-serif;
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bolder;
+  margin-top: 0px;
+}
+.dead
+{
+  display: block;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 60px;
+  text-align: right;
+  font-size: 200%;
+  height: 60px;
+  margin-right: 11.875px;
+  margin-left: 11.875px;
+}
+.off
+{
+  opacity: .3;
+}
+
+
+#noplayermessages
+{
+  display: block;
+  background-image: url("../images/sh.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 275px;
+  height: 275px;
+  margin: 0 auto;
+  margin-top: 50px;
+  margin-bottom: 0px;
+}
 #turn
 {
   font-size: 300%;
@@ -125,6 +208,17 @@ button
 h2
 {
   color: rgb(172, 170, 170);
+  font-size: 170%;
+}
+#g
+{
+  color: rgb(172, 170, 170) !important;
+}
+h1
+{
+  color: white;
+  font-size: 230%;
+  margin-top: 10px;
 }
 h4
 {
@@ -132,25 +226,74 @@ h4
   font-size: 110%;
   padding-top: 5px;
   margin-bottom: 10px;
+  margin-top: 5px;
 }
 h5
 {
   color: rgb(172, 170, 170);
-  padding-bottom: 5px;
   margin-top: 5px;
+}
+.center
+{
+  color: white !important;
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+.col
+{
+  display: block;
+  width: 50%;
+  height: 100%;
+}
+.centered
+{
+  display: block;
+  text-align: center;
+  margin: 0 auto;
+}
+.less-margin
+{
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 p
 {
   margin: 0px;
+  padding-bottom: 10px;
+  overflow-wrap: break-word;
 }
 .message
 {
   margin: 0 auto;
   display: block;
-  background-color: rgba(122, 119, 155, 0.411);
+  background-color: rgba(128, 120, 218, 0.411);
   width: 80%;
   padding-left: 5px;
   padding-right: 5px;
+  margin-bottom: 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+#bottom
+{
+  position: absolute;
+  display: flex;
+  left: 0px;
+  bottom: 0px;
+  width: 100%;
+  justify-content: space-evenly;
+  align-items: baseline;
+}
+#serverMessage
+{
+  word-wrap: normal;
+  color: rgba(255, 255, 255, 0.671);
+  text-align: center;
+  margin-top: 0px;
+  font-size: 140%;
+  font-family: 'Cairo', sans-serif;
 }
 .form
 {
@@ -173,6 +316,9 @@ p
   background-color: rgba(163, 163, 163, 0.541);
   border: 0px;
   margin-right: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 130%;
+  color: white;
 }
 #send
 {
@@ -198,6 +344,19 @@ p
 {
   background-color: rgb(158, 100, 61);
 }
+.white:hover
+{
+  background-color: rgb(250, 228, 196);
+}
+.black:hover
+{
+  background-color:rgb(179, 122, 84);
+}
+.losses
+{
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 .block
 {
   display: block;
@@ -211,7 +370,23 @@ p
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: center;
+}
+.add-top-margin
+{
+  margin-top: 20px;
+}
+.add-more-top-margin
+{
+  margin-top: 30px;
+}
+.messageDetails
+{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
+  justify-content: space-between;
+  
 }
 .wrap
 {
@@ -220,50 +395,62 @@ p
 .bb
 {
   background-image: url("../images/bb.png");
+  color: black;
 }
 .bk
 {
   background-image: url("../images/bk.png");
+  color: black;
 }
 .bn
 {
   background-image: url("../images/bn.png");
+  color: black;
 }
 .bp
 {
   background-image: url("../images/bp.png");
+  color: black;
 }
 .bq
 {
   background-image: url("../images/bq.png");
+  color: black;
 }
 .br
 {
   background-image: url("../images/br.png");
+  color: black;
 }
 .wb
 {
   background-image: url("../images/wb.png");
+  color: white;
 }
 .wk
 {
   background-image: url("../images/wk.png");
+  color: white;
 }
 .wn
 {
   background-image: url("../images/wn.png");
+  color: white;
 }
 .wp
 {
   background-image: url("../images/wp.png");
+  color: white;
 }
 .wq
 {
   background-image: url("../images/wq.png");
+  color: white;
 }
 .wr
 {
   background-image: url("../images/wr.png");
+  color: white;
 }
 .wt
 {
@@ -272,6 +459,36 @@ p
 .bt
 {
   background-image: url("../images/bt.png");
+}
+#bv
+{
+  display: block;
+  width: 150px;
+  height: 194px;
+  margin: 0 auto;
+  margin-top: 90px;
+  background-image: url("../images/bv.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+#w
+{
+  color: white;
+}
+#b
+{
+  color: black;
+}
+#wv
+{
+  display: block;
+  width: 150px;
+  height: 194px;
+  margin: 0 auto;
+  margin-top: 90px;
+  background-image: url("../images/wv.png");
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 .empty
 {
@@ -287,32 +504,19 @@ p
 }
 .selected
 {
-  background-color: rgb(129, 205, 255);
+  background-color: rgb(129, 205, 255) !important;
+}
+.oppselected
+{
+  background-color: rgb(255, 129, 129) !important;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
 
 /* Masonry on large screens */
 @media only screen and (min-width: 1024px) {
@@ -334,4 +538,5 @@ p
     column-count: 2;
   }
 }
+
 

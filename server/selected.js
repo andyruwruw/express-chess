@@ -6,6 +6,7 @@ const selectionSchema = new mongoose.Schema({
     _id: String,
     turn: Number,
     selected: String,
+    pos: {row: Number, col: Number}
 });
 
 const Selection = mongoose.model('Selection', selectionSchema);
@@ -14,7 +15,8 @@ router.post('/', async (req, res) => {   // Create a new Selection
     const selection = new Selection({
     _id: req.body._id,
     turn: req.body.turn,
-    selected: req.body.selected
+    selected: req.body.selected,
+    pos: {row: req.body.pos.row, col: req.body.pos.col}
     });
     try {
         await selection.save();
@@ -31,7 +33,7 @@ router.put('/:idNum', async (req, res) => { // Update with new Selection
             _id: req.params.idNum
         },
         {
-            $set: { "selected": req.body.selected},
+            $set: { "selected": req.body.selected, "pos.row": req.body.pos.row, "pos.col": req.body.pos.col},
         });
         res.send("Selection Sent to Server.");
   } catch (error) {
