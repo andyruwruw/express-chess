@@ -393,6 +393,41 @@ var app = new Vue({
 		if (this.playerTurn)
 		this.updateSelection();
 	},
+	selectedToggleOpp(block)
+	{
+		var element = document.getElementById(block);
+		if (this.sharedData.action.selection.row == -1 &&
+			this.sharedData.action.selection.col == -1)
+		{
+			this.selectImage = this.sharedData.board[parseInt(block.charAt(0), 10) - 1][parseInt(block.charAt(2), 10) - 1].substring(0,2);
+			this.drawSelection();
+			this.sharedData.action.selection.row = parseInt(block.charAt(0), 10);
+			this.sharedData.action.selection.col = parseInt(block.charAt(2), 10);
+			if (this.playerTurn)
+			{
+				if (!(element.classList.contains("selected"))) element.classList.add("selected");
+			}
+			else
+			{
+				if (!(element.classList.contains("oppselected"))) element.classList.add("oppselected");
+			}
+		}
+		else
+		{
+			this.selectImage = this.PLAYER_INFO.color + "t";
+			this.drawSelection();
+			this.sharedData.action.selection.row = -1;
+			this.sharedData.action.selection.col = -1;
+			if (this.playerTurn)
+			{
+				if (element.classList.contains("selected")) element.classList.remove("selected");
+			}
+			else 
+			{
+				if ((element.classList.contains("oppselected"))) element.classList.remove("oppselected");
+			}
+		}	
+	},
 	async getSelection()
 	{
 		try {
