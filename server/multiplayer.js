@@ -71,14 +71,14 @@ router.put('/:idNum', async (req, res) => {                                     
         var teamScore;
         if (color == "w")                                                             // Gathering both team's piece objects. (Needed to find Piece Key)
         {
-            teamPieces = req.body.pieceData.whitePieces;                              
-            oppPieces = req.body.pieceData.blackPieces;
+            teamPieces = convertObject(req.body.pieceData.whitePieces);                              
+            oppPieces = convertObject(req.body.pieceData.blackPieces);  
             teamScore = req.body.whiteScore;
         }
         else
         {
-            oppPieces = req.body.pieceData.whitePieces;
-            teamPieces = req.body.pieceData.blackPieces;
+            oppPieces = convertObject(req.body.pieceData.whitePieces); 
+            teamPieces = convertObject(req.body.pieceData.blackPieces);  
             teamScore = req.body.blackScore;
         }
         console.log("Team Pieces: " + teamPieces);
@@ -210,8 +210,6 @@ module.exports = router;
 // Game logic
 
 // =====================================Piece Classes
-
-/* HELPER */ 
 function gatherAllPositions(whitePieces){
     var positions = [];
     var pieces = Object.values(whitePieces);
@@ -220,22 +218,18 @@ function gatherAllPositions(whitePieces){
         else {var testObject = pieces[i].getPositionObject();
             positions.push(testObject);}}
     return positions;}
-/* HELPER */ 
+
 function findPositionInArray(desired, array){
-    for (item in array){
-        if (isEqual(desired, array[item]))
+    for (var i = 0; i < array.length; i++){
+        if (isEqual(desired, array[i]))
             return true;}
     return false;}
-
-/* HELPER */ 
-function isMyPiece(testBlock, teamPositions) {
-    return findPositionInArray(testBlock, teamPositions);}
 
 function isEmpty(testBlock, whitePositions, blackPostions) {
     if (findPositionInArray(testBlock, whitePositions) || findPositionInArray(testBlock, blackPostions))
     return false;
     return true;}
-/* HELPER */ 
+
 function isEqual(a, b){
     var aProps = Object.keys(a);
     var bProps = Object.keys(b);
@@ -246,7 +240,7 @@ function isEqual(a, b){
     return true;
 }
 function setData(a, b){
-    var aProps = Object.getOwnPropertyNames(a);
+    var aProps = Object.keys(a);
     for (var i = 0; i < aProps.length; i++) {
         var propName = aProps[i];
         a[propName] = b[propName]}
@@ -260,7 +254,7 @@ function findKeyOffPosition(position, teamPieces)
         var item = array[i][1];
         var itemPos = {row: item.row, col: item.col};
         if (isEqual(position, itemPos)){
-            return array[i][0];
+            return array[i][0].getPositionObject();
         }
     }
     return false;
@@ -284,26 +278,72 @@ function getPiece(selection, teamPieces)
 function gatherPossibleMoves(pieces){
     possibleMoves = [];
     var pieces = Object.values(pieces);
-    for (piece in pieces){
-        if (!((pieces[piece]).getStatus())) continue;
-        else {var pieceMoves = pieces[piece].getPossibleMoves();
+    for (var i = 0; i < pieces.length; i++){
+        if (!((pieces[i]).getStatus())) continue;
+        else {var pieceMoves = pieces[i].getPossibleMoves();
             possibleMoves.concat(pieceMoves);}}
-    return possibleMoves}
+    return possibleMoves;}
 
 function isKingSafe(kingPos, oppPossibleMoves){
-    for (move in oppPossibleMoves){
-        if (isEqual(kingPos, oppPossibleMoves[move])) return false;}
+    for (var i = 0; i < oppPossibleMoves.length; i++){
+        if (isEqual(kingPos, oppPossibleMoves[i])) return false;}
     return true;}
 
-function checkMate(kingPossibleMoves, teamPossibleMoves){
+function checkMate(kingPossibleMoves, teamPossibleMoves, oppPossibleMoves, dangeringBlock, dangeringPath){
     var blockedMoves = [];
-    for (move in kingPossibleMoves){
+    for (var i = 0; i < kingPossibleMoves.length; i++){
         var blocked = false;
-        for (attack in teamPossibleMoves){
-            if (isEqual(kingPossibleMoves[move], teamPossibleMoves[attack])) blocked = true;}
+        for (var j = 0; j < teamPossibleMoves.length; i++){
+            if (isEqual(kingPossibleMoves[i], teamPossibleMoves[j])) blocked = true;}
         if (!blocked) return false;}
+    for (var i = 0; i < oppPossibleMoves.length; i++)
+    {
+        if (isEqual(oppPossibleMoves[i], dangeringBlock)) return false;
+        for (var j = 0; j < dangeringPath.length; j++)
+        {
+            if (isEqual(oppPossibleMoves[i], dangeringPath[j])) return false;
+        }
+    }
     return true;}
 
+function convertObject(piecesData)
+{
+    var piecesArray = Object.values(piecesData);
+    var newData = new Object();
+    newData.k1 = new King(piecesArray[0].row, piecesArray[0].col, piecesArray[0].num, piecesArray[0].team);
+    newData.k1.setData(piecesArray[0].possibleMoves, piecesArray[0].blockBlocks, piecesArray[0].isDead);
+    newData.q1 = new Queen(piecesArray[1].row, piecesArray[1].col, piecesArray[1].num, piecesArray[1].team);
+    newData.q1.setData(piecesArray[1].possibleMoves, piecesArray[1].blockBlocks, piecesArray[1].isDead);
+    newData.r1 = new Rook(piecesArray[2].row, piecesArray[2].col, piecesArray[2].num, piecesArray[2].team);
+    newData.r1.setData(piecesArray[2].possibleMoves, piecesArray[2].blockBlocks, piecesArray[2].isDead);
+    newData.r2 = new Rook(piecesArray[3].row, piecesArray[3].col, piecesArray[3].num, piecesArray[3].team);
+    newData.r2.setData(piecesArray[3].possibleMoves, piecesArray[3].blockBlocks, piecesArray[3].isDead);
+    newData.b1 = new Bishop(piecesArray[4].row, piecesArray[4].col, piecesArray[4].num, piecesArray[4].team);
+    newData.b1.setData(piecesArray[4].possibleMoves, piecesArray[4].blockBlocks, piecesArray[4].isDead);
+    newData.b2 = new Bishop(piecesArray[5].row, piecesArray[5].col, piecesArray[5].num, piecesArray[5].team);
+    newData.b2.setData(piecesArray[5].possibleMoves, piecesArray[5].blockBlocks, piecesArray[5].isDead);
+    newData.n1 = new Knight(piecesArray[6].row, piecesArray[6].col, piecesArray[6].num, piecesArray[6].team);
+    newData.n1.setData(piecesArray[6].possibleMoves, piecesArray[6].blockBlocks, piecesArray[6].isDead);
+    newData.n2 = new Knight(piecesArray[7].row, piecesArray[7].col, piecesArray[7].num, piecesArray[7].team);
+    newData.n2.setData(piecesArray[7].possibleMoves, piecesArray[7].blockBlocks, piecesArray[7].isDead);
+    newData.p1 = new Pawn(piecesArray[8].row, piecesArray[8].col, piecesArray[8].num, piecesArray[8].team);
+    newData.p1.setData(piecesArray[8].possibleMoves, piecesArray[8].blockBlocks, piecesArray[8].isDead);
+    newData.p2 = new Pawn(piecesArray[9].row, piecesArray[9].col, piecesArray[9].num, piecesArray[9].team);
+    newData.p2.setData(piecesArray[9].possibleMoves, piecesArray[9].blockBlocks, piecesArray[9].isDead);
+    newData.p3 = new Pawn(piecesArray[10].row, piecesArray[10].col, piecesArray[10].num, piecesArray[10].team);
+    newData.p3.setData(piecesArray[10].possibleMoves, piecesArray[10].blockBlocks, piecesArray[10].isDead);
+    newData.p4 = new Pawn(piecesArray[11].row, piecesArray[11].col, piecesArray[11].num, piecesArray[11].team);
+    newData.p4.setData(piecesArray[11].possibleMoves, piecesArray[11].blockBlocks, piecesArray[11].isDead);
+    newData.p5 = new Pawn(piecesArray[12].row, piecesArray[12].col, piecesArray[12].num, piecesArray[12].team);
+    newData.p5.setData(piecesArray[12].possibleMoves, piecesArray[12].blockBlocks, piecesArray[12].isDead);
+    newData.p6 = new Pawn(piecesArray[13].row, piecesArray[13].col, piecesArray[13].num, piecesArray[13].team);
+    newData.p6.setData(piecesArray[13].possibleMoves, piecesArray[13].blockBlocks, piecesArray[13].isDead);
+    newData.p7 = new Pawn(piecesArray[14].row, piecesArray[14].col, piecesArray[14].num, piecesArray[14].team);
+    newData.p7.setData(piecesArray[14].possibleMoves, piecesArray[14].blockBlocks, piecesArray[14].isDead);
+    newData.p8 = new Pawn(piecesArray[15].row, piecesArray[15].col, piecesArray[15].num, piecesArray[15].team);
+    newData.p8.setData(piecesArray[15].possibleMoves, piecesArray[15].blockBlocks, piecesArray[15].isDead);
+    return newData;
+}
 
 //=========================================PIECE CLASSES
 
@@ -322,6 +362,13 @@ class Piece {
         this.blockBlocks = [{row: this.row, col: this.col}];
         this.isDead = 0;
         }
+
+    setData(possibleMoves, blockBlocks, isDead)
+    {
+        this.possibleMoves = possibleMoves;
+        this.blockBlocks = blockBlocks;
+        this.isDead = isDead;
+    }
 
     getPositionObject() {
         var position = {row: this.row, col: this.col};

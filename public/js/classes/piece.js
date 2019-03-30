@@ -11,6 +11,13 @@ class Piece {
         this.isDead = 0;
         }
 
+    setData(possibleMoves, blockBlocks, isDead)
+    {
+        this.possibleMoves = possibleMoves;
+        this.blockBlocks = blockBlocks;
+        this.isDead = isDead;
+    }
+
     getPositionObject() {
         var position = {row: this.row, col: this.col};
         return position;}
