@@ -3,7 +3,7 @@
 
 <head>
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="./css/style.css" />
   <title>Express Chess</title>
   <audio id="music">
       <source src="sounds/music.mp3" type="audio/mpeg">
@@ -36,27 +36,28 @@
 
 <body onclick="playMusic();">
   <a href="http://andrewdanielyoung.com/" id="homeButton"> </a>
-  <div id="app">
-    <div class="header" v-if="startGame">
+
+<div id="app">
+    <div class="header" v-if="matchData.startGame">
       <div class="title">
         <h1>Express Chess</h1>
       </div>
     </div>
-    <h1 id="menuTitle" v-if="!startGame">Express Chess</h1>
-    <div id="menuButtons" v-if="!startGame">
-        <button class="add-margin" @click="checkAvailableMatches">{{buttonText}}</button>
+    <h1 id="menuTitle" v-if="!matchData.startGame">Express Chess</h1>
+    <div id="menuButtons" v-if="!matchData.startGame">
+        <button class="add-margin" @click="getMatchMakers">{{findMatchButtonText}}</button>
         <a class="button add-margin" href="./pages/about.html">ABOUT</a>
     </div>
-    <div id="topDiv" class="container" v-if="startGame">
+    <div id="topDiv" class="container" v-if="matchData.startGame">
       <div class="third">
           <h1>Current Turn</h1>
-          <h1 id="turn">{{displayedTurn}}</h1>
+          <h1 id="turn">{{gameData.displayedTurn}}</h1>
           <h2>{{playerTurnCalc}}</h2>
       </div>
       <div class="third">
           <h1>{{winningCalc}}</h1>
-          <h2 class="less-margin">White Score: {{sharedData.room.scores.w}}</h2>
-          <h2 class="less-margin">Black Score: {{sharedData.room.scores.b}}</h2>
+          <h2 class="less-margin">White Score: {{gameData.whiteScore}}</h2>
+          <h2 class="less-margin">Black Score: {{gameData.blackScore}}</h2>
       </div>
       <div class="third">
           <h1>Selected</h1>
@@ -64,7 +65,7 @@
       </div>
       
     </div>
-    <div class="container wrap" v-if="startGame">
+    <div class="container wrap" v-if="matchData.startGame">
       <div class="sideDiv" id="stats">
         <h2 class="center">Captures</h2>
         <div class="add-top-margin container">
@@ -88,180 +89,180 @@
           </div>
         </div>
         <h2 class="center add-more-top-margin">From Server</h2>
-        <h3 id="serverMessage">{{serverMessage}}</h3>
+        <h3 id="serverMessage">{{serverData.serverMessage}}</h3>
         <div id="bottom" class="container">
         <h2 class="center">Game ID</h2>
-        <h5 id="gameID">{{sharedData._id}}</h5>
+        <h5 id="gameID">{{serverData.gameID}}</h5>
         </div>
       </div>
-      <div id="board" v-if="PLAYER_INFO.color == 'w'">
+      <div id="board" v-if="!gameData.team">
         <div class="container">
-          <div @click="selectPiece('8-1')" class="block white" id="8-1"></div>
-          <div @click="selectPiece('8-2')" class="block black" id="8-2"></div>
-          <div @click="selectPiece('8-3')" class="block white" id="8-3"></div>
-          <div @click="selectPiece('8-4')" class="block black" id="8-4"></div>
-          <div @click="selectPiece('8-5')" class="block white" id="8-5"></div>
-          <div @click="selectPiece('8-6')" class="block black" id="8-6"></div>
-          <div @click="selectPiece('8-7')" class="block white" id="8-7"></div>
-          <div @click="selectPiece('8-8')" class="block black" id="8-8"></div>
+          <div @click="clickBlock('7-0')" class="br block white" id="7-0"></div>
+          <div @click="clickBlock('7-1')" class="bn block black" id="7-1"></div>
+          <div @click="clickBlock('7-2')" class="bb block white" id="7-2"></div>
+          <div @click="clickBlock('7-3')" class="bq block black" id="7-3"></div>
+          <div @click="clickBlock('7-4')" class="bq block white" id="7-4"></div>
+          <div @click="clickBlock('7-5')" class="bb block black" id="7-5"></div>
+          <div @click="clickBlock('7-6')" class="bn block white" id="7-6"></div>
+          <div @click="clickBlock('7-7')" class="br block black" id="7-7"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('7-1')" class="block black" id="7-1"></div>
-          <div @click="selectPiece('7-2')" class="block white" id="7-2"></div>
-          <div @click="selectPiece('7-3')" class="block black" id="7-3"></div>
-          <div @click="selectPiece('7-4')" class="block white" id="7-4"></div>
-          <div @click="selectPiece('7-5')" class="block black" id="7-5"></div>
-          <div @click="selectPiece('7-6')" class="block white" id="7-6"></div>
-          <div @click="selectPiece('7-7')" class="block black" id="7-7"></div>
-          <div @click="selectPiece('7-8')" class="block white" id="7-8"></div>
+          <div @click="clickBlock('6-0')" class="bp block black" id="6-0"></div>
+          <div @click="clickBlock('6-1')" class="bp block white" id="6-1"></div>
+          <div @click="clickBlock('6-2')" class="bp block black" id="6-2"></div>
+          <div @click="clickBlock('6-3')" class="bp block white" id="6-3"></div>
+          <div @click="clickBlock('6-4')" class="bp block black" id="6-4"></div>
+          <div @click="clickBlock('6-5')" class="bp block white" id="6-5"></div>
+          <div @click="clickBlock('6-6')" class="bp block black" id="6-6"></div>
+          <div @click="clickBlock('6-7')" class="bp block white" id="6-7"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('6-1')" class="block white" id="6-1"></div>
-          <div @click="selectPiece('6-2')" class="block black" id="6-2"></div>
-          <div @click="selectPiece('6-3')" class="block white" id="6-3"></div>
-          <div @click="selectPiece('6-4')" class="block black" id="6-4"></div>
-          <div @click="selectPiece('6-5')" class="block white" id="6-5"></div>
-          <div @click="selectPiece('6-6')" class="block black" id="6-6"></div>
-          <div @click="selectPiece('6-7')" class="block white" id="6-7"></div>
-          <div @click="selectPiece('6-8')" class="block black" id="6-8"></div>
+          <div @click="clickBlock('5-0')" class="block white" id="5-0"></div>
+          <div @click="clickBlock('5-1')" class="block black" id="5-1"></div>
+          <div @click="clickBlock('5-2')" class="block white" id="5-2"></div>
+          <div @click="clickBlock('5-3')" class="block black" id="5-3"></div>
+          <div @click="clickBlock('5-4')" class="block white" id="5-4"></div>
+          <div @click="clickBlock('5-5')" class="block black" id="5-5"></div>
+          <div @click="clickBlock('5-6')" class="block white" id="5-6"></div>
+          <div @click="clickBlock('5-7')" class="block black" id="5-7"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('5-1')" class="block black" id="5-1"></div>
-          <div @click="selectPiece('5-2')" class="block white" id="5-2"></div>
-          <div @click="selectPiece('5-3')" class="block black" id="5-3"></div>
-          <div @click="selectPiece('5-4')" class="block white" id="5-4"></div>
-          <div @click="selectPiece('5-5')" class="block black" id="5-5"></div>
-          <div @click="selectPiece('5-6')" class="block white" id="5-6"></div>
-          <div @click="selectPiece('5-7')" class="block black" id="5-7"></div>
-          <div @click="selectPiece('5-8')" class="block white" id="5-8"></div>
+          <div @click="clickBlock('4-0')" class="block black" id="4-0"></div>
+          <div @click="clickBlock('4-1')" class="block white" id="4-1"></div>
+          <div @click="clickBlock('4-2')" class="block black" id="4-2"></div>
+          <div @click="clickBlock('4-3')" class="block white" id="4-3"></div>
+          <div @click="clickBlock('4-4')" class="block black" id="4-4"></div>
+          <div @click="clickBlock('4-5')" class="block white" id="4-5"></div>
+          <div @click="clickBlock('4-6')" class="block black" id="4-6"></div>
+          <div @click="clickBlock('4-7')" class="block white" id="4-7"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('4-1')" class="block white" id="4-1"></div>
-          <div @click="selectPiece('4-2')" class="block black" id="4-2"></div>
-          <div @click="selectPiece('4-3')" class="block white" id="4-3"></div>
-          <div @click="selectPiece('4-4')" class="block black" id="4-4"></div>
-          <div @click="selectPiece('4-5')" class="block white" id="4-5"></div>
-          <div @click="selectPiece('4-6')" class="block black" id="4-6"></div>
-          <div @click="selectPiece('4-7')" class="block white" id="4-7"></div>
-          <div @click="selectPiece('4-8')" class="block black" id="4-8"></div>
+          <div @click="clickBlock('3-0')" class="block white" id="3-0"></div>
+          <div @click="clickBlock('3-1')" class="block black" id="3-1"></div>
+          <div @click="clickBlock('3-2')" class="block white" id="3-2"></div>
+          <div @click="clickBlock('3-3')" class="block black" id="3-3"></div>
+          <div @click="clickBlock('3-4')" class="block white" id="3-4"></div>
+          <div @click="clickBlock('3-5')" class="block black" id="3-5"></div>
+          <div @click="clickBlock('3-6')" class="block white" id="3-6"></div>
+          <div @click="clickBlock('3-7')" class="block black" id="3-7"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('3-1')" class="block black" id="3-1"></div>
-          <div @click="selectPiece('3-2')" class="block white" id="3-2"></div>
-          <div @click="selectPiece('3-3')" class="block black" id="3-3"></div>
-          <div @click="selectPiece('3-4')" class="block white" id="3-4"></div>
-          <div @click="selectPiece('3-5')" class="block black" id="3-5"></div>
-          <div @click="selectPiece('3-6')" class="block white" id="3-6"></div>
-          <div @click="selectPiece('3-7')" class="block black" id="3-7"></div>
-          <div @click="selectPiece('3-8')" class="block white" id="3-8"></div>
+          <div @click="clickBlock('2-0')" class="block black" id="2-0"></div>
+          <div @click="clickBlock('2-1')" class="block white" id="2-1"></div>
+          <div @click="clickBlock('2-2')" class="block black" id="2-2"></div>
+          <div @click="clickBlock('2-3')" class="block white" id="2-3"></div>
+          <div @click="clickBlock('2-4')" class="block black" id="2-4"></div>
+          <div @click="clickBlock('2-5')" class="block white" id="2-5"></div>
+          <div @click="clickBlock('2-6')" class="block black" id="2-6"></div>
+          <div @click="clickBlock('2-7')" class="block white" id="2-7"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('2-1')" class="block white" id="2-1"></div>
-          <div @click="selectPiece('2-2')" class="block black" id="2-2"></div>
-          <div @click="selectPiece('2-3')" class="block white" id="2-3"></div>
-          <div @click="selectPiece('2-4')" class="block black" id="2-4"></div>
-          <div @click="selectPiece('2-5')" class="block white" id="2-5"></div>
-          <div @click="selectPiece('2-6')" class="block black" id="2-6"></div>
-          <div @click="selectPiece('2-7')" class="block white" id="2-7"></div>
-          <div @click="selectPiece('2-8')" class="block black" id="2-8"></div>
+          <div @click="clickBlock('1-0')" class="wp block white" id="1-0"></div>
+          <div @click="clickBlock('1-1')" class="wp block black" id="1-1"></div>
+          <div @click="clickBlock('1-2')" class="wp block white" id="1-2"></div>
+          <div @click="clickBlock('1-3')" class="wp block black" id="1-3"></div>
+          <div @click="clickBlock('1-4')" class="wp block white" id="1-4"></div>
+          <div @click="clickBlock('1-5')" class="wp block black" id="1-5"></div>
+          <div @click="clickBlock('1-6')" class="wp block white" id="1-6"></div>
+          <div @click="clickBlock('1-7')" class="wp block black" id="1-7"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('1-1')" class="block black" id="1-1"></div>
-          <div @click="selectPiece('1-2')" class="block white" id="1-2"></div>
-          <div @click="selectPiece('1-3')" class="block black" id="1-3"></div>
-          <div @click="selectPiece('1-4')" class="block white" id="1-4"></div>
-          <div @click="selectPiece('1-5')" class="block black" id="1-5"></div>
-          <div @click="selectPiece('1-6')" class="block white" id="1-6"></div>
-          <div @click="selectPiece('1-7')" class="block black" id="1-7"></div>
-          <div @click="selectPiece('1-8')" class="block white" id="1-8"></div>
+          <div @click="clickBlock('0-0')" class="wr block black" id="0-0"></div>
+          <div @click="clickBlock('0-1')" class="wn block white" id="0-1"></div>
+          <div @click="clickBlock('0-2')" class="wb block black" id="0-2"></div>
+          <div @click="clickBlock('0-3')" class="wq block white" id="0-3"></div>
+          <div @click="clickBlock('0-4')" class="wk block black" id="0-4"></div>
+          <div @click="clickBlock('0-5')" class="wb block white" id="0-5"></div>
+          <div @click="clickBlock('0-6')" class="wn block black" id="0-6"></div>
+          <div @click="clickBlock('0-7')" class="wr block white" id="0-7"></div>
         </div>
       </div>
-      <div id="board" v-if="PLAYER_INFO.color == 'b'">
+      <div id="board" v-if="gameData.team">
         <div class="container">
-          <div @click="selectPiece('1-8')" class="block black" id="1-8"></div>
-          <div @click="selectPiece('1-7')" class="block white" id="1-7"></div>
-          <div @click="selectPiece('1-6')" class="block black" id="1-6"></div>
-          <div @click="selectPiece('1-5')" class="block white" id="1-5"></div>
-          <div @click="selectPiece('1-4')" class="block black" id="1-4"></div>
-          <div @click="selectPiece('1-3')" class="block white" id="1-3"></div>
-          <div @click="selectPiece('1-2')" class="block black" id="1-2"></div>
-          <div @click="selectPiece('1-1')" class="block white" id="1-1"></div>
+          <div @click="clickBlock('0-7')" class="wr block black" id="0-7"></div>
+          <div @click="clickBlock('0-6')" class="wn block white" id="0-6"></div>
+          <div @click="clickBlock('0-5')" class="wb block black" id="0-5"></div>
+          <div @click="clickBlock('0-4')" class="wk block white" id="0-4"></div>
+          <div @click="clickBlock('0-3')" class="wq block black" id="0-3"></div>
+          <div @click="clickBlock('0-2')" class="wb block white" id="0-2"></div>
+          <div @click="clickBlock('0-1')" class="wn block black" id="0-1"></div>
+          <div @click="clickBlock('0-0')" class="wr block white" id="0-0"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('2-8')" class="block white" id="2-8"></div>
-          <div @click="selectPiece('2-7')" class="block black" id="2-7"></div>
-          <div @click="selectPiece('2-6')" class="block white" id="2-6"></div>
-          <div @click="selectPiece('2-5')" class="block black" id="2-5"></div>
-          <div @click="selectPiece('2-4')" class="block white" id="2-4"></div>
-          <div @click="selectPiece('2-3')" class="block black" id="2-3"></div>
-          <div @click="selectPiece('2-2')" class="block white" id="2-2"></div>
-          <div @click="selectPiece('2-1')" class="block black" id="2-1"></div>
+          <div @click="clickBlock('1-7')" class="wp block white" id="1-7"></div>
+          <div @click="clickBlock('1-6')" class="wp block black" id="1-6"></div>
+          <div @click="clickBlock('1-5')" class="wp block white" id="1-5"></div>
+          <div @click="clickBlock('1-4')" class="wp block black" id="1-4"></div>
+          <div @click="clickBlock('1-3')" class="wp block white" id="1-3"></div>
+          <div @click="clickBlock('1-2')" class="wp block black" id="1-2"></div>
+          <div @click="clickBlock('1-1')" class="wp block white" id="1-1"></div>
+          <div @click="clickBlock('1-0')" class="wp block black" id="1-0"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('3-8')" class="block black" id="3-8"></div>
-          <div @click="selectPiece('3-7')" class="block white" id="3-7"></div>
-          <div @click="selectPiece('3-6')" class="block black" id="3-6"></div>
-          <div @click="selectPiece('3-5')" class="block white" id="3-5"></div>
-          <div @click="selectPiece('3-4')" class="block black" id="3-4"></div>
-          <div @click="selectPiece('3-3')" class="block white" id="3-3"></div>
-          <div @click="selectPiece('3-2')" class="block black" id="3-2"></div>
-          <div @click="selectPiece('3-1')" class="block white" id="3-1"></div>
+          <div @click="clickBlock('2-7')" class="block black" id="2-7"></div>
+          <div @click="clickBlock('2-6')" class="block white" id="2-6"></div>
+          <div @click="clickBlock('2-5')" class="block black" id="2-5"></div>
+          <div @click="clickBlock('2-4')" class="block white" id="2-4"></div>
+          <div @click="clickBlock('2-3')" class="block black" id="2-3"></div>
+          <div @click="clickBlock('2-2')" class="block white" id="2-2"></div>
+          <div @click="clickBlock('2-1')" class="block black" id="2-1"></div>
+          <div @click="clickBlock('2-0')" class="block white" id="2-0"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('4-8')" class="block white" id="4-8"></div>
-          <div @click="selectPiece('4-7')" class="block black" id="4-7"></div>
-          <div @click="selectPiece('4-6')" class="block white" id="4-6"></div>
-          <div @click="selectPiece('4-5')" class="block black" id="4-5"></div>
-          <div @click="selectPiece('4-4')" class="block white" id="4-4"></div>
-          <div @click="selectPiece('4-3')" class="block black" id="4-3"></div>
-          <div @click="selectPiece('4-2')" class="block white" id="4-2"></div>
-          <div @click="selectPiece('4-1')" class="block black" id="4-1"></div>
+          <div @click="clickBlock('3-7')" class="block white" id="3-7"></div>
+          <div @click="clickBlock('3-6')" class="block black" id="3-6"></div>
+          <div @click="clickBlock('3-5')" class="block white" id="3-5"></div>
+          <div @click="clickBlock('3-4')" class="block black" id="3-4"></div>
+          <div @click="clickBlock('3-3')" class="block white" id="3-3"></div>
+          <div @click="clickBlock('3-2')" class="block black" id="3-2"></div>
+          <div @click="clickBlock('3-1')" class="block white" id="3-1"></div>
+          <div @click="clickBlock('3-0')" class="block black" id="3-0"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('5-8')" class="block black" id="5-8"></div>
-          <div @click="selectPiece('5-7')" class="block white" id="5-7"></div>
-          <div @click="selectPiece('5-6')" class="block black" id="5-6"></div>
-          <div @click="selectPiece('5-5')" class="block white" id="5-5"></div>
-          <div @click="selectPiece('5-4')" class="block black" id="5-4"></div>
-          <div @click="selectPiece('5-3')" class="block white" id="5-3"></div>
-          <div @click="selectPiece('5-2')" class="block black" id="5-2"></div>
-          <div @click="selectPiece('5-1')" class="block white" id="5-1"></div>
+          <div @click="clickBlock('4-7')" class="block black" id="4-7"></div>
+          <div @click="clickBlock('4-6')" class="block white" id="4-6"></div>
+          <div @click="clickBlock('4-5')" class="block black" id="4-5"></div>
+          <div @click="clickBlock('4-4')" class="block white" id="4-4"></div>
+          <div @click="clickBlock('4-3')" class="block black" id="4-3"></div>
+          <div @click="clickBlock('4-2')" class="block white" id="4-2"></div>
+          <div @click="clickBlock('4-1')" class="block black" id="4-1"></div>
+          <div @click="clickBlock('4-0')" class="block white" id="4-0"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('6-8')" class="block white" id="6-8"></div>
-          <div @click="selectPiece('6-7')" class="block black" id="6-7"></div>
-          <div @click="selectPiece('6-6')" class="block white" id="6-6"></div>
-          <div @click="selectPiece('6-5')" class="block black" id="6-5"></div>
-          <div @click="selectPiece('6-4')" class="block white" id="6-4"></div>
-          <div @click="selectPiece('6-3')" class="block black" id="6-3"></div>
-          <div @click="selectPiece('6-2')" class="block white" id="6-2"></div>
-          <div @click="selectPiece('6-1')" class="block black" id="6-1"></div>
+          <div @click="clickBlock('5-7')" class="block white" id="5-7"></div>
+          <div @click="clickBlock('5-6')" class="block black" id="5-6"></div>
+          <div @click="clickBlock('5-5')" class="block white" id="5-5"></div>
+          <div @click="clickBlock('5-4')" class="block black" id="5-4"></div>
+          <div @click="clickBlock('5-3')" class="block white" id="5-3"></div>
+          <div @click="clickBlock('5-2')" class="block black" id="5-2"></div>
+          <div @click="clickBlock('5-1')" class="block white" id="5-1"></div>
+          <div @click="clickBlock('5-0')" class="block black" id="5-0"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('7-8')" class="block black" id="7-8"></div>
-          <div @click="selectPiece('7-7')" class="block white" id="7-7"></div>
-          <div @click="selectPiece('7-6')" class="block black" id="7-6"></div>
-          <div @click="selectPiece('7-5')" class="block white" id="7-5"></div>
-          <div @click="selectPiece('7-4')" class="block black" id="7-4"></div>
-          <div @click="selectPiece('7-3')" class="block white" id="7-3"></div>
-          <div @click="selectPiece('7-2')" class="block black" id="7-2"></div>
-          <div @click="selectPiece('7-1')" class="block white" id="7-1"></div>
+          <div @click="clickBlock('6-7')" class="bp block black" id="6-7"></div>
+          <div @click="clickBlock('6-6')" class="bp block white" id="6-6"></div>
+          <div @click="clickBlock('6-5')" class="bp block black" id="6-5"></div>
+          <div @click="clickBlock('6-4')" class="bp block white" id="6-4"></div>
+          <div @click="clickBlock('6-3')" class="bp block black" id="6-3"></div>
+          <div @click="clickBlock('6-2')" class="bp block white" id="6-2"></div>
+          <div @click="clickBlock('6-1')" class="bp block black" id="6-1"></div>
+          <div @click="clickBlock('6-0')" class="bp block white" id="6-0"></div>
         </div>
         <div class="container">
-          <div @click="selectPiece('8-8')" class="block white" id="8-8"></div>
-          <div @click="selectPiece('8-7')" class="block black" id="8-7"></div>
-          <div @click="selectPiece('8-6')" class="block white" id="8-6"></div>
-          <div @click="selectPiece('8-5')" class="block black" id="8-5"></div>
-          <div @click="selectPiece('8-4')" class="block white" id="8-4"></div>
-          <div @click="selectPiece('8-3')" class="block black" id="8-3"></div>
-          <div @click="selectPiece('8-2')" class="block white" id="8-2"></div>
-          <div @click="selectPiece('8-1')" class="block black" id="8-1"></div>
+          <div @click="clickBlock('7-7')" class="br block white" id="7-7"></div>
+          <div @click="clickBlock('7-6')" class="bn block black" id="7-6"></div>
+          <div @click="clickBlock('7-5')" class="bb block white" id="7-5"></div>
+          <div @click="clickBlock('7-4')" class="bk block black" id="7-4"></div>
+          <div @click="clickBlock('7-3')" class="bq block white" id="7-3"></div>
+          <div @click="clickBlock('7-2')" class="bb block black" id="7-2"></div>
+          <div @click="clickBlock('7-1')" class="bn block white" id="7-1"></div>
+          <div @click="clickBlock('7-0')" class="bk block black" id="7-0"></div>
         </div>
       </div>
       <div class="sideDiv" id="chat">
         <h2 class="center">Chat</h2>
-        <div v-if="messagesBool" id="noplayermessages"></div>
-        <div class="message" v-if="!messagesBool" v-for="message in messages">  
+        <div v-if="!chatData.messagesBool" id="noplayermessages"></div>
+        <div class="message" v-if="chatData.messagesBool" v-for="message in chatData.messages">  
           <div class="messageDetails">
               <h4>{{message.usr}}</h4>
               <h5>{{message.time}}</h5>
@@ -269,19 +270,26 @@
           <p>{{message.text}}</p>
         </div>
         <div class="form">
-          <input v-model="messageText" id="textbox" placeholder="Send Message">
-          <button @click="sendMesage" id="send">Send</button>
+          <input v-model="chatData.messageText" id="textbox" placeholder="Send Message">
+          <button @click="messageChatRoom" id="send">Send</button>
         </div>
       </div>
     </div>
 
-  </div>
+</div>
 
-  <div class="footer">
-      <a href="https://github.com/andyruwruw/Express-Chess.git" id="git">Git Repository</a>
+    <div class="footer">
+        <a href="https://github.com/andyruwruw/Express-Chess.git" id="git">Git Repository</a>
     </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.7/vue.js" integrity="sha256-g+Q8DFAmG5+eyRPSydX0LY4TfjsL11XSDrIGerbbEdA=" crossorigin="anonymous"></script>
+  <script src="js/classes/piece.js"></script>
+  <script src="js/classes/king.js"></script>
+  <script src="js/classes/queen.js"></script>
+  <script src="js/classes/rook.js"></script>
+  <script src="js/classes/bishop.js"></script>
+  <script src="js/classes/knight.js"></script>
+  <script src="js/classes/pawn.js"></script>
   <script src="js/game.js"></script>
 </body>
 

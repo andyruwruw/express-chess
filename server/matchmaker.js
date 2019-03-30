@@ -71,14 +71,7 @@ router.get('/:idNum', async (req, res) => { // Check your room for new players
 		let room = await Match.findOne({
       _id: req.params.idNum
 		});
-		if (room.playerNum > 1)
-		{
 			res.send(room);
-		}
-		else
-		{
-			res.send(room);
-		}
   } catch (error) {
     console.log(error);
     res.sendStatus(500);

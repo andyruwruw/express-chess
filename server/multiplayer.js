@@ -1,22 +1,30 @@
+"use strict";
+
 const mongoose = require('mongoose');
 const express = require("express");
 const router = express.Router();
 
 const boardSchema = new mongoose.Schema({
     _id: String,
-    room: {num: Number, turnNum: Number, currTeam: String, scores: {w: Number, b: Number}},
-    board: [[String, String, String, String, String,  String, String, String], 
-    [String, String, String, String, String, String, String, String],
-    [String,    String,    String,    String,    String,    String,    String,    String   ], 
-    [String,    String,    String,    String,    String,    String,    String,    String   ], 
-    [String,    String,    String,    String,    String,    String,    String,    String   ], 
-    [String,    String,    String,    String,    String,    String,    String,    String   ], 
-    [String, String, String, String, String, String, String, String],
-    [String, String, String, String, String,  String, String, String]],
-    action: {selection: {row: Number, col: Number}, move: {row: Number, col: Number}},
-    dead: [],
-    special: {wkingmv: Number, bkingmv: Number, wWin: Number, bWin: Number, stale: Number, lastAction: 
-        {selection: {row: Number, col: Number}, move: {row: Number, col: Number}}},
+    serverTurn: Number,
+    whiteScore: Number,
+    blackScore: Number,
+    whiteCheck: false,
+    blackCheck: false,
+    whiteCheckMate: false,
+    blackCheckMate: false,
+    stalemate: false,
+    pieceData:{
+        whitePieces: {k1: Object, q1: Object, r1: Object, r2: Object, 
+                      b1: Object, b2: Object, n1: Object, n2: Object, 
+                      p1: Object, p2: Object, p3: Object, p4: Object, 
+                      p5: Object, p6: Object, p7: Object, p8: Object},
+        blackPieces: {k1: Object, q1: Object, r1: Object, r2: Object, 
+                      b1: Object, b2: Object, n1: Object, n2: Object, 
+                      p1: Object, p2: Object, p3: Object, p4: Object, 
+                      p5: Object, p6: Object, p7: Object, p8: Object},},
+    changedSlots: [],
+    deadArray: [],
 });
 
 const Board = mongoose.model('Board', boardSchema);
@@ -24,21 +32,25 @@ const Board = mongoose.model('Board', boardSchema);
 router.post('/', async (req, res) => {   // Create a new Game
 const match = new Board({
     _id: req.body._id,
-    room: {num: req.body.room.num, turnNum: req.body.room.turnNum, currTeam: req.body.room.currTeam, scores: {w: req.body.room.scores.w, b: req.body.room.scores.b}},
-    board: 
-    [[req.body.board[0][0], req.body.board[0][1], req.body.board[0][2], req.body.board[0][3], req.body.board[0][4],  req.body.board[0][5], req.body.board[0][6], req.body.board[0][7]], 
-    [req.body.board[1][0], req.body.board[1][1], req.body.board[1][2], req.body.board[1][3], req.body.board[1][4],  req.body.board[1][5], req.body.board[1][6], req.body.board[1][7]], 
-    [req.body.board[2][0], req.body.board[2][1], req.body.board[2][2], req.body.board[2][3], req.body.board[2][4],  req.body.board[2][5], req.body.board[2][6], req.body.board[2][7]], 
-    [req.body.board[3][0], req.body.board[3][1], req.body.board[3][2], req.body.board[3][3], req.body.board[3][4],  req.body.board[3][5], req.body.board[3][6], req.body.board[3][7]], 
-    [req.body.board[4][0], req.body.board[4][1], req.body.board[4][2], req.body.board[4][3], req.body.board[4][4],  req.body.board[4][5], req.body.board[4][6], req.body.board[4][7]], 
-    [req.body.board[5][0], req.body.board[5][1], req.body.board[5][2], req.body.board[5][3], req.body.board[5][4],  req.body.board[5][5], req.body.board[5][6], req.body.board[5][7]], 
-    [req.body.board[6][0], req.body.board[6][1], req.body.board[6][2], req.body.board[6][3], req.body.board[6][4],  req.body.board[6][5], req.body.board[6][6], req.body.board[6][7]], 
-    [req.body.board[7][0], req.body.board[7][1], req.body.board[7][2], req.body.board[7][3], req.body.board[7][4],  req.body.board[7][5], req.body.board[7][6], req.body.board[7][7]]],
-    action: {selection: {row: req.body.action.selection.row, col: req.body.action.selection.col}, move: {row: req.body.action.move.row, col: req.body.action.move.col}},
-    dead: req.body.dead,
-    special: {wkingmv: req.body.special.wkingmv, bkingmv: req.body.special.bkingmv, 
-        wWin: req.body.special.wWin, bWin: req.body.special.bWin, stale: req.body.special.stale, 
-        lastAction: {selection: {row: req.body.action.selection.row, col: req.body.action.selection.col}, move: {row: req.body.action.move.row, col: req.body.action.move.col}}},
+    serverTurn: req.body.serverTurn,
+    whiteScore: req.body.whiteScore,
+    blackScore: req.body.blackScore,
+    whiteCheck: req.body.whiteCheck,
+    blackCheck: req.body.blackCheck,
+    whiteCheckMate: req.body.whiteCheckMate,
+    blackCheckMate: req.body.blackCheckMate,
+    stalemate: req.body.stalemate,
+    pieceData:{
+        whitePieces: {k1: req.body.pieceData.whitePieces.k1, q1: req.body.pieceData.whitePieces.q1, r1: req.body.pieceData.whitePieces.r1, r2: req.body.pieceData.whitePieces.r2,
+                      b1: req.body.pieceData.whitePieces.b1, b2: req.body.pieceData.whitePieces.b2, n1: req.body.pieceData.whitePieces.n1, n2: req.body.pieceData.whitePieces.n2,
+                      p1: req.body.pieceData.whitePieces.p1, p2: req.body.pieceData.whitePieces.p2, p3: req.body.pieceData.whitePieces.p3, p4: req.body.pieceData.whitePieces.p4,
+                      p5: req.body.pieceData.whitePieces.p5, p6: req.body.pieceData.whitePieces.p6, p7: req.body.pieceData.whitePieces.p7, p8: req.body.pieceData.whitePieces.p8},
+        blackPieces: {k1: req.body.pieceData.blackPieces.k1, q1: req.body.pieceData.blackPieces.q1, r1: req.body.pieceData.blackPieces.r1, r2: req.body.pieceData.blackPieces.r2,
+                      b1: req.body.pieceData.blackPieces.b1, b2: req.body.pieceData.blackPieces.b2, n1: req.body.pieceData.blackPieces.n1, n2: req.body.pieceData.blackPieces.n2,
+                      p1: req.body.pieceData.blackPieces.p1, p2: req.body.pieceData.blackPieces.p2, p3: req.body.pieceData.blackPieces.p3, p4: req.body.pieceData.blackPieces.p4,
+                      p5: req.body.pieceData.blackPieces.p5, p6: req.body.pieceData.blackPieces.p6, p7: req.body.pieceData.blackPieces.p7, p8: req.body.pieceData.blackPieces.p8}},
+    changedSlots: req.body.changedSlots,
+    deadArray: req.body.deadArray,
     });
     try {
         await match.save();
@@ -49,99 +61,133 @@ const match = new Board({
     }
 });
 
-router.put('/:idNum', async (req, res) => { // Player Updates their Move
+router.put('/:idNum', async (req, res) => {                                         // Function Updates Game Data with Player Move.
     try {
-        var newroom = {};
-        var newboard = [];
-        var newdead = [];
-        var newGame = {wWin: 0, bWin: 0};
-        var changeData = 0;
-        var desiredAction = {};
-        newroom = req.body.room;
-        newboard = req.body.board;
-        newdead = req.body.dead;
-        desiredAction = req.body.action;
-        var didWKingMv = req.body.special.wkingmv;
-        var didBKingMv = req.body.special.bkingmv;
-        var movingpiece = req.body.board[desiredAction.selection.row - 1][desiredAction.selection.col - 1];
-        var landingBlock = req.body.board[desiredAction.move.row - 1][desiredAction.move.col - 1];
-        console.log("Game \"" + req.params.idNum + "\": Requesting Move");
-        if (validMove(req.body, desiredAction, didBKingMv, didWKingMv))
+        var moveAccepted = false;
+        var color = teamColor(req.body.team);                                         // Getting the moving piece's team. (Needed to find Piece Key without looking through both teams)
+        var oppcolor = oppColor(req.body.team);
+        var teamPieces;
+        var oppPieces;
+        var teamScore;
+        if (color == "w")                                                             // Gathering both team's piece objects. (Needed to find Piece Key)
         {
-            if (movingpiece.charAt(1) == "k" && movingpiece.charAt(0) == "w")
-            didWKingMv = 1;
-            if (movingpiece.charAt(1) == "k" && movingpiece.charAt(0) == "b")
-            didBKingMv = 1;
-            console.log("Game \"" + req.params.idNum + "\": Valid Move");
-            changeData = 1;
-            if (landingBlock != "")
-            {
-                newdead.push(landingBlock);
-                const PIECE_WORTH = {p: 1, n: 3, b: 3, r: 5, q: 9};
-                if (landingBlock.charAt(0) == 'w')
-                newroom.scores.b += PIECE_WORTH[landingBlock.charAt(1)];
-                else newroom.scores.w += PIECE_WORTH[landingBlock.charAt(1)];
-            }
-            console.log("Game \"" + req.params.idNum + "\": Saving Match");
-            newboard[desiredAction.move.row - 1][desiredAction.move.col - 1] = movingpiece;
-            newboard[desiredAction.selection.row - 1][desiredAction.selection.col - 1] = "";
-            
-            if (movingpiece.charAt(1) == "k" &&
-            (desiredAction.move.row - desiredAction.selection.row == 0) && 
-            (Math.abs(desiredAction.move.col - desiredAction.selection.col) == 2))
-            {
-                console.log("Castle: Moving Rook as well.");
-                if (desiredAction.move.col - desiredAction.selection.col < 0)
-                {
-                    var rook = newboard[desiredAction.move.row - 1][0];
-                    console.log("Rook: " + rook);
-                    newboard[desiredAction.move.row - 1][0] = "";
-                    newboard[desiredAction.move.row - 1][desiredAction.move.col] = rook;
-                }
-                else if (desiredAction.move.col - desiredAction.selection.col > 0)
-                {
-                    var rook = newboard[desiredAction.move.row - 1][7];
-                    console.log("Rook: " + rook);
-                    newboard[desiredAction.move.row - 1][7] = "";
-                    newboard[desiredAction.move.row - 1][desiredAction.move.col - 2] = rook;
-                }
-            }
-            newboard = newQueen(newboard);
-            newroom.turnNum += 1;
-            newGame.bWin = checkForCheckMate(req.body.board, 'w');
-            newGame.wWin = checkForCheckMate(req.body.board, 'b');
-            if (changeData == 1)
-            {
-                try {
-                    let data = await Board.updateOne({
-                        _id: req.params.idNum
-                    },
-                    {
-                        $inc: { "room.turnNum": 1 },
-                        $set: { "action.selection.row": -1, "action.selection.col": -1, "action.move.row": -1, "action.move.col": -1,
-                                "room.scores.w": newroom.scores.w, "room.scores.b": newroom.scores.b, "dead": newdead, "special.wkingmv": didWKingMv,
-                                "special.bkingmv": didBKingMv, "special.wWin": newGame.wWin, "special.bWin": newGame.bWin,
-                            "special.lastAction.selection.row": desiredAction.selection.row, "special.lastAction.selection.col": desiredAction.selection.col, 
-                            "special.lastAction.move.row": desiredAction.move.row, "special.lastAction.move.col": desiredAction.move.col},
-                        $push : {
-                            board : {
-                                $each: [newboard[0], newboard[1], newboard[2], newboard[3], newboard[4], newboard[5], newboard[6], newboard[7]],
-                                $slice: -8
-                            }
-                        }
-                    });
-                    res.send(data);
-                } catch (error) {
-                console.log(error);
-                res.sendStatus(500);
-                }
-            }
+            teamPieces = req.body.pieceData.whitePieces;                              
+            oppPieces = req.body.pieceData.blackPieces;
+            teamScore = req.body.whiteScore;
         }
         else
         {
-            var returnObject = {data: {_id: "Invalid_Move", nModified : 0}};
-            res.send(returnObject);
+            oppPieces = req.body.pieceData.whitePieces;
+            teamPieces = req.body.pieceData.blackPieces;
+            teamScore = req.body.blackScore;
         }
+        console.log("Team Pieces: " + teamPieces);
+        var deadArray = req.body.deadArray;
+        var action = req.body.action;                                                  // Preparing requested move data. (Needed to find Piece Key)
+        var piece = getPiece(action.selected, teamPieces);                             // Finding Moving Piece Key. 
+        console.log("Piece to Move: " + piece);
+        var killPiece;
+        var changedSlots = [action.selected, action.move];
+        console.log("To Move: " + changedSlots);   
+        var teamPositions = gatherAllPositions(teamPieces);                        // Preparing two arrays with all the piece's locations.
+        var oppPositions = gatherAllPositions(oppPieces);     
+        console.log(teamPositions); 
+        console.log(oppPositions);
+        if (teamPieces[piece].move(action.move, teamPositions, oppPositions)){                        // Requesting the Move from Piece
+        moveAccepted = true; console.log("Move Approved.");}
+        if (moveAccepted)                                                              // The move was valid for that piece.
+        {
+            var pieceKilled = false;
+            if (!isEmpty(action.move)) {killPiece = getPiece(action.move, oppPieces); pieceKilled = true; deadArray.push(oppcolor + killPiece)}
+            if (pieceKilled) teamScore += oppPieces[killPiece].kill();                 // If a piece is killed in the movement, it's set to dead and it's score value is added.
+            let keyArray = Object.keys(teamPieces);                     // Getting key values to iterate through pieces object.
+            for (var i = 0; i < keyArray.length; i++)                                  // Going through each piece and determining if we need to update its POSSIBLE moves and BLOCKED moves.
+            {
+                if (teamPieces[keyArray[i]].getStatus())
+                {
+                    teamPieces[keyArray[i]].checkForRefresh(action.selected);
+                    teamPieces[keyArray[i]].checkForRefresh(action.move);
+                }
+            }
+            keyArray = Object.getOwnPropertyNames(oppPieces)
+            for (var i = 0; i < keyArray.length; i++)
+            {
+                if (oppPieces[keyArray[i]].getStatus())
+                {
+                    oppPieces[keyArray[i]].checkForRefresh(action.selected);
+                    oppPieces[keyArray[i]].checkForRefresh(action.move);
+                }
+            }                                                                          // We now have a clear idea of where each team can move and only updated the ones nessisary.
+            
+            // Checkmate Variables
+            var possibleTeamMoves = gatherPossibleMoves(teamPieces);                   // Array of all possible moves create to for check, checkmate or stalemate
+            var possibleOppMoves = gatherPossibleMoves(oppPieces);
+            var teamKingPosition = teamPieces.k1.getPositionObject();                  // Accessing both King's Positions.
+            var oppKingPosition = oppPieces.k1.getPositionObject();                       
+            var oppInCheck = false;                                                    // Both values defaulted to false.
+            var oppCheckMate = false;
+            var stalemate = false;
+
+            if (!(isKingSafe(oppPieces.k1.getPositionObject(), possibleOppMoves)))       h             // If the move put the player in check, or failed make him safe, request for move is denied.
+            {
+                var returnObject = {data: {_id: "Invalid_Move", nModified : 0, check: 1}};
+                res.send(returnObject);
+            }
+            if (!(isKingSafe(oppKingPosition, possibleTeamMoves)))                     // If Opponent in check, save the data to report.
+            {
+                oppInCheck = true;
+                var oppKingPossibleMoves = oppPieces.k1.getPossibleMoves();
+                if (checkMate(oppKingPossibleMoves, possibleTeamMoves))                     // Checking if the check is a checkmate.
+                oppCheckMate = true;
+            }
+            if (possibleOppMoves.length == 0)                                          // If opponent has no available moves, stalemate is called.
+            {
+                stalemate = true;
+            }
+            var whitePieces;
+            var blackPieces;
+            var whiteScore;
+            var blackScore;
+            var whiteCheck = false;
+            var blackCheck = false;
+            var whiteCheckMate = false;
+            var blackCheckMate = false;
+            if (color == "w")
+            {
+                whitePieces = teamPieces;
+                blackPieces = oppPieces;
+                whiteScore = teamScore;
+                blackScore = oppScore;
+                blackCheck = oppInCheck;
+                blackCheckMate = oppCheckMate;
+            }
+            else
+            {
+                blackPieces = teamPieces;
+                whitePieces = oppPieces;
+                blackScore = teamScore;
+                whiteScore = oppScore;
+                whiteCheck = oppInCheck;
+                whiteCheckMate = oppCheckMate;
+            }
+            try {
+                let data = await Board.updateOne({
+                    _id: req.params.idNum
+                },
+                {
+                    $inc: { "serverTurn": 1 },
+                    $set: { "pieceData.whitePieces": whitePieces, "pieceData.blackPieces": blackPieces, "changedSlots": changedSlots, 
+                            "whiteScore": whiteScore, "blackScore": blackScore, "whiteCheck": whiteCheck, "blackCheck": blackCheck,
+                            "whiteCheckMate": whiteCheckMate, "blackCheckMate": blackCheckMate, "stalemate": stalemate, "deadArray": deadArray},
+                });
+                res.send(data);
+            } catch (error) {
+            console.log(error);
+            res.sendStatus(500);
+            }
+        }
+        var returnObject = {data: {_id: "Invalid_Move", nModified : 0, check: 0}};
+        res.send(returnObject);
     } catch (error) {
     console.log(error);
     res.sendStatus(500);
@@ -161,354 +207,445 @@ try {
 
 module.exports = router;
 
-// GAME LOGIC =============================================================================================
-// If the move is valid, returns true.
-function validMove(match, action, didBKingMv, didWKingMv)
-{
-    // If the Player Tries to Move His Piece onto another one of his Pieces.
-    if ((match.board[action.move.row - 1][action.move.col - 1]) != "")
-        if ((match.board[action.selection.row - 1][action.selection.col - 1]).charAt(0) == (match.board[action.move.row - 1][action.move.col - 1]).charAt(0))
-            return false; 
-    // Get Selected Piece Type
-    var color = (match.board[action.selection.row - 1][action.selection.col - 1]).charAt(0); 
-    var char = (match.board[action.selection.row - 1][action.selection.col - 1]).charAt(1); 
-    // For Each Piece, if it is a valid move, return true.
-    switch (char)   
-    {
-        case 'k':
-            if (kingAction(action.selection, action.move, match.board, color, didBKingMv, didWKingMv)) return true;
-            break;
-        case 'q':
-            if (queenAction(action.selection, action.move, match.board, color)) return true;
-            break;
-        case 'r':
-            if (rookAction(action.selection, action.move, match.board, color)) return true;
-            break;
-        case 'b':
-            if (bishopAction(action.selection, action.move, match.board, color)) return true;
-            break;
-        case 'n':
-            if (knightAction(action.selection, action.move, match.board, color)) return true;
-            break;
-        case 'p':
-            if (pawnAction(action.selection, action.move, match.board, color)) return true;
-            break;
-    }
-};
-// Checks the Validity of a KING Move
-function kingAction(position, actionBlock, board, color, didBKingMv, didWKingMv)
-{
-    console.log("Processing King Logic");
-    // If the move square is Adjacent.
-	if ((Math.abs(actionBlock.row - position.row) <= 1) &&
-	(Math.abs(actionBlock.col - position.col) <= 1) &&
-	 isClearPath(position, actionBlock, board))
-	{
-        // Moves the piece and checks that the King is Safe.
-        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-        board[position.row - 1][position.col - 1] = "";
-        if (isSafe(1, actionBlock, board, color)) return true;
-        return false;
-    }
-    // Logic for Castling
-    if ((Math.abs(actionBlock.row - position.row) == 0) &&
-	(Math.abs(actionBlock.col - position.col) == 2) &&
-     isClearPath(position, actionBlock, board) &&
-     isValidCastle(position, actionBlock, board, color) &&
-     (((color == "w") && (!didWKingMv)) || 
-     ((color == "b") && (!didBKingMv))))
-     {
-        return true;  
-     }
-};
-// Checks the Validity of a QUEEN Move
-function queenAction(position, actionBlock, board, color)
-{
-    console.log("Processing Queen Logic");
-    // If the move is DIAGONAL, HORIZONTAL or VERTICAL
-	if (((actionBlock.row == position.row || actionBlock.col == position.col) || 
-	(Math.abs(actionBlock.row - position.row) == Math.abs(actionBlock.col - position.col))) &&
-	 isClearPath(position, actionBlock, board))
-	{
-        // Moves the piece and checks that the King is Safe.
-        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-        board[position.row - 1][position.col - 1] = "";
-        if (isSafe(0, actionBlock, board, color)) return true;
-        return false;
-	}
-};
-// Checks the Validity of a ROOK Move
-function rookAction(position, actionBlock, board, color)
-{
-    console.log("Processing Rook Logic");
-    // If the move is HORIZONTAL or VERTICAL
-	if ((actionBlock.row == position.row || actionBlock.col == position.col) &&
-	 isClearPath(position, actionBlock, board))
-	{
-        // Moves the piece and checks that the King is Safe.
-        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-        board[position.row - 1][position.col - 1] = "";
-        if (isSafe(0, actionBlock, board, color)) return true;
-		return false;
-	}
-};
-// Checks the Validity of a BISHOP Move
-function bishopAction(position, actionBlock, board, color)
-{
-    console.log("Processing Bishop Logic");
-    // If the move is DIAGONAL
-	if ((Math.abs(actionBlock.row - position.row) == Math.abs(actionBlock.col - position.col)) &&
-	 isClearPath(position, actionBlock, board))
-	{
-        // Moves the piece and checks that the King is Safe.
-        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-        board[position.row - 1][position.col - 1] = "";
-        if (isSafe(0, actionBlock, board, color)) return true;
-        return false;
-	}
-};
-// Checks the Validity of a KNIGHT Move
-function knightAction(position, actionBlock, board, color)
-{
-    console.log("Processing Knight Logic");
-    // If the move is a 2 - 1 ratio.
-	if ((((Math.abs(actionBlock.row - position.row) == 2) &&
-	(Math.abs(actionBlock.col - position.col) == 1)) ||
-	((Math.abs(actionBlock.row - position.row) == 1) &&
-	(Math.abs(actionBlock.col - position.col) == 2))))
-	{
-        // Moves the piece and checks that the King is Safe.
-        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-        board[position.row - 1][position.col - 1] = "";
-        if (isSafe(0, actionBlock, board, color)) return true;
-        return false;
-	}
-};
-// Checks the Validity of a BISHOP Move
-function pawnAction(position, actionBlock, board, color)
-{
-    console.log("Processing Pawn Logic");
-    // Setting Direction for Color
-	var colorDirection = 1;
-    if ((board[position.row - 1][position.col - 1]).charAt(0) == 'b') colorDirection = -1;
-    // Allows Double on First Move
-    var doubleMove = 0;
-    if ((colorDirection == 1 && position.row == 2) || (colorDirection == -1 && position.row == 7)) doubleMove = 1;
-    // If the move is forward and empty.
-    if (((actionBlock.row - position.row == colorDirection) ||
-     (doubleMove && (actionBlock.row - position.row == (colorDirection * 2)))) && 
-	(Math.abs(actionBlock.col - position.col) == 0) &&
-	board[actionBlock.row - 1][actionBlock.col - 1] == "")
-	{
-        // Moves the piece and checks that the King is Safe.
-		board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-		board[position.row - 1][position.col - 1] = "";
-		if (isSafe(0, actionBlock, board, color)) return true;
-		return false;
-    }
-    // If move is DIAGONAL 1, FORWARD 1, and KILLS
-	else if ((actionBlock.row - position.row == colorDirection) && 
-	(Math.abs(actionBlock.col - position.col) == 1) &&
-	((board[actionBlock.row - 1][actionBlock.col - 1]) != ""))
-	{
-        // Moves the piece and checks that the King is Safe.
-        board[actionBlock.row - 1][actionBlock.col - 1] = board[position.row - 1][position.col - 1];
-        board[position.row - 1][position.col - 1] = "";
-        if (isSafe(0, actionBlock, board, color)) return true;
-        return false;
-	}
-};
+// Game logic
 
-// Checks far rows for brave pawns to turn to queens.
-function newQueen(board)
-{
-    console.log("Checking for New Queens.");
-	for (var i = 0; i < 8; i++)
-	{
-        var piece = board[7][i];
-        if (piece != "")
-            if (piece.charAt(1) == 'p' && piece.charAt(0) == 'w') board[7][i] = "wq";
-        piece = board[0][i];
-        if (piece != "")
-		    if (piece.charAt(1) == 'p' && piece.charAt(0) == 'b') board[0][i] = "bq";
-	}
-	return board;
-};
+// =====================================Piece Classes
 
-// Returns true if castle is valid.
-function isValidCastle(position, actionBlock, board, color)
-{
-    console.log("Checking for valid castle...");
-    if (color == "w" && (position.row != 1 || position.col != 5)) {console.log("King not on base row."); return false;}
-    if (color == "b" && (position.row != 8 || position.col != 5)) {console.log("King not on base row."); return false;}
+/* HELPER */ 
+function gatherAllPositions(whitePieces){
+    var positions = [];
+    var pieces = Object.values(whitePieces);
+    for (var i = 0; i < pieces.length; i++){
+        if (!((pieces[i]).getStatus())) continue;
+        else {var testObject = pieces[i].getPositionObject();
+            positions.push(testObject);}}
+    return positions;}
+/* HELPER */ 
+function findPositionInArray(desired, array){
+    for (item in array){
+        if (isEqual(desired, array[item]))
+            return true;}
+    return false;}
 
+/* HELPER */ 
+function isMyPiece(testBlock, teamPositions) {
+    return findPositionInArray(testBlock, teamPositions);}
 
-    var direction = 1;
-    if (actionBlock.col - position.col < 0) direction = -1;
-    
-    var castleObjects = [{direction: 1, piece: "wr2"}, {direction: -1, piece: "wr1"}];
-    if (color == "b") castleObjects = [{direction: 1, piece: "br2"}, {direction: -1, piece: "br1"}];
-    var index = 0;
-    var end = 8;
-    if (direction == castleObjects[1].direction)  {index = 1; end = 1}
-    testBlock = position.col;
-    for (var i = 0; i < 3; i++)
-    {
-        testBlock = position.col + i * direction;
-        console.log("TESTING: " + testBlock + " Found: " + board[position.row - 1][testBlock - 1]);
-        if (board[position.row - 1][testBlock - 1] != "") if (board[position.row - 1][testBlock - 1].charAt(1) != "k") {console.log("Path not clear for Castle."); return false;}
-        var checkposition = {row: position.row, col: testBlock};
-        if (!isSafe(1, checkposition, board, color)) {console.log("King not safe on path or in check."); return false;}
-    }
-    if (board[position.row - 1][testBlock + 1 * direction - 1] != castleObjects[index].piece)
-    {
-        if (board[position.row - 1][testBlock + 1 * direction - 1] != "") {console.log("Path not clear for Castle."); return false;}
-    }
-    if (board[position.row - 1][end - 1] != castleObjects[index].piece) {console.log("Rook ID Not Correct for Castle."); return false;}
-    console.log("Valid Castle.");
+function isEmpty(testBlock, whitePositions, blackPostions) {
+    if (findPositionInArray(testBlock, whitePositions) || findPositionInArray(testBlock, blackPostions))
+    return false;
+    return true;}
+/* HELPER */ 
+function isEqual(a, b){
+    var aProps = Object.keys(a);
+    var bProps = Object.keys(b);
+    if (aProps.length != bProps.length) return false;
+    for (var i = 0; i < aProps.length; i++) {
+        var propName = aProps[i];
+        if (a[propName] !== b[propName]) return false;}
     return true;
 }
+function setData(a, b){
+    var aProps = Object.getOwnPropertyNames(a);
+    for (var i = 0; i < aProps.length; i++) {
+        var propName = aProps[i];
+        a[propName] = b[propName]}
+}
 
-// Returns true if no pieces are in the way.
-function isClearPath(position, actionBlock, board)
+function findKeyOffPosition(position, teamPieces)
 {
-    console.log("Processing Path...");
-    var distanceX = actionBlock.col - position.col;
-    var distanceY = actionBlock.row - position.row;
-    if (Math.abs(distanceX) <= 1 && Math.abs(distanceY) <= 1) return true;
-    var directionX = 0;
-    var directionY = 0;
-    if (distanceX != 0)
+    var array = Object.entries(teamPieces);
+    for (var i = 0; i < array.length; i++)
     {
-        if (distanceX < 0) directionX = -1;
-        else directionX = 1;
+        var item = array[i][1];
+        var itemPos = {row: item.row, col: item.col};
+        if (isEqual(position, itemPos)){
+            return array[i][0];
+        }
     }
-    if (distanceY != 0)
-    {
-        if (distanceY < 0) directionY = -1;
-        else directionY = 1;
-    }
-    var testBlock = {row: (position.row + directionY), col: (position.col + directionX)};
-    var distance = 0;
-    if (Math.abs(distanceY) > Math.abs(distanceX)) distance = Math.abs(distanceY) - 1;
-    else distance = Math.abs(distanceX) - 1;
-    for (var i = 0; i < distance; i++)
-    {
-        if (board[testBlock.row - 1][testBlock.col - 1] != "") {console.log("Path is Blocked."); return false;}
-        testBlock.row += directionY;
-        testBlock.col += directionX;
-    }
-    console.log("Valid Path.");
-    return true;
-};
+    return false;
+}
 
-function isSafe(isKing, block, board, color)
+function teamColor(team){
+    if (team) return "b";
+    return "w";
+}
+
+function oppColor(team){
+    if (team) return "w";
+    return "b";
+}
+
+function getPiece(selection, teamPieces)
 {
-    console.log("Processing King Safety.");
-    var kingPosition = {row: 0, col: 0};
-    var oppcolor = "";
-    if (color == 'b') oppcolor = 'w'; 
-    else oppcolor = "b";
-	if (isKing)
-	{
-        kingPosition.row = block.row - 1;
-        kingPosition.col = block.col - 1;
-    }
-    else
-    {
-        // Finds the King and Stores Location
-        for (var i = 0; i < 8; i++) { for (var j = 0; j < 8; j++) {
-            if (board[i][j].charAt(0) == color && board[i][j].charAt(1) == "k")
-            { kingPosition.row = i; kingPosition.col = j; }
-        }}
-    }
-    var testBlock = {row: kingPosition.row, col: kingPosition.col};
-    var testDirection = [{row: 1, col: 0}, {row: -1, col: 0}, {row: 0, col: 1}, {row: 0, col: -1},
-                         {row: 1, col: 1}, {row: -1, col: 1}, {row: -1, col: -1}, {row: 1, col: -1}];
-    // For each direction.
-    for (var i = 0; i < testDirection.length; i++)
-    {
-        testBlock = {row: (kingPosition.row + testDirection[i].row), col: (kingPosition.col + testDirection[i].col)};
-        // Ensures we don't check for data past or before the array
-        if (testBlock.row < 0 || testBlock.row > 7 ||
-            testBlock.col < 0 || testBlock.col > 7) continue;
-        if (board[testBlock.row][testBlock.col] != "")
-            if (board[testBlock.row][testBlock.col].charAt(0) == color) continue;
-        var distance = 0;
-        var end = 0;
-        // Extend that direction until you find a piece.
-        while(board[testBlock.row][testBlock.col] == "")
+    return findKeyOffPosition(selection, teamPieces);
+}
+
+function gatherPossibleMoves(pieces){
+    possibleMoves = [];
+    var pieces = Object.values(pieces);
+    for (piece in pieces){
+        if (!((pieces[piece]).getStatus())) continue;
+        else {var pieceMoves = pieces[piece].getPossibleMoves();
+            possibleMoves.concat(pieceMoves);}}
+    return possibleMoves}
+
+function isKingSafe(kingPos, oppPossibleMoves){
+    for (move in oppPossibleMoves){
+        if (isEqual(kingPos, oppPossibleMoves[move])) return false;}
+    return true;}
+
+function checkMate(kingPossibleMoves, teamPossibleMoves){
+    var blockedMoves = [];
+    for (move in kingPossibleMoves){
+        var blocked = false;
+        for (attack in teamPossibleMoves){
+            if (isEqual(kingPossibleMoves[move], teamPossibleMoves[attack])) blocked = true;}
+        if (!blocked) return false;}
+    return true;}
+
+
+//=========================================PIECE CLASSES
+
+// Castle
+// Finish Queen Promotion
+
+
+class Piece {
+    constructor (row, col, num, team) {
+        this.row = row;
+        this.col = col;
+        this.team = team;
+        this.enemy = !team;
+        this.num = num;
+        this.possibleMoves = [];
+        this.blockBlocks = [{row: this.row, col: this.col}];
+        this.isDead = 0;
+        }
+
+    getPositionObject() {
+        var position = {row: this.row, col: this.col};
+        return position;}
+
+    getPossibleMoves() {
+        return this.possibleMoves;}
+
+    getblockBlocks() {
+        return this.blockBlocks;}
+
+    move(newPos, teamPositions, oppPostions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
+        for (var i = 0; i < possibleMoves.length; i++)
         {
-            // Ensures we don't check for data past or before the array while moving.
-            if ((testBlock.row + testDirection[i].row) < 0 ||
-            (testBlock.row + testDirection[i].row > 7) ||
-            (testBlock.col + testDirection[i].col < 0) || 
-            (testBlock.col + testDirection[i].col > 7))
+            if (this.isEqual(this.possibleMoves[i], newPos))
             {
-                end = 1;
-                break;
-            }
-            distance += 1;
-            testBlock.row += testDirection[i].row;
-            testBlock.col += testDirection[i].col;
+                this.row = newPos.row;
+                this.col = newPos.col;
+                this.findPossibleMoves(teamPositions, oppPostions);
+                return true;}
         }
-        // If the while loop didn't end by finding the edge, check danger.
-        if (!end)
-        {
-            // If that piece is player color, continue.
-            if (board[testBlock.row][testBlock.col].charAt(0) == color) continue;
-            // If that piece is an enemy QUEEN one, NOT SAFE.
-            else if ((board[testBlock.row][testBlock.col].charAt(1) == "q")) {console.log("King is not Safe."); return false;}
-            // If that piece is an enemy KING one away, NOT SAFE.
-            else if ((board[testBlock.row][testBlock.col].charAt(1) == "k") && distance == 1) {console.log("King is not Safe."); return false;}
-            // If that piece is an enemy ROOK and direction is HORIZONTAL or VERTICAL, NOT SAFE.
-            else if ((board[testBlock.row][testBlock.col].charAt(1) == "r") && (i < 4)) {console.log("King is not Safe."); return false;}
-            // If that piece is an enemy BISHOP and direction is DIAGONAL, NOT SAFE.
-            else if ((board[testBlock.row][testBlock.col].charAt(1) == "b") && (i >= 4)) {console.log("King is not Safe."); return false;}
-            // If that piece is an enemey PAWN and direction is DIAGONAL one away in the right direction, NOT SAFE.
-            else if ((board[testBlock.row][testBlock.col].charAt(1) == "p") &&
-            (((color == 'w') && ((i == 5) || (i == 6))) ||
-            ((color == 'b') && ((i == 4) || (i == 5)))) 
-            && distance == 1) {console.log("King is not Safe."); return false;}
-        }
+        return false;
     }
-    // Separately check for a knight.
-    var knightTest = [{row: 1, col: 2}, {row: -1, col: 2}, {row: 1, col: -2}, {row: -1, col: -2},
-                      {row: 2, col: 1}, {row: -2, col: 1}, {row: 2, col: -1}, {row: -2, col: -1}];
-    for (test in knightTest)
-    {
-        testBlock = {row: (kingPosition.row + knightTest[test].row), col: (kingPosition.col + knightTest[test].col)};
-        // Ensures we don't check for dat apast or before the array.
-        if (testBlock.row < 0 || testBlock.row > 7 ||
-        testBlock.col < 0 || testBlock.col > 7) continue;
-        // If the block is empty, continue.
-        if (board[testBlock.row][testBlock.col] == "") continue;
-        // If the pices is king color, continue.
-        if (board[testBlock.row][testBlock.col].charAt(0) == color) continue;
-        // If the pices is an enemy knight, NOT SAFE.
-        if ((board[testBlock.row][testBlock.col].charAt(1) == "n")) {console.log("King is not Safe."); return false;}
-    }
-    console.log("King is Safe.");
-    return true;
-};
 
-function checkForCheckMate(board, color)
-{
-    // Is the King Currently Safe?
-    var kingPosition = {row: 0, col: 0};
-    for (var i = 0; i < 8; i++) { for (var j = 0; j < 8; j++) {
-        if (board[i][j].charAt(0) == color && board[i][j].charAt(1) == "k")
-        { kingPosition.row = i; kingPosition.col = j; }
-    }}
-    if (isSafe(1, kingPosition, board, color)) return false;
-    var testDirection = [{row: 1, col: 0}, {row: -1, col: 0}, {row: 0, col: 1}, {row: 0, col: -1},
-        {row: 1, col: 1}, {row: -1, col: 1}, {row: -1, col: -1}, {row: 1, col: -1}];
-    for (var i = 0; i < testDirection.length; i++)
+    kill() { // Kills the piece, placing it at 9-9 and Returning its point worth.
+        this.row = 100;
+        this.col = 100;
+        this.isDead = 1;
+        return this.points;}
+
+    getStatus() // false if dead
     {
-        var testBlock = {row: kingPosition.row + testDirection[i].row, col: kingPosition.col + testDirection[i].col};
-        if (testBlock.row < 0 || testBlock.row > 7 ||
-            testBlock.col < 0 || testBlock.col > 7) continue;
-        if (isSafe(1, testBlock, board, color)) return false;
+        if (this.isDead) return false;
+        return true;
     }
-    return true;
+
+    checkForRefresh(changeBlock, teamPositions, oppPostions)
+    {
+        for (i = 0; i < this.possibleMoves.length; i++)
+        {
+            if (this.isEqual(this.possibleMoves[i], changeBlock))
+            {
+                this.findPossibleMoves(teamPositions, oppPostions);
+                return true;
+            }
+        }
+        for (i = 0; i < this.blockBlocks; i++)
+        {
+            if (this.isEqual(this.blockBlocks[i], changeBlock))
+            {
+                this.findPossibleMoves(teamPositions, oppPostions);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    checkRecursive (xDirection, yDirection, teamPositions, oppPostions, testBlock)
+    {
+        var testBlock = this.addValues(testBlock, xDirection, yDirection);
+        if (!this.isInBoard(testBlock))return true;
+        
+        for (position in teamPositions)
+        {
+            if (this.isEqual(testBlock, teamPositions[position]))
+            {
+                teamPositions.splice(position, 1);
+                this.blockBlocks.push(testBlock);
+                return true;
+            }
+        }
+        for (position in oppPostions)
+        {
+            if (this.isEqual(testBlock, oppPostions[position]))
+            {
+                oppPostions.splice(position, 1);
+                this.possibleMoves.push(testBlock);
+                return true;
+            }
+        }
+        this.possibleMoves.push(testBlock);
+        if (this.checkDiagonal(xDirection, yDirection, teamPositions, oppPostions, testBlock))
+        return true;
+    }
+
+    checkOnce(xDirection, yDirection, teamPositions, oppPostions, testBlock)
+    {
+        var testBlock = this.addValues(testBlock, xDirection, yDirection);
+        if (!this.isInBoard(testBlock))return true;
+
+        for (position in teamPositions)
+        {
+            if (this.isEqual(testBlock, teamPositions[position]))
+            {
+                teamPositions.splice(position, 1);
+                this.blockBlocks.push(testBlock);
+                return true;
+            }
+        }
+        for (position in oppPostions)
+        {
+            if (this.isEqual(testBlock, oppPostions[position]))
+            {
+                oppPostions.splice(position, 1);
+                this.possibleMoves.push(testBlock);
+                return true;
+            }
+        }
+        this.possibleMoves.push(testBlock);
+        return true;
+    }
+
+    isEqual(a, b){
+        var aProps = Object.keys(a);
+        var bProps = Object.keys(b);
+        if (aProps.length != bProps.length) return false;
+        for (var i = 0; i < aProps.length; i++) {
+            var propName = aProps[i];
+            if (a[propName] !== b[propName]) return false;}
+        return true;
+    }
+    setData(a, b){
+        var aProps = Object.getOwnPropertyNames(a);
+        for (var i = 0; i < aProps.length; i++) {
+            var propName = aProps[i];
+            a[propName] = b[propName]}
+    }
+    isInBoard(a){
+        if (a.row < 0 || a.row > 7 || a.col < 0 || a.col > 7) return false;
+        return true;
+    }
+
+    addValues(block, x, y)
+    {
+        return {row: block.row + y, col: block.col + x};
+    }
+}
+
+class Bishop extends Piece {
+    constructor (row, col, num, team) {
+        super(row, col, num, team);
+        this.points = 3;
+        }
+
+    findPossibleMoves(teamPositions, oppPostions) {
+        this.possibleMoves = [];
+        this.blockBlocks = [];
+        this.checkDiagonal(1, 1, teamPositions, oppPostions);
+        this.checkDiagonal(-1, -1, teamPositions, oppPostions);
+        this.checkDiagonal(-1, 1, teamPositions, oppPostions);
+        this.checkDiagonal(1, -1, teamPositions, oppPostions);
+    }
+    
+    checkDiagonal(xDirection, yDirection, teamPositions, oppPostions)
+    {
+        this.checkRecursive(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+    }
+}
+
+class King extends Piece {
+    constructor (row, col, num, team) {
+        super(row, col, num, team);
+        this.hasMoved = 0;
+        this.points = 0;
+        }
+
+    findPossibleMoves(teamPositions, oppPostions) {
+        this.possibleMoves = [];
+        this.blockBlocks = [];
+        this.checkDiagonal(1, 1, teamPositions, oppPostions);
+        this.checkDiagonal(-1, -1, teamPositions, oppPostions);
+        this.checkDiagonal(-1, 1, teamPositions, oppPostions);
+        this.checkDiagonal(1, -1, teamPositions, oppPostions);
+        this.checkStraight(1, 0, teamPositions, oppPostions);
+        this.checkStraight(-1, 0, teamPositions, oppPostions);
+        this.checkStraight(0, 1, teamPositions, oppPostions);
+        this.checkStraight(0, -1, teamPositions, oppPostions);
+    }
+    
+    checkStraight(xDirection, yDirection, teamPositions, oppPostions)
+    {
+        this.checkOnce(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+    }
+    
+    checkDiagonal(xDirection, yDirection, teamPositions, oppPostions)
+    {
+        this.checkOnce(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+    }
+}
+
+class Knight extends Piece {
+    constructor (row, col, num, team) {
+        super(row, col, num, team);
+        this.points = 3;
+        }
+
+    findPossibleMoves(teamPositions, oppPostions) {
+        this.possibleMoves = [];
+        this.blockBlocks = [];
+        this.checkKnightL(2, 5, teamPositions, oppPostions);
+        this.checkKnightL(-2, -5, teamPositions, oppPostions);
+        this.checkKnightL(-2, 5, teamPositions, oppPostions);
+        this.checkKnightL(2, -5, teamPositions, oppPostions);
+    }
+
+    checkKnightL(xDirection, yDirection, teamPositions, oppPostions)
+    {
+        this.checkOnce(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+    }
+}
+
+class Pawn extends Piece {
+    constructor (row, col, num, team) {
+        super(row, col, num, team);
+        if (!team) this.rowDirection = -1;
+        else this.rowDirection = 1;
+        this.hasMoved = 0;
+        this.points = 1;}
+
+    checkPromotion()
+    {
+        if (this.rowDirection < 0 && row == 0)
+        {
+            return true;
+        }
+        if (this.rowDirection > 0 && row == 7)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    findPossibleMoves(teamPositions, oppPostions) {
+        this.possibleMoves = [];
+        this.blockBlocks = [];
+        this.checkForward(this.rowDirection, 0, teamPositions, oppPostions);
+        if (!this.hasMoved)
+        {
+            this.checkForward(this.rowDirection * 2, 0, teamPositions, oppPostions);
+        }
+        this.checkKillDiag(this.rowDirection, 1, teamPositions, oppPostions);
+        this.checkKillDiag(this.rowDirection, 1, teamPositions, oppPostions);
+    }
+
+    checkForward(xDirection, yDirection, teamPositions, oppPostions)
+    {
+        this.checkOnce(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+    }
+
+
+    canKillDiag(xDirection, yDirection, teamPositions, oppPostions) {
+        var testBlock = this.addValues(testBlock, xDirection, yDirection);
+        if (!isInBoard(testBlock))return true;
+
+        for (position in teamPositions)
+        {
+            if (this.isEqual(testBlock, teamPositions[position]))
+            {
+                teamPositions.splice(position, 1);
+                this.blockBlocks.push(testBlock);
+                return true;
+            }
+        }
+        for (position in oppPostions)
+        {
+            if (this.isEqual(testBlock, oppPostions[position]))
+            {
+                oppPostions.splice(position, 1);
+                this.possibleMoves.push(testBlock);
+                return true;
+            }
+        }  
+        return true;
+    }
+}
+
+class Queen extends Piece {
+    constructor (row, col, num, team) {
+        super(row, col, num, team);
+        this.points = 9;
+
+        }
+
+    findPossibleMoves(teamPositions, oppPostions) {
+        this.possibleMoves = [];
+        this.blockBlocks = [];
+        this.checkDiagonal(1, 1, teamPositions, oppPostions);
+        this.checkDiagonal(-1, -1, teamPositions, oppPostions);
+        this.checkDiagonal(-1, 1, teamPositions, oppPostions);
+        this.checkDiagonal(1, -1, teamPositions, oppPostions);
+        this.checkStraight(1, 0, teamPositions, oppPostions);
+        this.checkStraight(-1, 0, teamPositions, oppPostions);
+        this.checkStraight(0, 1, teamPositions, oppPostions);
+        this.checkStraight(0, -1, teamPositions, oppPostions);
+    }
+    
+    checkStraight(xDirection, yDirection, teamPositions, oppPostions)
+    {
+        this.checkRecursive(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+    }
+    
+    checkDiagonal(xDirection, yDirection, teamPositions, oppPostions)
+    {
+        this.checkRecursive(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+    }
+}
+
+class Rook extends Piece {
+    constructor (row, col, num, team) {
+        super(row, col, num, team);
+        this.points = 5;
+        }
+
+    findPossibleMoves(teamPositions, oppPostions) {
+        this.possibleMoves = [];
+        this.blockBlocks = [];
+        this.checkStraight(1, 0, teamPositions, oppPostions);
+        this.checkStraight(-1, 0, teamPositions, oppPostions);
+        this.checkStraight(0, 1, teamPositions, oppPostions);
+        this.checkStraight(0, -1, teamPositions, oppPostions);
+    }
+    
+    checkStraight(xDirection, yDirection, teamPositions, oppPostions)
+    {
+        this.checkRecursive(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+    }
 }

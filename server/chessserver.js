@@ -7,7 +7,7 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 
-//app.use(express.static('../public'));
+app.use(express.static('../public'));
 
 const mongoose = require('mongoose');
 
@@ -28,9 +28,13 @@ app.use("/api/match", multiplayer);
 const chat = require("./chat.js");
 app.use("/api/chat", chat);
 
+app.listen(8000, () => console.log('Server listening on port 3000!'));
+
+/*
 var port = process.env.PORT || 3000;
 
 app.listen(port, function () {
 console.log("Server listening on port  " + port+ "!");
 });
+*/
 
