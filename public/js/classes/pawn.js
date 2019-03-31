@@ -58,7 +58,7 @@ class Pawn extends Piece {
         }
         for (var i = 0; i < oppPostions.length; i++)
         {
-            if (this.isEqual(testBlock, oppPostions[position]))
+            if (this.isEqual(testBlock, oppPostions[i]))
             {
                 oppPostions.splice(position, 1);
                 this.possibleMoves.push(testBlock);
