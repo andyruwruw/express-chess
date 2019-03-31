@@ -210,21 +210,16 @@ var app = new Vue({
                 var elementMove = document.getElementById(this.blockToString(changedSlots[i * 2 + 1]));
                 var changedColor;
                 var id;
-                if ((this.gameData.playerTurn && this.gameData.team) || (!this.gameData.playerTurn && !this.gameData.team)){
-                    id = this.findKeyOffPosition(changedSlots[i * 2], this.pieceData.whitePieces);
-                    changedColor = "w";}
-                else{
-                    id = this.findKeyOffPosition(changedSlots[i * 2], this.pieceData.blackPieces);
-                    changedColor = "b";}
                 let colors = ["w", "b"];
                 let pieces = ["q", "k", "n", "b", "r", "p"];
                 for (var k = 0; k < colors.length; k++){						                    // It runs through removing any piece classes.
                     for (var l = 0; l < pieces.length; l++){
-                        if (element.classList.contains(colors[k] + pieces[l])) 
-                        element.classList.remove(colors[k] + pieces[l]);
+                        if (element.classList.contains(colors[k] + pieces[l])) {
+                        id = (colors[k] + pieces[l]);
+                        element.classList.remove(colors[k] + pieces[l]);}
                         if (elementMove.classList.contains(colors[k] + pieces[l])) 
                         elementMove.classList.remove(colors[k] + pieces[l]);}}
-                elementMove.classList.add(changedColor + id);    
+                elementMove.classList.add(id);    
             }
         },
         updateDead()
