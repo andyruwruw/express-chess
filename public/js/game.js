@@ -367,6 +367,7 @@ var app = new Vue({
                 {
                     this.serverData.serverMessageText = ("Opponent Moved. Your Turn!");
                     this.gameData.playerTurn = true;
+                    this.setData(this.selectData.selected, this.selectData.unselected);
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.getGameData();
                 }
