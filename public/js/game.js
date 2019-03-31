@@ -129,21 +129,21 @@ var app = new Vue({
             if (this.gameData.playerTurn)                                                       // If it's the player's turn
             {
                 this.unselectRedBlockDiv();
-                var clickBlock = this.parseBlock(blockString);
+                var blockData = this.parseBlock(blockString);
                 if (this.isEqual(this.selectData.selected, this.selectData.unselected))       // If nothing is selected
                 {
                     console.log("New Selection");
-                    if (this.isEmpty(clickBlock)) {console.log("Empty Selected"); return 0;}                                             // Or if it's empty, do nothing.
-                    else if (this.isMyPiece(clickBlock)) this.selectBlock(clickBlock, blockString);     // If it's your piece, select it.
+                    if (this.isEmpty(blockData)) {console.log("Empty Selected"); return 0;}                                             // Or if it's empty, do nothing.
+                    else if (this.isMyPiece(blockData)) this.selectBlock(blockData, blockString);     // If it's your piece, select it.
                     else this.throwError("You cannot select your opponent's pieces.");                  // Or if it's your opponent's piece, throw error
                 }
                 else                                                                                // If a piece is already selected.
                 {
-                    if (this.isMyPiece(clickBlock))                                                     // If next selection is your piece as well, unselect all.
-                        this.unselectBlock(clickBlock, blockString);
+                    if (this.isMyPiece(blockData))                                                     // If next selection is your piece as well, unselect all.
+                        this.unselectBlock(blockData, blockString);
                     else                                                                                // Or if next selection is not your piece, check if you can move there.
                     {
-                        this.setData(this.selectData.move, clickBlock);
+                        this.setData(this.selectData.move, blockData);
                         this.sendGameData();
                     }
                 }
@@ -340,6 +340,8 @@ var app = new Vue({
                     serverTurn: this.gameData.displayedTurn,
                     action: {selected: this.selectData.selected, move: this.selectData.move},
                     deadArray: this.gameData.deadArray,
+                    whiteScore: this.gameData.whiteScore,
+                    blackScore: this.gameData.blackScore,
                 };
                 let response = await axios.put("/api/match/" + this.serverData.gameID, request);
                 if (response.data.nModified == 1)                                                   // If server approves move.
@@ -473,16 +475,20 @@ var app = new Vue({
         /* HELPER */ 
         findPositionInArray(desired, array){
             for (var i = 0; i < array.length; i++){
+                console.log(desired);
+                console.log(array[i]);
                 if (this.isEqual(desired, array[i]))
                     return true;}
             return false;},
         /* HELPER */ 
         isMyPiece(testBlock) {
             if (this.teamColor() == "w") return this.findPositionInArray(testBlock, this.testData.whitePositions);
-            else return this.findPositionInArray(testBlock, this.testData.blackPostions); },
+            else return this.findPositionInArray(testBlock, this.testData.blackPositions); },
 
         isEmpty(testBlock) {
-            if (this.findPositionInArray(testBlock, this.testData.whitePositions) || this.findPositionInArray(testBlock, this.testData.blackPostions))
+            console.log(this.testData.whitePositions);
+            console.log(this.testData.blackPositions);
+            if (this.findPositionInArray(testBlock, this.testData.whitePositions) || this.findPositionInArray(testBlock, this.testData.blackPositions))
             return false;
             return true;},
         /* HELPER */ 
@@ -541,6 +547,14 @@ var app = new Vue({
         async getMatchMakers()
         {
             try {
+                if (this.matchData.findingMatch)
+                {
+                    this.matchData.findingMatch = 0;
+                    await axios.delete("/api/queue/" + this.serverData.gameID);
+                    this.serverData.gameID = "";
+                }
+                else
+                {
                 let response = await axios.get("/api/queue");
                 var matches = response.data;
                 var matchNum = 0;
@@ -574,6 +588,7 @@ var app = new Vue({
                     this.matchData.findingMatch = 1;
                     this.postMatchMaker(matchNum + 1);
                     this.serverData.interval = setInterval(this.intervalMethod, this.serverData.intervalspeed);
+                }
                 }
             } catch (error) {
                 console.log(error);

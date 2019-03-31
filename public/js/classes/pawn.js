@@ -15,8 +15,8 @@ class Pawn extends Piece {
         return data;
     }
 
-    move(newPos, teamPositions, oppPostions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
-        if (super.move(newPos, teamPositions, oppPostions)){
+    move(newPos, teamPositions, oppPositions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
+        if (super.move(newPos, teamPositions, oppPositions)){
         this.hasMoved = 1; return true;}
         else return false;
     }
@@ -34,24 +34,24 @@ class Pawn extends Piece {
         return false;
     }
 
-    findPossibleMoves(teamPositions, oppPostions) {
+    findPossibleMoves(teamPositions, oppPositions) {
         this.possibleMoves = [];
         this.blockBlocks = [];
-        this.checkForward(0, this.rowDirection, teamPositions, oppPostions);
+        this.checkForward(0, this.rowDirection, teamPositions, oppPositions);
         if (!this.hasMoved)
         {
-            this.checkForward(0, this.rowDirection * 2, teamPositions, oppPostions);
+            this.checkForward(0, this.rowDirection * 2, teamPositions, oppPositions);
         }
-        this.checkKillDiag(1, this.rowDirection, teamPositions, oppPostions);
-        this.checkKillDiag(-1, this.rowDirection, teamPositions, oppPostions);
+        this.checkKillDiag(1, this.rowDirection, teamPositions, oppPositions);
+        this.checkKillDiag(-1, this.rowDirection, teamPositions, oppPositions);
     }
 
-    checkForward(xDirection, yDirection, teamPositions, oppPostions)
+    checkForward(xDirection, yDirection, teamPositions, oppPositions)
     {
-        this.checkOnce(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+        this.checkOnce(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
 
-    checkKillDiag(xDirection, yDirection, teamPositions, oppPostions) {
+    checkKillDiag(xDirection, yDirection, teamPositions, oppPositions) {
         var testBlock = this.addValues({row: this.row, col: this.col}, xDirection, yDirection);
         if (!this.isInBoard(testBlock))return true;
 
@@ -64,11 +64,11 @@ class Pawn extends Piece {
                 return true;
             }
         }
-        for (var i = 0; i < oppPostions.length; i++)
+        for (var i = 0; i < oppPositions.length; i++)
         {
-            if (this.isEqual(testBlock, oppPostions[i]))
+            if (this.isEqual(testBlock, oppPositions[i]))
             {
-                oppPostions.splice(position, 1);
+                oppPositions.splice(i, 1);
                 this.possibleMoves.push(testBlock);
                 return true;
             }
