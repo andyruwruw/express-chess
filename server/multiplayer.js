@@ -460,7 +460,7 @@ class Piece {
     checkOnce(xDirection, yDirection, teamPositions, oppPostions, testBlock)
     {
         var testBlock = this.addValues(testBlock, xDirection, yDirection);
-        if (!this.isInBoard(testBlock))return true;
+        if (!this.isInBoard(testBlock)) return true;
 
         for (var i = 0; i < teamPositions.length; i++)
         {
@@ -571,10 +571,14 @@ class Knight extends Piece {
     findPossibleMoves(teamPositions, oppPostions) {
         this.possibleMoves = [];
         this.blockBlocks = [];
-        this.checkKnightL(2, 5, teamPositions, oppPostions);
-        this.checkKnightL(-2, -5, teamPositions, oppPostions);
-        this.checkKnightL(-2, 5, teamPositions, oppPostions);
-        this.checkKnightL(2, -5, teamPositions, oppPostions);
+        this.checkKnightL(1, 2, teamPositions, oppPostions);
+        this.checkKnightL(2, 1, teamPositions, oppPostions);
+        this.checkKnightL(2, -1, teamPositions, oppPostions);
+        this.checkKnightL(1, -2, teamPositions, oppPostions);
+        this.checkKnightL(-1, -2, teamPositions, oppPostions);
+        this.checkKnightL(-2, -1, teamPositions, oppPostions);
+        this.checkKnightL(-2, 1, teamPositions, oppPostions);
+        this.checkKnightL(-1, 2, teamPositions, oppPostions);
     }
 
     checkKnightL(xDirection, yDirection, teamPositions, oppPostions)
