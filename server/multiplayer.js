@@ -272,7 +272,7 @@ function getPiece(selection, teamPieces)
 }
 
 function gatherPossibleMoves(pieces){
-    possibleMoves = [];
+    var possibleMoves = [];
     var pieces = Object.values(pieces);
     for (var i = 0; i < pieces.length; i++){
         if (!((pieces[i]).getStatus())) continue;
