@@ -209,11 +209,11 @@ var app = new Vue({
                 var changedColor;
                 var id;
                 if ((this.gameData.playerTurn && this.gameData.team) || (!this.gameData.playerTurn && !this.gameData.team)){
-                id = this.findKeyOffPosition(changedSlots[slot], pieceData.whitePieces);
-                changedColor = "w";}
+                    id = this.findKeyOffPosition(changedSlots[i], pieceData.whitePieces);
+                    changedColor = "w";}
                 else{
-                id = this.findKeyOffPosition(changedSlots[slot], pieceData.blackPieces);
-                changedColor = "b";}
+                    id = this.findKeyOffPosition(changedSlots[i], pieceData.blackPieces);
+                    changedColor = "b";}
                 let colors = ["w", "b"];
                 let pieces = ["q", "k", "n", "b", "r", "p"];
                 for (var k = 0; k < colors.length; k++){						                    // It runs through removing any piece classes.
