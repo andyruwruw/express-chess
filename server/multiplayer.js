@@ -622,7 +622,7 @@ class Pawn extends Piece {
     }
 
 
-    canKillDiag(xDirection, yDirection, teamPositions, oppPostions) {
+    checkKillDiag(xDirection, yDirection, teamPositions, oppPostions) {
         var testBlock = this.addValues(testBlock, xDirection, yDirection);
         if (!isInBoard(testBlock))return true;
 
