@@ -64,22 +64,22 @@ var app = new Vue({
         },
         pieceData:
         {
-            whitePieces: {k1: new King(0, 4, 1, 0, this.sD(1,"wk1"), this.sD(2,"wk1"), 0),   q1: new Queen(0, 3, 1, 0, this.sD(1,"wq1"), this.sD(2,"wq1"), 0),  
-                          r1: new Rook(0, 0, 1, 0, this.sD(1,"wr1"), this.sD(2,"wr1"), 0),   r2: new Rook(0, 7, 2, 0, this.sD(1,"wr2"), this.sD(2,"wr2"), 0), 
-                          b1: new Bishop(0, 2, 1, 0, this.sD(1,"wb1"), this.sD(2,"wb1"), 0), b2: new Bishop(0, 5, 2, 0, this.sD(1,"wb2"), this.sD(2,"wb2"), 0), 
-                          n1: new Knight(0, 1, 1, 0, this.sD(1,"wn1"), this.sD(2,"wn1"), 0), n2: new Knight(0, 6, 2, 0, this.sD(1,"wn2"), this.sD(2,"wn2"), 0), 
-                          p1: new Pawn(1, 0, 1, 0, this.sD(1,"wp1"), this.sD(2,"wp1"), 0),   p2: new Pawn(1, 1, 2, 0, this.sD(1,"wp2"), this.sD(2,"wp2"), 0),   
-                          p3: new Pawn(1, 2, 3, 0, this.sD(1,"wp3"), this.sD(2,"wp3"), 0),   p4: new Pawn(1, 3, 4, 0, this.sD(1,"wp4"), this.sD(2,"wp4"), 0), 
-                          p5: new Pawn(1, 4, 5, 0, this.sD(1,"wp5"), this.sD(2,"wp5"), 0),   p6: new Pawn(1, 5, 6, 0, this.sD(1,"wp6"), this.sD(2,"wp6"), 0),   
-                          p7: new Pawn(1, 6, 7, 0, this.sD(1,"wp7"), this.sD(2,"wp7"), 0),   p8: new Pawn(1, 7, 8, 0, this.sD(1,"wp8"), this.sD(2,"wp8"), 0)},
-            blackPieces: {k1: new King(7, 4, 1, 1, this.sD(1,"bk1"), this.sD(2,"bk1"), 0),   q1: new Queen(7, 3, 1, 1, this.sD(1,"bq1"), this.sD(2,"bq1"), 0),  
-                          r1: new Rook(7, 0, 1, 1, this.sD(1,"br1"), this.sD(2,"br1"), 0),   r2: new Rook(7, 7, 2, 1, this.sD(1,"br2"), this.sD(2,"br2"), 0), 
-                          b1: new Bishop(7, 2, 1, 1, this.sD(1,"bb1"), this.sD(2,"bb1"), 0), b2: new Bishop(7, 5, 2, 1, this.sD(1,"bb2"), this.sD(2,"bb2"), 0), 
-                          n1: new Knight(7, 1, 1, 1, this.sD(1,"bn1"), this.sD(2,"bn1"), 0), n2: new Knight(7, 6, 2, 1, this.sD(1,"bn2"), this.sD(2,"bn2"), 0), 
-                          p1: new Pawn(6, 0, 1, 1, this.sD(1,"bp1"), this.sD(2,"bp1"), 0),   p2: new Pawn(6, 1, 2, 1, this.sD(1,"bp2"), this.sD(2,"bp2"), 0),   
-                          p3: new Pawn(6, 2, 3, 1, this.sD(1,"bp3"), this.sD(2,"bp3"), 0),   p4: new Pawn(6, 3, 4, 1, this.sD(1,"bp4"), this.sD(2,"bp4"), 0), 
-                          p5: new Pawn(6, 4, 5, 1, this.sD(1,"bp5"), this.sD(2,"bp5"), 0),   p6: new Pawn(6, 5, 6, 1, this.sD(1,"bp6"), this.sD(2,"bp6"), 0),   
-                          p7: new Pawn(6, 6, 7, 1, this.sD(1,"bp7"), this.sD(2,"bp7"), 0),   p8: new Pawn(6, 7, 8, 1, this.sD(1,"bp8"), this.sD(2,"bp8"), 0)},
+            whitePieces: {k1: new King(0, 4, 1, 0, sD(1,"wk1"), sD(2,"wk1"), 0),   q1: new Queen(0, 3, 1, 0, sD(1,"wq1"), sD(2,"wq1"), 0),  
+                          r1: new Rook(0, 0, 1, 0, sD(1,"wr1"), sD(2,"wr1"), 0),   r2: new Rook(0, 7, 2, 0, sD(1,"wr2"), sD(2,"wr2"), 0), 
+                          b1: new Bishop(0, 2, 1, 0, sD(1,"wb1"), sD(2,"wb1"), 0), b2: new Bishop(0, 5, 2, 0, sD(1,"wb2"), sD(2,"wb2"), 0), 
+                          n1: new Knight(0, 1, 1, 0, sD(1,"wn1"), sD(2,"wn1"), 0), n2: new Knight(0, 6, 2, 0, sD(1,"wn2"), sD(2,"wn2"), 0), 
+                          p1: new Pawn(1, 0, 1, 0, sD(1,"wp1"), sD(2,"wp1"), 0),   p2: new Pawn(1, 1, 2, 0, sD(1,"wp2"), sD(2,"wp2"), 0),   
+                          p3: new Pawn(1, 2, 3, 0, sD(1,"wp3"), sD(2,"wp3"), 0),   p4: new Pawn(1, 3, 4, 0, sD(1,"wp4"), sD(2,"wp4"), 0), 
+                          p5: new Pawn(1, 4, 5, 0, sD(1,"wp5"), sD(2,"wp5"), 0),   p6: new Pawn(1, 5, 6, 0, sD(1,"wp6"), sD(2,"wp6"), 0),   
+                          p7: new Pawn(1, 6, 7, 0, sD(1,"wp7"), sD(2,"wp7"), 0),   p8: new Pawn(1, 7, 8, 0, sD(1,"wp8"), sD(2,"wp8"), 0)},
+            blackPieces: {k1: new King(7, 4, 1, 1, sD(1,"bk1"), sD(2,"bk1"), 0),   q1: new Queen(7, 3, 1, 1, sD(1,"bq1"), sD(2,"bq1"), 0),  
+                          r1: new Rook(7, 0, 1, 1, sD(1,"br1"), sD(2,"br1"), 0),   r2: new Rook(7, 7, 2, 1, sD(1,"br2"), sD(2,"br2"), 0), 
+                          b1: new Bishop(7, 2, 1, 1, sD(1,"bb1"), sD(2,"bb1"), 0), b2: new Bishop(7, 5, 2, 1, sD(1,"bb2"), sD(2,"bb2"), 0), 
+                          n1: new Knight(7, 1, 1, 1, sD(1,"bn1"), sD(2,"bn1"), 0), n2: new Knight(7, 6, 2, 1, sD(1,"bn2"), sD(2,"bn2"), 0), 
+                          p1: new Pawn(6, 0, 1, 1, sD(1,"bp1"), sD(2,"bp1"), 0),   p2: new Pawn(6, 1, 2, 1, sD(1,"bp2"), sD(2,"bp2"), 0),   
+                          p3: new Pawn(6, 2, 3, 1, sD(1,"bp3"), sD(2,"bp3"), 0),   p4: new Pawn(6, 3, 4, 1, sD(1,"bp4"), sD(2,"bp4"), 0), 
+                          p5: new Pawn(6, 4, 5, 1, sD(1,"bp5"), sD(2,"bp5"), 0),   p6: new Pawn(6, 5, 6, 1, sD(1,"bp6"), sD(2,"bp6"), 0),   
+                          p7: new Pawn(6, 6, 7, 1, sD(1,"bp7"), sD(2,"bp7"), 0),   p8: new Pawn(6, 7, 8, 1, sD(1,"bp8"), sD(2,"bp8"), 0)},
         },
         SOUNDS: { 
             select: {sound: "select", volume: .7},
@@ -812,33 +812,6 @@ var app = new Vue({
         {
             this.gameData.playerTurn = false;
         },
-        sD(PorB, item) // Starting Data
-        {switch(PorB){case 1:switch(item){case"wk1":return[];case"wq1":return[];case"wr1":return[];case"wr2":return[];
-        case"wb1":return[];case"wb2":return[];case"wn1":return[{row:2,col:0},{row:2,col:2}];case"wn2":return[{row:2,
-        col:5},{row:2,col:7}];case"wp1":return[{row:2,col:0},{row:3,col:0}];case"wp2":return[{row:2,col:1},{row:3,col:
-        1}];case"wp3":return[{row:2,col:2},{row:3,col:2}];case"wp4":return[{row:2,col:3},{row:3,col:3}];case"wp5":
-        return[{row:2,col:4},{row:3,col:4}];case"wp6":return[{row:2,col:5},{row:3,col:5}];case"wp7":return[{row:2,
-        col:6},{row:3,col:6}];case"wp8":return[{row:2,col:7},{row:3,col:7}];case"bk1":return[];case"bq1":return[];
-        case"br1":return[];case"br2":return[];case"bb1":return[];case"bb2":return[];case"bn1":return[{row:5,
-        col:0},{row:5,col:2}];case"bn2":return[{row:5,col:5},{row:5,col:7}];case"bp1":return[{row:5,col:0},{row:4,col:
-        0}];case"bp2":return[{row:5,col:1},{row:4,col:1}];case"bp3":return[{row:5,col:2},{row:4,col:2}];case"bp4":
-        return[{row:5,col:3},{row:4,col:3}];case"bp5":return[{row:5,col:4},{row:4,col:4}];case"bp6":return[{row:5,
-        col:5},{row:4,col:5}];case"bp7":return[{row:5,col:6},{row:4,col:6}];case"bp8":return[{row:5,col:7},{row:4,col:
-        7}];}case 2:switch(item){case"wk1":return[{row:0,col:3},{row:0,col:5},{row:1,col:3},{row:1,col:4},{row:1,col:5}];
-        case"wq1":return[{row:0,col:2},{row:0,col:4},{row:1,col:2},{row:1,col:3},{row:1,col:4}];case"wr1":return[{row:0,
-        col:1},{row:1,col:0}];case"wr2":return[{row:0,col:6},{row:1,col:7}];case"wb1":return[{row:1,col:1},{row:1,col:3}];
-        case"wb2":return[{row:1,col:4},{row:1,col:6}];case"wn1":return[{row:1,col:3}];case"wn2":return[{row:1,col:4}];
-        case"wp1":return[{row:2,col:1}];case"wp2":return[{row:2,col:0},{row:2,col:2}];case"wp3":return[{row:2,col:1},
-        {row:2,col:3}];case"wp4":return[{row:2,col:2},{row:2,col:4}];case"wp5":return[{row:2,col:3},{row:2,col:5}];
-        case"wp6":return[{row:2,col:4},{row:2,col:6}];case"wp7":return[{row:2,col:5},{row:2,col:7}];case"wp8":
-        return[{row:2,col:6}];case"bk1":return[{row:7,col:3},{row:7,col:5},{row:6,col:3},{row:6,col:4},{row:6,col:5}];
-        case"bq1":return[{row:7,col:2},{row:7,col:4},{row:6,col:2},{row:6,col:3},{row:6,col:4}];case"br1":return[{row:7,
-        col:1},{row:6,col:0}];case"br2":return[{row:7,col:6},{row:6,col:7}];case"bb1":return[{row:6,col:1},{row:6,col:3}];
-        case"bb2":return[{row:6,col:4},{row:6,col:6}];case"bn1":return[{row:6,col:3}];case"bn2":return[{row:6,col:4}];
-        case"bp1":return[{row:5,col:1}];case"bp2":return[{row:5,col:0},{row:5,col:2}];case"bp3":return[{row:5,col:1},
-        {row:5,col:3}];case"bp4":return[{row:5,col:2},{row:5,col:4}];case"bp5":return[{row:5,col:3},{row:5,col:5}];
-        case"bp6":return[{row:5,col:4},{row:5,col:6}];case"bp7":return[{row:5,col:5},{row:5,col:7}];
-        case"bp8":return[{row:5,col:6}];}}},
         convertObjectToSend(piecesData)
         {
             var result = new Object();
