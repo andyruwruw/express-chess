@@ -319,7 +319,6 @@ function convertObject(piecesData)
     newData.b2 = new Bishop(piecesArray[5].row, piecesArray[5].col, piecesArray[5].num, piecesArray[5].team);
     newData.b2.setData(piecesArray[5].possibleMoves, piecesArray[5].blockBlocks, piecesArray[5].isDead);
     newData.n1 = new Knight(piecesArray[6].row, piecesArray[6].col, piecesArray[6].num, piecesArray[6].team);
-    console.log(piecesArray[6].possibleMoves + " " + piecesArray[6].blockBlocks);
     newData.n1.setData(piecesArray[6].possibleMoves, piecesArray[6].blockBlocks, piecesArray[6].isDead);
     newData.n2 = new Knight(piecesArray[7].row, piecesArray[7].col, piecesArray[7].num, piecesArray[7].team);
     newData.n2.setData(piecesArray[7].possibleMoves, piecesArray[7].blockBlocks, piecesArray[7].isDead);
@@ -378,6 +377,7 @@ class Piece {
         return this.blockBlocks;}
 
     move(newPos, teamPositions, oppPostions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
+        this.findPossibleMoves(teamPositions, oppPostions);
         console.log(this.possibleMoves);
         console.log(newPos);
         
