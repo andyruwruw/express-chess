@@ -707,11 +707,18 @@ var app = new Vue({
             
             this.setData(this.selectData.oppSelected, selectBlock);
 
-            this.selectData.selectImage = this.findBlockImage(selectBlock);
+            this.selectData.selectImage = blockString;
             this.drawSelection();
 
             if (this.selectData.red != "") this.unselectRedBlockDiv();
-            this.selectRedBlockDiv(this.blockToString(selectBlock));
+            if (this.isEqual(selectBlock, this.selectImage.unselected))
+            {
+                this.unselectRedBlockDiv();
+            }
+            else
+            {
+                this.selectRedBlockDiv(this.blockToString(selectBlock));
+            }
         },
         selectRedBlockDiv(block)
         {
