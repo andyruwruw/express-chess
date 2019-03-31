@@ -1,4 +1,3 @@
-
 class Pawn extends Piece {
     constructor (row, col, num, team, possibleMoves, blockBlocks, isDead, hasMoved) {
         super(row, col, num, team, possibleMoves, blockBlocks, isDead);

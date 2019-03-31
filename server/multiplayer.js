@@ -78,7 +78,6 @@ router.put('/:idNum', async (req, res) => {                                     
             teamScore = req.body.blackScore;
             oppScore = req.body.whiteScore;
         }
-        console.log(teamScore);
         var deadArray = req.body.deadArray;
         var action = req.body.action;                                                  // Preparing requested move data. (Needed to find Piece Key)
         var piece = getPiece(action.selected, teamPieces);                             // Finding Moving Piece Key. 
@@ -88,6 +87,12 @@ router.put('/:idNum', async (req, res) => {                                     
         var oppPositions = gatherAllPositions(oppPieces);
         if (!isEmpty(action.move, teamPositions, oppPositions)) {killPiece = getPiece(action.move, oppPieces); pieceKilled = true; console.log("Piece to be killed: " + killPiece);}
         var changedSlots = [action.selected, action.move];
+        var possibleTeamMoves = gatherPossibleMoves(teamPieces);                   // Array of all possible moves create to for check, checkmate or stalemate
+        var possibleOppMoves = gatherPossibleMoves(oppPieces); 
+        var teamBlocked = gatherBlockedMoves(teamPieces);
+        var oppBlocked = gatherBlockedMoves(oppPieces);
+        teamPieces.k1.removeUnsafeMoves(oppBlocked);
+        oppPieces.k1.removeUnsafeMoves(teamBlocked);
         if (teamPieces[piece].move(action.move, teamPositions, oppPositions)){                        // Requesting the Move from Piece
         moveAccepted = true; console.log("Move Approved.");}
         else {console.log("Move Denied.");}
@@ -116,8 +121,8 @@ router.put('/:idNum', async (req, res) => {                                     
             }                                                                          // We now have a clear idea of where each team can move and only updated the ones nessisary.
             
             // Checkmate Variables
-            var possibleTeamMoves = gatherPossibleMoves(teamPieces);                   // Array of all possible moves create to for check, checkmate or stalemate
-            var possibleOppMoves = gatherPossibleMoves(oppPieces);                    
+            possibleTeamMoves = gatherPossibleMoves(teamPieces);                   // Array of all possible moves create to for check, checkmate or stalemate
+            possibleOppMoves = gatherPossibleMoves(oppPieces);                 
             var oppInCheck = false;                                                    // Both values defaulted to false.
             var oppCheckMate = false;
             var stalemate = false;
@@ -129,10 +134,16 @@ router.put('/:idNum', async (req, res) => {                                     
                 if (!(oppPieces.k1.isKingSafe(possibleTeamMoves)))                  // If Opponent in check, save the data to report.
                 {
                     oppInCheck = true;
+                    teamBlocked = gatherBlockedMoves(teamPieces);
+                    oppPieces.k1.removeUnsafeMoves(teamBlocked);
                     var oppKingPossibleMoves = oppPieces.k1.getPossibleMoves();
-                    if (checkMate(oppKingPossibleMoves, possibleTeamMoves))                     // Checking if the check is a checkmate.
+                    var dangeringPiece = findDangeringPiece(oppPieces.k1.getPositionObject(), teamPieces);
+                    var dangeringPath = findDangeringPath(oppPieces.k1.getPositionObject(), dangeringPiece);
+                    possibleTeamMoves = gatherPossibleMoves(teamPieces);                   // Array of all possible moves create to for check, checkmate or stalemate
+                    possibleOppMoves = gatherPossibleMoves(oppPieces); 
+                    if (checkMate(oppKingPossibleMoves, possibleTeamMoves, possibleOppMoves, dangeringPiece, dangeringPath))                     // Checking if the check is a checkmate.
                     oppCheckMate = true;
-                }
+                }  
                 if (possibleOppMoves.length == 0)                                          // If opponent has no available moves, stalemate is called.
                 {
                     stalemate = true;
@@ -282,26 +293,41 @@ function gatherPossibleMoves(pieces){
     var possibleMoves = [];
     var pieceKeys = Object.keys(pieces);
     for (var i = 0; i < pieceKeys.length; i++){
-        if (!(pieces[pieceKeys[i]].getStatus())) continue;
-        else {var pieceMoves = pieces[pieceKeys[i]].getPossibleMoves();
-            possibleMoves.concat(pieceMoves);}}
+        if (!(pieces[pieceKeys[i]].getStatus())) {continue;}
+        else {var pieceMoves = (pieces[pieceKeys[i]]).getPossibleMoves();
+            possibleMoves = possibleMoves.concat(pieceMoves);}}
     return possibleMoves;}
+
+function gatherBlockedMoves(pieces){
+    var blockedMoves = [];
+    var pieceKeys = Object.keys(pieces);
+    for (var i = 0; i < pieceKeys.length; i++){
+        if (!(pieces[pieceKeys[i]].getStatus())) {continue;}
+        else {var pieceMoves = (pieces[pieceKeys[i]]).getblockBlocks();
+            blockedMoves = blockedMoves.concat(pieceMoves);}}
+    return blockedMoves;}
 
 function checkMate(kingPossibleMoves, teamPossibleMoves, oppPossibleMoves, dangeringBlock, dangeringPath){
     var blockedMoves = [];
-    for (var i = 0; i < kingPossibleMoves.length; i++){
+    for (var i = 0; i < kingPossibleMoves.length; i++)
+    {
         var blocked = false;
-        for (var j = 0; j < teamPossibleMoves.length; i++){
-            if (isEqual(kingPossibleMoves[i], teamPossibleMoves[j])) blocked = true;}
-        if (!blocked) return false;}
+        for (var j = 0; j < teamPossibleMoves.length; j++)
+        {
+            if (isEqual(kingPossibleMoves[i], teamPossibleMoves[j])) 
+            blocked = true;
+        } 
+        if (!blocked) {console.log("NOT BLOCKED"); return false;}
+    }
     for (var i = 0; i < oppPossibleMoves.length; i++)
     {
-        if (isEqual(oppPossibleMoves[i], dangeringBlock)) return false;
+        if (isEqual(oppPossibleMoves[i], dangeringBlock)) {console.log("CAN BE KILLED"); return false;}
         for (var j = 0; j < dangeringPath.length; j++)
         {
-            if (isEqual(oppPossibleMoves[i], dangeringPath[j])) return false;
+            if (isEqual(oppPossibleMoves[i], dangeringPath[j])) {console.log("BLOCKED PATH"); return false;}
         }
     }
+    console.log("CheckMate");
     return true;}
 
 function convertObjectFromRecieved(recievedData){
@@ -331,6 +357,62 @@ function convertObjectToSend(piecesData){
         result[keys[i]] = piecesData[keys[i]].getSendObject();}
     return result;}
 
+function findDangeringPiece(kingPos, teamPieces)
+{
+    var teamKeys = Object.keys(teamPieces);
+    for (var i = 0; i < teamKeys.length; i++)
+    {
+        if (!((teamPieces[teamKeys[i]]).getStatus())) continue;
+        var possArray = teamPieces[teamKeys[i]].getPossibleMoves();
+        for (var j = 0; j < possArray.length; j++)
+        {
+            if (isEqual(possArray[j], kingPos))
+            {
+                return teamPieces[teamKeys[i]].getPositionObject();
+            }
+        }
+    }
+    console.log("Failed to find dangering Pieces");
+    return false;
+}
+
+function findDangeringPath(kingPos, dangeringPos)
+{
+    var path = [];
+    if (isKnight(kingPos, dangeringPos))
+    {
+        return path;
+    }
+    var yDirection = 0;
+    if (kingPos.row > dangeringPos.row) yDirection = 1;
+    if (kingPos.row < dangeringPos.row) yDirection = -1;
+    var xDirection = 0;
+    if (kingPos.col > dangeringPos.col) xDirection = 1;
+    if (kingPos.col < dangeringPos.col) xDirection = -1;
+    
+    var testBlock = {row: dangeringPos.row, col: dangeringPos.col};
+    addValues(testBlock, xDirection, yDirection);
+    while (!(isEqual(testBlock, kingPos)))
+    {
+        path.push(testBlock);
+        testBlock = addValues(testBlock, xDirection, yDirection);
+    }
+    return path;
+}
+
+function addValues(block, x, y)
+{
+    return {row: block.row + y, col: block.col + x};
+}
+function isKnight(a, b)
+{
+    var x = Math.abs(a.col - b.col);
+    var y = Math.abs(a.row - b.row);
+    if ((x == 2 && y == 1) || (x == 1 && y == 2))
+    return true;
+    else
+    return false;
+}
 //=========================================PIECE CLASSES
 
 // Castle
@@ -374,13 +456,8 @@ class Piece {
 
     move(newPos, teamPositions, oppPositions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
         this.findPossibleMoves(teamPositions, oppPositions);
-        console.log(this.possibleMoves);
-        console.log(newPos);
-        
         for (var i = 0; i < this.possibleMoves.length; i++)
         {
-            
-            console.log(this.isEqual(this.possibleMoves[i], newPos));
             if (this.isEqual(this.possibleMoves[i], newPos))
             {
                 this.row = newPos.row;
@@ -396,7 +473,6 @@ class Piece {
         this.row = 100;
         this.col = 100;
         this.isDead = 1;
-        console.log("PIECE THINGS SCORE POINTS - " + this.points);
         return this.points;}
 
     getStatus() // false if dead
@@ -411,14 +487,16 @@ class Piece {
         {
             if (this.isEqual(this.possibleMoves[i], changeBlock))
             {
+                console.log("FINDING NEW POSITIONS");
                 this.findPossibleMoves(teamPositions, oppPositions);
                 return true;
             }
         }
-        for (var i = 0; i < this.blockBlocks; i++)
+        for (var i = 0; i < this.blockBlocks.length; i++)
         {
             if (this.isEqual(this.blockBlocks[i], changeBlock))
             {
+                console.log("UNBLOCKED");
                 this.findPossibleMoves(teamPositions, oppPositions);
                 return true;
             }
@@ -435,7 +513,6 @@ class Piece {
         {
             if (this.isEqual(testBlock, teamPositions[i]))
             {
-                teamPositions.splice(i, 1);
                 this.blockBlocks.push(testBlock);
                 return true;
             }
@@ -444,7 +521,6 @@ class Piece {
         {
             if (this.isEqual(testBlock, oppPositions[i]))
             {
-                oppPositions.splice(i, 1);
                 this.possibleMoves.push(testBlock);
                 return true;
             }
@@ -454,16 +530,15 @@ class Piece {
         {return true;}
     }
 
-    checkOnce(xDirection, yDirection, teamPositions, oppPositions, testBlock)
+    checkOnce(xDirection, yDirection, teamPositions, oppPositions, currPos)
     {
-        var testBlock = this.addValues(testBlock, xDirection, yDirection);
+        var testBlock = this.addValues(currPos, xDirection, yDirection);
         if (!this.isInBoard(testBlock)) return true;
 
         for (var i = 0; i < teamPositions.length; i++)
         {
             if (this.isEqual(testBlock, teamPositions[i]))
             {
-                teamPositions.splice(i, 1);
                 this.blockBlocks.push(testBlock);
                 return true;
             }
@@ -472,7 +547,6 @@ class Piece {
         {
             if (this.isEqual(testBlock, oppPositions[i]))
             {
-                oppPositions.splice(i, 1);
                 this.possibleMoves.push(testBlock);
                 return true;
             }
@@ -552,12 +626,39 @@ class King extends Piece {
         this.checkStraight(-1, 0, teamPositions, oppPositions);
         this.checkStraight(0, 1, teamPositions, oppPositions);
         this.checkStraight(0, -1, teamPositions, oppPositions);
+        for (var i = 0; i < this.possibleMoves.length; i++)
+        {
+            console.log("King can move: " + this.possibleMoves[i].row + " " + this.possibleMoves[i].col);
+        }
+    }
+
+    removeUnsafeMoves(opponentBlockedMoves)
+    {
+        var newPossible = [];
+        for (var j = 0; j < this.possibleMoves.length; j++)
+        {
+            var blocked = false;
+            for (var i = 0; i < opponentBlockedMoves.length; i++)
+            {
+                if ((this.isEqual(this.possibleMoves[j], opponentBlockedMoves[i])))
+                {
+                    blocked = true;
+                    break;
+                }
+            }
+            if (!blocked)
+            {
+                newPossible.push(this.possibleMoves[j]);
+            }
+        }
+        this.possibleMoves = newPossible;
     }
 
     isKingSafe(oppPossibleMoves){
     for (var i = 0; i < oppPossibleMoves.length; i++){
         if (this.isEqual({row: this.row, col: this.col}, oppPossibleMoves[i])) return false;}
-        return true;
+        {console.log("IN CHECK");
+        return true;}
     }
     
     checkStraight(xDirection, yDirection, teamPositions, oppPositions)

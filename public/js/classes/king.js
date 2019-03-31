@@ -12,32 +12,59 @@ class King extends Piece {
         return data;
     }
 
-    findPossibleMoves(teamPositions, oppPostions) {
+    findPossibleMoves(teamPositions, oppPositions) {
         this.possibleMoves = [];
         this.blockBlocks = [];
-        this.checkDiagonal(1, 1, teamPositions, oppPostions);
-        this.checkDiagonal(-1, -1, teamPositions, oppPostions);
-        this.checkDiagonal(-1, 1, teamPositions, oppPostions);
-        this.checkDiagonal(1, -1, teamPositions, oppPostions);
-        this.checkStraight(1, 0, teamPositions, oppPostions);
-        this.checkStraight(-1, 0, teamPositions, oppPostions);
-        this.checkStraight(0, 1, teamPositions, oppPostions);
-        this.checkStraight(0, -1, teamPositions, oppPostions);
+        this.checkDiagonal(1, 1, teamPositions, oppPositions);
+        this.checkDiagonal(-1, -1, teamPositions, oppPositions);
+        this.checkDiagonal(-1, 1, teamPositions, oppPositions);
+        this.checkDiagonal(1, -1, teamPositions, oppPositions);
+        this.checkStraight(1, 0, teamPositions, oppPositions);
+        this.checkStraight(-1, 0, teamPositions, oppPositions);
+        this.checkStraight(0, 1, teamPositions, oppPositions);
+        this.checkStraight(0, -1, teamPositions, oppPositions);
+        for (var i = 0; i < this.possibleMoves.length; i++)
+        {
+            console.log("King can move: " + this.possibleMoves[i].row + " " + this.possibleMoves[i].col);
+        }
+    }
+
+    removeUnsafeMoves(opponentBlockedMoves)
+    {
+        var newPossible = [];
+        for (var j = 0; j < this.possibleMoves.length; j++)
+        {
+            var blocked = false;
+            for (var i = 0; i < opponentBlockedMoves.length; i++)
+            {
+                if ((this.isEqual(this.possibleMoves[j], opponentBlockedMoves[i])))
+                {
+                    blocked = true;
+                    break;
+                }
+            }
+            if (!blocked)
+            {
+                newPossible.push(this.possibleMoves[j]);
+            }
+        }
+        this.possibleMoves = newPossible;
     }
 
     isKingSafe(oppPossibleMoves){
     for (var i = 0; i < oppPossibleMoves.length; i++){
         if (this.isEqual({row: this.row, col: this.col}, oppPossibleMoves[i])) return false;}
-        return true;
+        {console.log("IN CHECK");
+        return true;}
     }
     
-    checkStraight(xDirection, yDirection, teamPositions, oppPostions)
+    checkStraight(xDirection, yDirection, teamPositions, oppPositions)
     {
-        this.checkOnce(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+        this.checkOnce(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
     
-    checkDiagonal(xDirection, yDirection, teamPositions, oppPostions)
+    checkDiagonal(xDirection, yDirection, teamPositions, oppPositions)
     {
-        this.checkOnce(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+        this.checkOnce(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
 }

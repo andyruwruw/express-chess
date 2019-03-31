@@ -51,8 +51,11 @@ var app = new Vue({
             oppMoved:  {row: -1, col: -1},
             blue: "",
             red: "",
+            possible: [],
+            check: "",
             unselected: {row: -1, col: -1},
             oppSelectionDif: "",
+            assist: true,
         },
         serverData:
         {
@@ -168,10 +171,94 @@ var app = new Vue({
             this.selectData.selectImage = this.findBlockImage(selectBlock);                     // Adds the photo to the selected section up top.
             this.postOppSelection();                    
             this.drawSelection();
+            this.colorPossible(selectBlock);
 
             if (this.selectData.blue != "") this.unselectBlueBlockDiv();                        // If something is already lit up as selected, undo it.
             this.selectBlueBlockDiv(blockString)                                                 // Color the selected block blue.
 
+        },
+        colorPossible(block)
+        {
+            if (this.selectData.assist)
+            {
+                if (!this.gameData.team)
+                {
+                    var keys = Object.keys(this.pieceData.whitePieces);
+                    var piece;
+                    for (var i = 0; i < keys.length; i++)
+                    {
+                        if (this.isEqual(this.pieceData.whitePieces[keys[i]].getPositionObject(), block))
+                        {
+                            var piece = keys[i];
+                            console.log(piece);
+                        }
+                    }
+                    var possible = this.pieceData.whitePieces[piece].getPossibleMoves();
+                    for (var i = 0; i < possible.length; i++)
+                    {
+                        var id = this.blockToString(possible[i]);
+                        this.selectData.possible.push(id);
+                        var element = document.getElementById(id);
+                        if (!(element.classList.contains("possible")))
+                        {
+                            element.classList.add("possible");
+                        }
+                    }
+                }
+                if (this.gameData.team)
+                {
+                    var keys = Object.keys(this.pieceData.blackPieces);
+                    var piece;
+                    for (var i = 0; i < keys.length; i++)
+                    {
+                        if (this.isEqual(this.pieceData.blackPieces[keys[i]].getPositionObject(), block))
+                        {
+                            var piece = keys[i];
+                            console.log(piece);
+                        }
+                    }
+                    var possible = this.pieceData.blackPieces[piece].getPossibleMoves();
+                    for (var i = 0; i < possible.length; i++)
+                    {
+                        var id = this.blockToString(possible[i]);
+                        this.selectData.possible.push(id);
+                        var element = document.getElementById(id);
+                        if (!(element.classList.contains("possible")))
+                        {
+                            element.classList.add("possible");
+                        }
+                    }
+                }
+            }
+        },
+        unColorPossible()
+        {
+            for (var i = 0; i < this.selectData.possible.length; i++)
+            {
+                var id = this.selectData.possible[i];
+                var element = document.getElementById(id);
+                if (element.classList.contains("possible"))
+                {
+                    element.classList.remove("possible");
+                }
+            }
+            this.selectData.possible = [];
+        },
+        toggleAssistSelect()
+        {
+            if (this.selectData.assist)
+            {
+                this.selectData.assist = false;
+                this.unColorPossible();
+            }
+            else
+            {
+                this.selectData.assist = true;
+                if (!(this.isEqual(this.selectData.selected, this.selectData.unselected)))
+                {
+                    this.colorPossible(this.selectData.selected);
+                }
+            }
         },
         unselectBlock()                                                                     // Unselect a block.
         {
@@ -179,6 +266,7 @@ var app = new Vue({
             this.playSound(this.SOUNDS.unselect.sound, this.SOUNDS.unselect.volume);
 
             this.setData(this.selectData.selected, this.selectData.unselected);
+            this.unColorPossible();
 
             this.selectData.selectImage = this.teamColor() + "t";
             this.postOppSelection();
@@ -322,7 +410,6 @@ var app = new Vue({
                     this.gameData.deadArray = response.data.deadArray;
                     this.convertObjectFromRecieved(response.data.pieceData);
                     var changedSlots = response.data.changedSlots;
-                    console.log(changedSlots);
                     this.refreshChangedBlocks(changedSlots);
                     this.findAllPositions();
                     this.updateDead();
@@ -360,7 +447,7 @@ var app = new Vue({
                     this.drawSelection();
                     this.unselectBlock();
                     this.setData(this.selectData.selected, this.selectData.unselected);
-                    this.postOppSelection();
+                    //this.postOppSelection();
                     this.getGameData();                                                                    // Retrieves new data.
                 }
                 else                                                                                // If server declines move.
@@ -421,7 +508,6 @@ var app = new Vue({
                 this.matchData.startGame = true;
                 this.gameData.gameStart = true;
                 this.gameData.playerTurn = true;
-                console.log(this.pieceData.whitePieces.k1);
             } catch (error) {
                 console.log(error);
             }
@@ -481,8 +567,6 @@ var app = new Vue({
         /* HELPER */ 
         findPositionInArray(desired, array){
             for (var i = 0; i < array.length; i++){
-                console.log(desired);
-                console.log(array[i]);
                 if (this.isEqual(desired, array[i]))
                     return true;}
             return false;},
@@ -492,8 +576,6 @@ var app = new Vue({
             else return this.findPositionInArray(testBlock, this.testData.blackPositions); },
 
         isEmpty(testBlock) {
-            console.log(this.testData.whitePositions);
-            console.log(this.testData.blackPositions);
             if (this.findPositionInArray(testBlock, this.testData.whitePositions) || this.findPositionInArray(testBlock, this.testData.blackPositions))
             return false;
             return true;},
@@ -652,6 +734,10 @@ var app = new Vue({
             for (var i = 0; i < 10; i++)
             text += possible.charAt(Math.floor(Math.random() * possible.length));
             return text;},
+        rejoinMatch()
+        {
+
+        },
 
         //=====================================================CHAT ROOM=====================================================
         async createChatRoom()
@@ -667,8 +753,9 @@ var app = new Vue({
         },
         async getChatRoom()
         {
-            let chat = await axios.get("/api/chat/" + this.serverData.gameID);
-            this.chatData.messages = chat.data.chats;
+            let response = await axios.get("/api/chat/" + this.serverData.gameID);
+            //console.log(response);
+            this.chatData.messages = response.data.chats;
             if (this.chatData.messages.length > 0)
             {
                 this.chatData.messageBool = true;

@@ -11,17 +11,17 @@ class Rook extends Piece {
         return data;
     }
 
-    findPossibleMoves(teamPositions, oppPostions) {
+    findPossibleMoves(teamPositions, oppPositions) {
         this.possibleMoves = [];
         this.blockBlocks = [];
-        this.checkStraight(1, 0, teamPositions, oppPostions);
-        this.checkStraight(-1, 0, teamPositions, oppPostions);
-        this.checkStraight(0, 1, teamPositions, oppPostions);
-        this.checkStraight(0, -1, teamPositions, oppPostions);
+        this.checkStraight(1, 0, teamPositions, oppPositions);
+        this.checkStraight(-1, 0, teamPositions, oppPositions);
+        this.checkStraight(0, 1, teamPositions, oppPositions);
+        this.checkStraight(0, -1, teamPositions, oppPositions);
     }
     
-    checkStraight(xDirection, yDirection, teamPositions, oppPostions)
+    checkStraight(xDirection, yDirection, teamPositions, oppPositions)
     {
-        this.checkRecursive(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
+        this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
 }

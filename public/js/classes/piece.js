@@ -33,20 +33,15 @@ class Piece {
     getblockBlocks() {
         return this.blockBlocks;}
 
-    move(newPos, teamPositions, oppPostions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
-        this.findPossibleMoves(teamPositions, oppPostions);
-        console.log(this.possibleMoves);
-        console.log(newPos);
-        
+    move(newPos, teamPositions, oppPositions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
+        this.findPossibleMoves(teamPositions, oppPositions);
         for (var i = 0; i < this.possibleMoves.length; i++)
         {
-            
-            console.log(this.isEqual(this.possibleMoves[i], newPos));
             if (this.isEqual(this.possibleMoves[i], newPos))
             {
                 this.row = newPos.row;
                 this.col = newPos.col;
-                this.findPossibleMoves(teamPositions, oppPostions);
+                this.findPossibleMoves(teamPositions, oppPositions);
                 return true;}
         }
         console.log("MOVE FAILED");
@@ -65,28 +60,30 @@ class Piece {
         return true;
     }
 
-    checkForRefresh(changeBlock, teamPositions, oppPostions)
+    checkForRefresh(changeBlock, teamPositions, oppPositions)
     {
         for (var i = 0; i < this.possibleMoves.length; i++)
         {
             if (this.isEqual(this.possibleMoves[i], changeBlock))
             {
-                this.findPossibleMoves(teamPositions, oppPostions);
+                console.log("FINDING NEW POSITIONS");
+                this.findPossibleMoves(teamPositions, oppPositions);
                 return true;
             }
         }
-        for (var i = 0; i < this.blockBlocks; i++)
+        for (var i = 0; i < this.blockBlocks.length; i++)
         {
             if (this.isEqual(this.blockBlocks[i], changeBlock))
             {
-                this.findPossibleMoves(teamPositions, oppPostions);
+                console.log("UNBLOCKED");
+                this.findPossibleMoves(teamPositions, oppPositions);
                 return true;
             }
         }
         return false;
     }
 
-    checkRecursive (xDirection, yDirection, teamPositions, oppPostions, inputBlock)
+    checkRecursive (xDirection, yDirection, teamPositions, oppPositions, inputBlock)
     {
         var testBlock = this.addValues(inputBlock, xDirection, yDirection);
         if (!(this.isInBoard(testBlock))) {return true;}
@@ -95,44 +92,40 @@ class Piece {
         {
             if (this.isEqual(testBlock, teamPositions[i]))
             {
-                teamPositions.splice(i, 1);
                 this.blockBlocks.push(testBlock);
                 return true;
             }
         }
-        for (var i = 0; i < oppPostions.length; i++)
+        for (var i = 0; i < oppPositions.length; i++)
         {
-            if (this.isEqual(testBlock, oppPostions[i]))
+            if (this.isEqual(testBlock, oppPositions[i]))
             {
-                oppPostions.splice(i, 1);
                 this.possibleMoves.push(testBlock);
                 return true;
             }
         }
         this.possibleMoves.push(testBlock);
-        if (this.checkRecursive(xDirection, yDirection, teamPositions, oppPostions, testBlock))
+        if (this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, testBlock))
         {return true;}
     }
 
-    checkOnce(xDirection, yDirection, teamPositions, oppPostions, testBlock)
+    checkOnce(xDirection, yDirection, teamPositions, oppPositions, currPos)
     {
-        var testBlock = this.addValues(testBlock, xDirection, yDirection);
+        var testBlock = this.addValues(currPos, xDirection, yDirection);
         if (!this.isInBoard(testBlock)) return true;
 
         for (var i = 0; i < teamPositions.length; i++)
         {
             if (this.isEqual(testBlock, teamPositions[i]))
             {
-                teamPositions.splice(i, 1);
                 this.blockBlocks.push(testBlock);
                 return true;
             }
         }
-        for (var i = 0; i < oppPostions.length; i++)
+        for (var i = 0; i < oppPositions.length; i++)
         {
-            if (this.isEqual(testBlock, oppPostions[i]))
+            if (this.isEqual(testBlock, oppPositions[i]))
             {
-                oppPostions.splice(i, 1);
                 this.possibleMoves.push(testBlock);
                 return true;
             }

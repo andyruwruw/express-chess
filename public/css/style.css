@@ -390,6 +390,36 @@ p
 {
   background-color:rgb(179, 122, 84);
 }
+
+.white.possible
+{
+  background-color: rgb(162,203,219);
+}
+.black.possible
+{
+  background-color: rgb(125,149,166);
+}
+.white.possible:hover
+{
+  background-color: rgb(177, 224, 255)
+}
+.black.possible:hover
+{
+  background-color: rgb(150, 191, 218)
+}
+.selected
+{
+  background-color: rgb(124, 203, 255) !important;
+}
+.oppselected
+{
+  background-color: rgb(255, 129, 129) !important;
+}
+.check
+{
+  background-color: rgb(255, 93, 93) !important;
+}
+
 .losses
 {
   margin-top: 10px;
@@ -528,26 +558,11 @@ p
   background-size: cover;
   background-repeat: no-repeat;
 }
-.empty
-{
-  background-image: rgba(0,0,0,0);
-}
-.possible
-{
-  background-color: rgb(188, 228, 255);
-}
-.possiblekill
-{
-  background-color: rgb(255, 188, 188);
-}
-.selected
-{
-  background-color: rgb(129, 205, 255) !important;
-}
-.oppselected
-{
-  background-color: rgb(255, 129, 129) !important;
-}
+
+
+
+
+
 
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s;
