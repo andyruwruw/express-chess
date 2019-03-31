@@ -786,7 +786,7 @@ var app = new Vue({
             var array = Object.entries(teamPieces);
             for (i = 0; i < array.length; i++)
             {
-                if (isEqual(position, array[i][1].getPositionObject())){
+                if (this.isEqual(position, array[i][1].getPositionObject())){
                     return array[i][0];
                 }
             }
