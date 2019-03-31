@@ -617,6 +617,7 @@ var app = new Vue({
             try {
                 let chat = await axios.post('/api/chat', {
                     _id: this.serverData.gameID,
+                    chats: this.chatData.messages,
                     });
             } catch (error) {
                 console.log(error);
@@ -711,7 +712,7 @@ var app = new Vue({
             this.drawSelection();
 
             if (this.selectData.red != "") this.unselectRedBlockDiv();
-            if (this.isEqual(selectBlock, this.selectImage.unselected))
+            if (this.isEqual(selectBlock, this.selectData.unselected))
             {
                 this.unselectRedBlockDiv();
             }

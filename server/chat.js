@@ -12,7 +12,7 @@ const Chat = mongoose.model('Chat', chatSchema);
 router.post('/', async (req, res) => {   // Create a new Selection
     const chat = new Chat({
     _id: req.body._id,
-    chats: [],
+    chats: req.body.chats,
     });
     try {
         await chat.save();

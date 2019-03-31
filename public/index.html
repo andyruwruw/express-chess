@@ -262,6 +262,7 @@
       <div class="sideDiv" id="chat">
         <h2 class="center">Chat</h2>
         <div v-if="!chatData.messagesBool" id="noplayermessages"></div>
+        <p>{{chatData.messages.length}}</p>
         <div class="message" v-if="chatData.messagesBool" v-for="message in chatData.messages">  
           <div class="messageDetails">
               <h4>{{message.usr}}</h4>
