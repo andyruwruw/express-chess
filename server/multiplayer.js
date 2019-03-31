@@ -72,15 +72,15 @@ router.put('/:idNum', async (req, res) => {                                     
         var oppScore;
         if (color == "w")                                                             // Gathering both team's piece objects. (Needed to find Piece Key)
         {
-            teamPieces = convertObject(req.body.pieceData.whitePieces);                              
-            oppPieces = convertObject(req.body.pieceData.blackPieces);  
+            teamPieces = convertObjectFromRecieved(req.body.pieceData.whitePieces);                              
+            oppPieces = convertObjectFromRecieved(req.body.pieceData.blackPieces);  
             teamScore = req.body.whiteScore;
             oppScore = req.body.blackScore;
         }
         else
         {
-            oppPieces = convertObject(req.body.pieceData.whitePieces); 
-            teamPieces = convertObject(req.body.pieceData.blackPieces);  
+            oppPieces = convertObjectFromRecieved(req.body.pieceData.whitePieces); 
+            teamPieces = convertObjectFromRecieved(req.body.pieceData.blackPieces);  
             teamScore = req.body.blackScore;
             oppScore = req.body.whiteScore;
         }
@@ -172,7 +172,7 @@ router.put('/:idNum', async (req, res) => {                                     
                     },
                     {
                         $inc: { "serverTurn": 1 },
-                        $set: { "pieceData.whitePieces": whitePieces, "pieceData.blackPieces": blackPieces, "changedSlots": changedSlots, 
+                        $set: { "pieceData.whitePieces": convertObjectToSend(whitePieces), "pieceData.blackPieces": convertObjectToSend(blackPieces), "changedSlots": changedSlots, 
                                 "whiteScore": whiteScore, "blackScore": blackScore, "whiteCheck": whiteCheck, "blackCheck": blackCheck,
                                 "whiteCheckMate": whiteCheckMate, "blackCheckMate": blackCheckMate, "stalemate": stalemate, "deadArray": deadArray},
                     });
@@ -310,44 +310,32 @@ function checkMate(kingPossibleMoves, teamPossibleMoves, oppPossibleMoves, dange
     }
     return true;}
 
-function convertObject(piecesData)
-{
-    var piecesArray = Object.values(piecesData);
-    var newData = new Object();
-    newData.k1 = new King(piecesArray[0].row, piecesArray[0].col, piecesArray[0].num, piecesArray[0].team);
-    newData.k1.setData(piecesArray[0].possibleMoves, piecesArray[0].blockBlocks, piecesArray[0].isDead);
-    newData.q1 = new Queen(piecesArray[1].row, piecesArray[1].col, piecesArray[1].num, piecesArray[1].team);
-    newData.q1.setData(piecesArray[1].possibleMoves, piecesArray[1].blockBlocks, piecesArray[1].isDead);
-    newData.r1 = new Rook(piecesArray[2].row, piecesArray[2].col, piecesArray[2].num, piecesArray[2].team);
-    newData.r1.setData(piecesArray[2].possibleMoves, piecesArray[2].blockBlocks, piecesArray[2].isDead);
-    newData.r2 = new Rook(piecesArray[3].row, piecesArray[3].col, piecesArray[3].num, piecesArray[3].team);
-    newData.r2.setData(piecesArray[3].possibleMoves, piecesArray[3].blockBlocks, piecesArray[3].isDead);
-    newData.b1 = new Bishop(piecesArray[4].row, piecesArray[4].col, piecesArray[4].num, piecesArray[4].team);
-    newData.b1.setData(piecesArray[4].possibleMoves, piecesArray[4].blockBlocks, piecesArray[4].isDead);
-    newData.b2 = new Bishop(piecesArray[5].row, piecesArray[5].col, piecesArray[5].num, piecesArray[5].team);
-    newData.b2.setData(piecesArray[5].possibleMoves, piecesArray[5].blockBlocks, piecesArray[5].isDead);
-    newData.n1 = new Knight(piecesArray[6].row, piecesArray[6].col, piecesArray[6].num, piecesArray[6].team);
-    newData.n1.setData(piecesArray[6].possibleMoves, piecesArray[6].blockBlocks, piecesArray[6].isDead);
-    newData.n2 = new Knight(piecesArray[7].row, piecesArray[7].col, piecesArray[7].num, piecesArray[7].team);
-    newData.n2.setData(piecesArray[7].possibleMoves, piecesArray[7].blockBlocks, piecesArray[7].isDead);
-    newData.p1 = new Pawn(piecesArray[8].row, piecesArray[8].col, piecesArray[8].num, piecesArray[8].team);
-    newData.p1.setData(piecesArray[8].possibleMoves, piecesArray[8].blockBlocks, piecesArray[8].isDead);
-    newData.p2 = new Pawn(piecesArray[9].row, piecesArray[9].col, piecesArray[9].num, piecesArray[9].team);
-    newData.p2.setData(piecesArray[9].possibleMoves, piecesArray[9].blockBlocks, piecesArray[9].isDead);
-    newData.p3 = new Pawn(piecesArray[10].row, piecesArray[10].col, piecesArray[10].num, piecesArray[10].team);
-    newData.p3.setData(piecesArray[10].possibleMoves, piecesArray[10].blockBlocks, piecesArray[10].isDead);
-    newData.p4 = new Pawn(piecesArray[11].row, piecesArray[11].col, piecesArray[11].num, piecesArray[11].team);
-    newData.p4.setData(piecesArray[11].possibleMoves, piecesArray[11].blockBlocks, piecesArray[11].isDead);
-    newData.p5 = new Pawn(piecesArray[12].row, piecesArray[12].col, piecesArray[12].num, piecesArray[12].team);
-    newData.p5.setData(piecesArray[12].possibleMoves, piecesArray[12].blockBlocks, piecesArray[12].isDead);
-    newData.p6 = new Pawn(piecesArray[13].row, piecesArray[13].col, piecesArray[13].num, piecesArray[13].team);
-    newData.p6.setData(piecesArray[13].possibleMoves, piecesArray[13].blockBlocks, piecesArray[13].isDead);
-    newData.p7 = new Pawn(piecesArray[14].row, piecesArray[14].col, piecesArray[14].num, piecesArray[14].team);
-    newData.p7.setData(piecesArray[14].possibleMoves, piecesArray[14].blockBlocks, piecesArray[14].isDead);
-    newData.p8 = new Pawn(piecesArray[15].row, piecesArray[15].col, piecesArray[15].num, piecesArray[15].team);
-    newData.p8.setData(piecesArray[15].possibleMoves, piecesArray[15].blockBlocks, piecesArray[15].isDead);
-    return newData;
-}
+function convertObjectFromRecieved(recievedData){
+    var pieces = new Object();
+    pieces.k1 = new King(recievedData.k1.row, recievedData.k1.col, recievedData.k1.num, recievedData.k1.team, recievedData.k1.possibleMoves, recievedData.k1.blockBlocks, recievedData.k1.isDead, recievedData.k1.hasMoved);
+    pieces.q1 = new Queen(recievedData.q1.row, recievedData.q1.col, recievedData.q1.num, recievedData.q1.team, recievedData.q1.possibleMoves, recievedData.q1.blockBlocks, recievedData.q1.isDead);
+    pieces.r1 = new Rook(recievedData.r1.row, recievedData.r1.col, recievedData.r1.num, recievedData.r1.team, recievedData.r1.possibleMoves, recievedData.r1.blockBlocks, recievedData.r1.isDead);
+    pieces.r2 = new Rook(recievedData.r2.row, recievedData.r2.col, recievedData.r2.num, recievedData.r2.team, recievedData.r2.possibleMoves, recievedData.r2.blockBlocks, recievedData.r2.isDead);
+    pieces.b1 = new Bishop(recievedData.b1.row, recievedData.b1.col, recievedData.b1.num, recievedData.b1.team, recievedData.b1.possibleMoves, recievedData.b1.blockBlocks, recievedData.b1.isDead);
+    pieces.b2 = new Bishop(recievedData.b2.row, recievedData.b2.col, recievedData.b2.num, recievedData.b2.team, recievedData.b2.possibleMoves, recievedData.b2.blockBlocks, recievedData.b2.isDead);
+    pieces.n1 = new Knight(recievedData.n1.row, recievedData.n1.col, recievedData.n1.num, recievedData.n1.team, recievedData.n1.possibleMoves, recievedData.n1.blockBlocks, recievedData.n1.isDead);
+    pieces.n2 = new Knight(recievedData.n2.row, recievedData.n2.col, recievedData.n2.num, recievedData.n2.team, recievedData.n2.possibleMoves, recievedData.n2.blockBlocks, recievedData.n2.isDead);
+    pieces.p1 = new Pawn(recievedData.p1.row, recievedData.p1.col, recievedData.p1.num, recievedData.p1.team, recievedData.p1.possibleMoves, recievedData.p1.blockBlocks, recievedData.p1.isDead, recievedData.p1.hasMoved);
+    pieces.p2 = new Pawn(recievedData.p2.row, recievedData.p2.col, recievedData.p2.num, recievedData.p2.team, recievedData.p2.possibleMoves, recievedData.p2.blockBlocks, recievedData.p2.isDead, recievedData.p2.hasMoved);
+    pieces.p3 = new Pawn(recievedData.p3.row, recievedData.p3.col, recievedData.p3.num, recievedData.p3.team, recievedData.p3.possibleMoves, recievedData.p3.blockBlocks, recievedData.p3.isDead, recievedData.p3.hasMoved);
+    pieces.p4 = new Pawn(recievedData.p4.row, recievedData.p4.col, recievedData.p4.num, recievedData.p4.team, recievedData.p4.possibleMoves, recievedData.p4.blockBlocks, recievedData.p4.isDead, recievedData.p4.hasMoved);
+    pieces.p5 = new Pawn(recievedData.p5.row, recievedData.p5.col, recievedData.p5.num, recievedData.p5.team, recievedData.p5.possibleMoves, recievedData.p5.blockBlocks, recievedData.p5.isDead, recievedData.p5.hasMoved);
+    pieces.p6 = new Pawn(recievedData.p6.row, recievedData.p6.col, recievedData.p6.num, recievedData.p6.team, recievedData.p6.possibleMoves, recievedData.p6.blockBlocks, recievedData.p6.isDead, recievedData.p6.hasMoved);
+    pieces.p7 = new Pawn(recievedData.p7.row, recievedData.p7.col, recievedData.p7.num, recievedData.p7.team, recievedData.p7.possibleMoves, recievedData.p7.blockBlocks, recievedData.p7.isDead, recievedData.p7.hasMoved);
+    pieces.p8 = new Pawn(recievedData.p8.row, recievedData.p8.col, recievedData.p8.num, recievedData.p8.team, recievedData.p8.possibleMoves, recievedData.p8.blockBlocks, recievedData.p8.isDead, recievedData.p8.hasMoved);
+    return pieces;};
+
+function convertObjectToSend(piecesData){
+    var result = new Object();
+    var keys = Object.keys(piecesData);
+    for (var i = 0; i < keys.length; i++){
+        result[keys[i]] = piecesData[keys[i]].getSendObject();}
+    return result;}
 
 //=========================================PIECE CLASSES
 
@@ -356,22 +344,28 @@ function convertObject(piecesData)
 
 
 class Piece {
-    constructor (row, col, num, team) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
         this.row = row;
         this.col = col;
         this.team = team;
         this.enemy = !team;
         this.num = num;
-        this.possibleMoves = [];
-        this.blockBlocks = [{row: this.row, col: this.col}];
-        this.isDead = 0;
-        }
-
-    setData(possibleMoves, blockBlocks, isDead)
-    {
         this.possibleMoves = possibleMoves;
         this.blockBlocks = blockBlocks;
         this.isDead = isDead;
+        }
+
+    getSendObject()
+    {
+        var data = new Object();
+        data.row = this.row;
+        data.col = this.col;
+        data.team = this.team;
+        data.num = this.num;
+        data.possibleMoves = this.possibleMoves;
+        data.blockBlocks = this.blockBlocks;
+        data.isDead = this.isDead;
+        return data;
     }
 
     getPositionObject() {
@@ -508,10 +502,9 @@ class Piece {
             a[propName] = b[propName]}
     }
     isInBoard(a){
-        if (a.row < 0 || a.row > 7 || a.col < 0 || a.col > 7) return false;
-        return true;
+        if (a.row < 0 || a.row > 7 || a.col < 0 || a.col > 7) {return false;}
+        else {return true;}
     }
-
     addValues(block, x, y)
     {
         return {row: block.row + y, col: block.col + x};
@@ -519,8 +512,8 @@ class Piece {
 }
 
 class Bishop extends Piece {
-    constructor (row, col, num, team) {
-        super(row, col, num, team);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
         this.points = 3;
         }
 
@@ -540,11 +533,18 @@ class Bishop extends Piece {
 }
 
 class King extends Piece {
-    constructor (row, col, num, team) {
-        super(row, col, num, team);
-        this.hasMoved = 0;
-        this.points = 0;
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead, hasMoved) {
+        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+        this.hasMoved = hasMoved;
+        this.points = 100;
         }
+
+    getSendObject()
+    {
+        var data = super.getSendObject();
+        data.hasMoved = this.hasMoved;
+        return data;
+    }
 
     findPossibleMoves(teamPositions, oppPostions) {
         this.possibleMoves = [];
@@ -577,8 +577,8 @@ class King extends Piece {
 }
 
 class Knight extends Piece {
-    constructor (row, col, num, team) {
-        super(row, col, num, team);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
         this.points = 3;
         }
 
@@ -602,12 +602,20 @@ class Knight extends Piece {
 }
 
 class Pawn extends Piece {
-    constructor (row, col, num, team) {
-        super(row, col, num, team);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead, hasMoved) {
+        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
         if (team) this.rowDirection = -1;
         else this.rowDirection = 1;
-        this.hasMoved = 0;
+        this.hasMoved = hasMoved;
         this.points = 1;}
+
+    getSendObject()
+    {
+        var data = super.getSendObject();
+        data.hasMoved = this.hasMoved;
+        data.rowDirection = this.rowDirection;
+        return data;
+    }
 
     move(newPos, teamPositions, oppPostions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
         if (super.move(newPos, teamPositions, oppPostions)){
@@ -672,8 +680,8 @@ class Pawn extends Piece {
 }
 
 class Queen extends Piece {
-    constructor (row, col, num, team) {
-        super(row, col, num, team);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
         this.points = 9;
         }
 
@@ -702,10 +710,17 @@ class Queen extends Piece {
 }
 
 class Rook extends Piece {
-    constructor (row, col, num, team) {
-        super(row, col, num, team);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
         this.points = 5;
         }
+
+    getSendObject()
+    {
+        var data = super.getSendObject();
+        data.hasMoved = this.hasMoved;
+        return data;
+    }
 
     findPossibleMoves(teamPositions, oppPostions) {
         this.possibleMoves = [];
@@ -721,3 +736,5 @@ class Rook extends Piece {
         this.checkRecursive(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
     }
 }
+
+

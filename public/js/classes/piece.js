@@ -1,20 +1,26 @@
 class Piece {
-    constructor (row, col, num, team) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
         this.row = row;
         this.col = col;
         this.team = team;
         this.enemy = !team;
         this.num = num;
-        this.possibleMoves = [];
-        this.blockBlocks = [{row: this.row, col: this.col}];
-        this.isDead = 0;
-        }
-
-    setData(possibleMoves, blockBlocks, isDead)
-    {
         this.possibleMoves = possibleMoves;
         this.blockBlocks = blockBlocks;
         this.isDead = isDead;
+        }
+
+    getSendObject()
+    {
+        var data = new Object();
+        data.row = this.row;
+        data.col = this.col;
+        data.team = this.team;
+        data.num = this.num;
+        data.possibleMoves = this.possibleMoves;
+        data.blockBlocks = this.blockBlocks;
+        data.isDead = this.isDead;
+        return data;
     }
 
     getPositionObject() {
@@ -154,7 +160,6 @@ class Piece {
         if (a.row < 0 || a.row > 7 || a.col < 0 || a.col > 7) {return false;}
         else {return true;}
     }
-
     addValues(block, x, y)
     {
         return {row: block.row + y, col: block.col + x};

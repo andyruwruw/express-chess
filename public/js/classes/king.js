@@ -1,9 +1,16 @@
 class King extends Piece {
-    constructor (row, col, num, team) {
-        super(row, col, num, team);
-        this.hasMoved = 0;
-        this.points = 0;
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead, hasMoved) {
+        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+        this.hasMoved = hasMoved;
+        this.points = 100;
         }
+
+    getSendObject()
+    {
+        var data = super.getSendObject();
+        data.hasMoved = this.hasMoved;
+        return data;
+    }
 
     findPossibleMoves(teamPositions, oppPostions) {
         this.possibleMoves = [];

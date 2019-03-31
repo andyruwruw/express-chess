@@ -1,8 +1,15 @@
 class Rook extends Piece {
-    constructor (row, col, num, team) {
-        super(row, col, num, team);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
         this.points = 5;
         }
+
+    getSendObject()
+    {
+        var data = super.getSendObject();
+        data.hasMoved = this.hasMoved;
+        return data;
+    }
 
     findPossibleMoves(teamPositions, oppPostions) {
         this.possibleMoves = [];

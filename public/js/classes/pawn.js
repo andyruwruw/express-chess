@@ -1,11 +1,19 @@
 
 class Pawn extends Piece {
-    constructor (row, col, num, team) {
-        super(row, col, num, team);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead, hasMoved) {
+        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
         if (team) this.rowDirection = -1;
         else this.rowDirection = 1;
-        this.hasMoved = 0;
+        this.hasMoved = hasMoved;
         this.points = 1;}
+
+    getSendObject()
+    {
+        var data = super.getSendObject();
+        data.hasMoved = this.hasMoved;
+        data.rowDirection = this.rowDirection;
+        return data;
+    }
 
     move(newPos, teamPositions, oppPostions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
         if (super.move(newPos, teamPositions, oppPostions)){

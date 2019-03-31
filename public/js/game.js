@@ -64,14 +64,22 @@ var app = new Vue({
         },
         pieceData:
         {
-            whitePieces: {k1: new King(0, 4, 1, 0),   q1: new Queen(0, 3, 1, 0),  r1: new Rook(0, 0, 1, 0),   r2: new Rook(0, 7, 2, 0), 
-                          b1: new Bishop(0, 2, 1, 0), b2: new Bishop(0, 5, 2, 0), n1: new Knight(0, 1, 1, 0), n2: new Knight(0, 6, 2, 0), 
-                          p1: new Pawn(1, 0, 1, 0),   p2: new Pawn(1, 1, 2, 0),   p3: new Pawn(1, 2, 3, 0),   p4: new Pawn(1, 3, 4, 0), 
-                          p5: new Pawn(1, 4, 5, 0),   p6: new Pawn(1, 5, 6, 0),   p7: new Pawn(1, 6, 7, 0),   p8: new Pawn(1, 7, 8, 0)},
-            blackPieces: {k1: new King(7, 4, 1, 0),   q1: new Queen(7, 3, 1, 0),  r1: new Rook(7, 0, 1, 0),   r2: new Rook(7, 7, 2, 0), 
-                          b1: new Bishop(7, 2, 1, 0), b2: new Bishop(7, 5, 2, 0), n1: new Knight(7, 1, 1, 0), n2: new Knight(7, 6, 2, 0), 
-                          p1: new Pawn(6, 0, 1, 0),   p2: new Pawn(6, 1, 2, 0),   p3: new Pawn(6, 2, 3, 0),   p4: new Pawn(6, 3, 4, 0), 
-                          p5: new Pawn(6, 4, 5, 0),   p6: new Pawn(6, 5, 6, 0),   p7: new Pawn(6, 6, 7, 0),   p8: new Pawn(6, 7, 8, 1)},
+            whitePieces: {k1: new King(0, 4, 1, 0, this.sD(1,"wk1"), this.sD(2,"wk1"), 0),   q1: new Queen(0, 3, 1, 0, this.sD(1,"wq1"), this.sD(2,"wq1"), 0),  
+                          r1: new Rook(0, 0, 1, 0, this.sD(1,"wr1"), this.sD(2,"wr1"), 0),   r2: new Rook(0, 7, 2, 0, this.sD(1,"wr2"), this.sD(2,"wr2"), 0), 
+                          b1: new Bishop(0, 2, 1, 0, this.sD(1,"wb1"), this.sD(2,"wb1"), 0), b2: new Bishop(0, 5, 2, 0, this.sD(1,"wb2"), this.sD(2,"wb2"), 0), 
+                          n1: new Knight(0, 1, 1, 0, this.sD(1,"wn1"), this.sD(2,"wn1"), 0), n2: new Knight(0, 6, 2, 0, this.sD(1,"wn2"), this.sD(2,"wn2"), 0), 
+                          p1: new Pawn(1, 0, 1, 0, this.sD(1,"wp1"), this.sD(2,"wp1"), 0),   p2: new Pawn(1, 1, 2, 0, this.sD(1,"wp2"), this.sD(2,"wp2"), 0),   
+                          p3: new Pawn(1, 2, 3, 0, this.sD(1,"wp3"), this.sD(2,"wp3"), 0),   p4: new Pawn(1, 3, 4, 0, this.sD(1,"wp4"), this.sD(2,"wp4"), 0), 
+                          p5: new Pawn(1, 4, 5, 0, this.sD(1,"wp5"), this.sD(2,"wp5"), 0),   p6: new Pawn(1, 5, 6, 0, this.sD(1,"wp6"), this.sD(2,"wp6"), 0),   
+                          p7: new Pawn(1, 6, 7, 0, this.sD(1,"wp7"), this.sD(2,"wp7"), 0),   p8: new Pawn(1, 7, 8, 0, this.sD(1,"wp8"), this.sD(2,"wp8"), 0)},
+            blackPieces: {k1: new King(7, 4, 1, 1, this.sD(1,"bk1"), this.sD(2,"bk1"), 0),   q1: new Queen(7, 3, 1, 1, this.sD(1,"bq1"), this.sD(2,"bq1"), 0),  
+                          r1: new Rook(7, 0, 1, 1, this.sD(1,"br1"), this.sD(2,"br1"), 0),   r2: new Rook(7, 7, 2, 1, this.sD(1,"br2"), this.sD(2,"br2"), 0), 
+                          b1: new Bishop(7, 2, 1, 1, this.sD(1,"bb1"), this.sD(2,"bb1"), 0), b2: new Bishop(7, 5, 2, 1, this.sD(1,"bb2"), this.sD(2,"bb2"), 0), 
+                          n1: new Knight(7, 1, 1, 1, this.sD(1,"bn1"), this.sD(2,"bn1"), 0), n2: new Knight(7, 6, 2, 1, this.sD(1,"bn2"), this.sD(2,"bn2"), 0), 
+                          p1: new Pawn(6, 0, 1, 1, this.sD(1,"bp1"), this.sD(2,"bp1"), 0),   p2: new Pawn(6, 1, 2, 1, this.sD(1,"bp2"), this.sD(2,"bp2"), 0),   
+                          p3: new Pawn(6, 2, 3, 1, this.sD(1,"bp3"), this.sD(2,"bp3"), 0),   p4: new Pawn(6, 3, 4, 1, this.sD(1,"bp4"), this.sD(2,"bp4"), 0), 
+                          p5: new Pawn(6, 4, 5, 1, this.sD(1,"bp5"), this.sD(2,"bp5"), 0),   p6: new Pawn(6, 5, 6, 1, this.sD(1,"bp6"), this.sD(2,"bp6"), 0),   
+                          p7: new Pawn(6, 6, 7, 1, this.sD(1,"bp7"), this.sD(2,"bp7"), 0),   p8: new Pawn(6, 7, 8, 1, this.sD(1,"bp8"), this.sD(2,"bp8"), 0)},
         },
         SOUNDS: { 
             select: {sound: "select", volume: .7},
@@ -306,8 +314,7 @@ var app = new Vue({
                     this.gameData.whiteWin = response.data.blackCheckMate;
                     this.gameData.stalemate = response.data.stalemate;
                     this.gameData.deadArray = response.data.deadArray;
-                    this.setData(this.pieceData.whitePieces, this.convertObject(response.data.pieceData.whitePieces));
-                    this.setData(this.pieceData.blackPieces, this.convertObject(response.data.pieceData.blackPieces));
+                    this.convertObjectFromRecieved(response.data.pieceData);
                     var changedSlots = response.data.changedSlots;
                     console.log(changedSlots);
                     this.refreshChangedBlocks(changedSlots);
@@ -325,7 +332,11 @@ var app = new Vue({
                 console.log("Sending Move to Server...");
                 let request = { 
                     team: this.gameData.team,
-                    pieceData: this.pieceData,
+                    pieceData: 
+                    {
+                        whitePieces: this.convertObjectToSend(this.pieceData.whitePieces), 
+                        blackPieces: this.convertObjectToSend(this.pieceData.blackPieces)
+                    },
                     serverTurn: this.gameData.displayedTurn,
                     action: {selected: this.selectData.selected, move: this.selectData.move},
                     deadArray: this.gameData.deadArray,
@@ -376,7 +387,6 @@ var app = new Vue({
         },
         async createGameData()
         {
-            this.setAllPossible();
             try {
                 let match = {
                     _id: this.serverData.gameID,
@@ -389,14 +399,8 @@ var app = new Vue({
                     blackCheckMate: false,
                     stalemate: false,
                     pieceData: {
-                        whitePieces: {k1: this.pieceData.whitePieces.k1, q1: this.pieceData.whitePieces.q1, r1: this.pieceData.whitePieces.r1, r2: this.pieceData.whitePieces.r2, 
-                                      b1: this.pieceData.whitePieces.b1, b2: this.pieceData.whitePieces.b2, n1: this.pieceData.whitePieces.n1, n2: this.pieceData.whitePieces.n2, 
-                                      p1: this.pieceData.whitePieces.p1, p2: this.pieceData.whitePieces.p2, p3: this.pieceData.whitePieces.p3, p4: this.pieceData.whitePieces.p4, 
-                                      p5: this.pieceData.whitePieces.p5, p6: this.pieceData.whitePieces.p6, p7: this.pieceData.whitePieces.p7, p8: this.pieceData.whitePieces.p8},
-                        blackPieces: {k1: this.pieceData.blackPieces.k1, q1: this.pieceData.blackPieces.q1, r1: this.pieceData.blackPieces.r1, r2: this.pieceData.blackPieces.r2, 
-                                      b1: this.pieceData.blackPieces.b1, b2: this.pieceData.blackPieces.b2, n1: this.pieceData.blackPieces.n1, n2: this.pieceData.blackPieces.n2, 
-                                      p1: this.pieceData.blackPieces.p1, p2: this.pieceData.blackPieces.p2, p3: this.pieceData.blackPieces.p3, p4: this.pieceData.blackPieces.p4, 
-                                      p5: this.pieceData.blackPieces.p5, p6: this.pieceData.blackPieces.p6, p7: this.pieceData.blackPieces.p7, p8: this.pieceData.blackPieces.p8},
+                        whitePieces: this.convertObjectToSend(this.pieceData.whitePieces),
+                        blackPieces: this.convertObjectToSend(this.pieceData.blackPieces),
                     },
                     changedSlots: [],
                     deadArray: [],
@@ -808,44 +812,76 @@ var app = new Vue({
         {
             this.gameData.playerTurn = false;
         },
-        convertObject(piecesData)
+        sD(PorB, item) // Starting Data
+        {switch(PorB){case 1:switch(item){case"wk1":return[];case"wq1":return[];case"wr1":return[];case"wr2":return[];
+        case"wb1":return[];case"wb2":return[];case"wn1":return[{row:2,col:0},{row:2,col:2}];case"wn2":return[{row:2,
+        col:5},{row:2,col:7}];case"wp1":return[{row:2,col:0},{row:3,col:0}];case"wp2":return[{row:2,col:1},{row:3,col:
+        1}];case"wp3":return[{row:2,col:2},{row:3,col:2}];case"wp4":return[{row:2,col:3},{row:3,col:3}];case"wp5":
+        return[{row:2,col:4},{row:3,col:4}];case"wp6":return[{row:2,col:5},{row:3,col:5}];case"wp7":return[{row:2,
+        col:6},{row:3,col:6}];case"wp8":return[{row:2,col:7},{row:3,col:7}];case"bk1":return[];case"bq1":return[];
+        case"br1":return[];case"br2":return[];case"bb1":return[];case"bb2":return[];case"bn1":return[{row:5,
+        col:0},{row:5,col:2}];case"bn2":return[{row:5,col:5},{row:5,col:7}];case"bp1":return[{row:5,col:0},{row:4,col:
+        0}];case"bp2":return[{row:5,col:1},{row:4,col:1}];case"bp3":return[{row:5,col:2},{row:4,col:2}];case"bp4":
+        return[{row:5,col:3},{row:4,col:3}];case"bp5":return[{row:5,col:4},{row:4,col:4}];case"bp6":return[{row:5,
+        col:5},{row:4,col:5}];case"bp7":return[{row:5,col:6},{row:4,col:6}];case"bp8":return[{row:5,col:7},{row:4,col:
+        7}];}case 2:switch(item){case"wk1":return[{row:0,col:3},{row:0,col:5},{row:1,col:3},{row:1,col:4},{row:1,col:5}];
+        case"wq1":return[{row:0,col:2},{row:0,col:4},{row:1,col:2},{row:1,col:3},{row:1,col:4}];case"wr1":return[{row:0,
+        col:1},{row:1,col:0}];case"wr2":return[{row:0,col:6},{row:1,col:7}];case"wb1":return[{row:1,col:1},{row:1,col:3}];
+        case"wb2":return[{row:1,col:4},{row:1,col:6}];case"wn1":return[{row:1,col:3}];case"wn2":return[{row:1,col:4}];
+        case"wp1":return[{row:2,col:1}];case"wp2":return[{row:2,col:0},{row:2,col:2}];case"wp3":return[{row:2,col:1},
+        {row:2,col:3}];case"wp4":return[{row:2,col:2},{row:2,col:4}];case"wp5":return[{row:2,col:3},{row:2,col:5}];
+        case"wp6":return[{row:2,col:4},{row:2,col:6}];case"wp7":return[{row:2,col:5},{row:2,col:7}];case"wp8":
+        return[{row:2,col:6}];case"bk1":return[{row:7,col:3},{row:7,col:5},{row:6,col:3},{row:6,col:4},{row:6,col:5}];
+        case"bq1":return[{row:7,col:2},{row:7,col:4},{row:6,col:2},{row:6,col:3},{row:6,col:4}];case"br1":return[{row:7,
+        col:1},{row:6,col:0}];case"br2":return[{row:7,col:6},{row:6,col:7}];case"bb1":return[{row:6,col:1},{row:6,col:3}];
+        case"bb2":return[{row:6,col:4},{row:6,col:6}];case"bn1":return[{row:6,col:3}];case"bn2":return[{row:6,col:4}];
+        case"bp1":return[{row:5,col:1}];case"bp2":return[{row:5,col:0},{row:5,col:2}];case"bp3":return[{row:5,col:1},
+        {row:5,col:3}];case"bp4":return[{row:5,col:2},{row:5,col:4}];case"bp5":return[{row:5,col:3},{row:5,col:5}];
+        case"bp6":return[{row:5,col:4},{row:5,col:6}];case"bp7":return[{row:5,col:5},{row:5,col:7}];
+        case"bp8":return[{row:5,col:6}];}}},
+        convertObjectToSend(piecesData)
         {
-            var piecesArray = Object.values(piecesData);
-            var newData = new Object();
-            newData.k1 = new King(piecesArray[0].row, piecesArray[0].col, piecesArray[0].num, piecesArray[0].team);
-            newData.k1.setData(piecesArray[0].possibleMoves, piecesArray[0].blockBlocks, piecesArray[0].isDead);
-            newData.q1 = new Queen(piecesArray[1].row, piecesArray[1].col, piecesArray[1].num, piecesArray[1].team);
-            newData.q1.setData(piecesArray[1].possibleMoves, piecesArray[1].blockBlocks, piecesArray[1].isDead);
-            newData.r1 = new Rook(piecesArray[2].row, piecesArray[2].col, piecesArray[2].num, piecesArray[2].team);
-            newData.r1.setData(piecesArray[2].possibleMoves, piecesArray[2].blockBlocks, piecesArray[2].isDead);
-            newData.r2 = new Rook(piecesArray[3].row, piecesArray[3].col, piecesArray[3].num, piecesArray[3].team);
-            newData.r2.setData(piecesArray[3].possibleMoves, piecesArray[3].blockBlocks, piecesArray[3].isDead);
-            newData.b1 = new Bishop(piecesArray[4].row, piecesArray[4].col, piecesArray[4].num, piecesArray[4].team);
-            newData.b1.setData(piecesArray[4].possibleMoves, piecesArray[4].blockBlocks, piecesArray[4].isDead);
-            newData.b2 = new Bishop(piecesArray[5].row, piecesArray[5].col, piecesArray[5].num, piecesArray[5].team);
-            newData.b2.setData(piecesArray[5].possibleMoves, piecesArray[5].blockBlocks, piecesArray[5].isDead);
-            newData.n1 = new Knight(piecesArray[6].row, piecesArray[6].col, piecesArray[6].num, piecesArray[6].team);
-            newData.n1.setData(piecesArray[6].possibleMoves, piecesArray[6].blockBlocks, piecesArray[6].isDead);
-            newData.n2 = new Knight(piecesArray[7].row, piecesArray[7].col, piecesArray[7].num, piecesArray[7].team);
-            newData.n2.setData(piecesArray[7].possibleMoves, piecesArray[7].blockBlocks, piecesArray[7].isDead);
-            newData.p1 = new Pawn(piecesArray[8].row, piecesArray[8].col, piecesArray[8].num, piecesArray[8].team);
-            newData.p1.setData(piecesArray[8].possibleMoves, piecesArray[8].blockBlocks, piecesArray[8].isDead);
-            newData.p2 = new Pawn(piecesArray[9].row, piecesArray[9].col, piecesArray[9].num, piecesArray[9].team);
-            newData.p2.setData(piecesArray[9].possibleMoves, piecesArray[9].blockBlocks, piecesArray[9].isDead);
-            newData.p3 = new Pawn(piecesArray[10].row, piecesArray[10].col, piecesArray[10].num, piecesArray[10].team);
-            newData.p3.setData(piecesArray[10].possibleMoves, piecesArray[10].blockBlocks, piecesArray[10].isDead);
-            newData.p4 = new Pawn(piecesArray[11].row, piecesArray[11].col, piecesArray[11].num, piecesArray[11].team);
-            newData.p4.setData(piecesArray[11].possibleMoves, piecesArray[11].blockBlocks, piecesArray[11].isDead);
-            newData.p5 = new Pawn(piecesArray[12].row, piecesArray[12].col, piecesArray[12].num, piecesArray[12].team);
-            newData.p5.setData(piecesArray[12].possibleMoves, piecesArray[12].blockBlocks, piecesArray[12].isDead);
-            newData.p6 = new Pawn(piecesArray[13].row, piecesArray[13].col, piecesArray[13].num, piecesArray[13].team);
-            newData.p6.setData(piecesArray[13].possibleMoves, piecesArray[13].blockBlocks, piecesArray[13].isDead);
-            newData.p7 = new Pawn(piecesArray[14].row, piecesArray[14].col, piecesArray[14].num, piecesArray[14].team);
-            newData.p7.setData(piecesArray[14].possibleMoves, piecesArray[14].blockBlocks, piecesArray[14].isDead);
-            newData.p8 = new Pawn(piecesArray[15].row, piecesArray[15].col, piecesArray[15].num, piecesArray[15].team);
-            newData.p8.setData(piecesArray[15].possibleMoves, piecesArray[15].blockBlocks, piecesArray[15].isDead);
-            console.log(newData);
-            return newData;
+            var result = new Object();
+            var keys = Object.keys(piecesData);
+            for (var i = 0; i < keys.length; i++){
+                result[keys[i]] = piecesData[keys[i]].getSendObject();}
+            return result;
+        },
+        convertObjectFromRecieved(recievedData)
+        {
+            this.pieceData.whitePieces.k1 = new King(recievedData.whitePieces.k1.row, recievedData.whitePieces.k1.col, recievedData.whitePieces.k1.num, recievedData.whitePieces.k1.team, recievedData.whitePieces.k1.possibleMoves, recievedData.whitePieces.k1.blockBlocks, recievedData.whitePieces.k1.isDead, recievedData.whitePieces.k1.hasMoved);
+            this.pieceData.whitePieces.q1 = new Queen(recievedData.whitePieces.q1.row, recievedData.whitePieces.q1.col, recievedData.whitePieces.q1.num, recievedData.whitePieces.q1.team, recievedData.whitePieces.q1.possibleMoves, recievedData.whitePieces.q1.blockBlocks, recievedData.whitePieces.q1.isDead);
+            this.pieceData.whitePieces.r1 = new Rook(recievedData.whitePieces.r1.row, recievedData.whitePieces.r1.col, recievedData.whitePieces.r1.num, recievedData.whitePieces.r1.team, recievedData.whitePieces.r1.possibleMoves, recievedData.whitePieces.r1.blockBlocks, recievedData.whitePieces.r1.isDead);
+            this.pieceData.whitePieces.r2 = new Rook(recievedData.whitePieces.r2.row, recievedData.whitePieces.r2.col, recievedData.whitePieces.r2.num, recievedData.whitePieces.r2.team, recievedData.whitePieces.r2.possibleMoves, recievedData.whitePieces.r2.blockBlocks, recievedData.whitePieces.r2.isDead);
+            this.pieceData.whitePieces.b1 = new Bishop(recievedData.whitePieces.b1.row, recievedData.whitePieces.b1.col, recievedData.whitePieces.b1.num, recievedData.whitePieces.b1.team, recievedData.whitePieces.b1.possibleMoves, recievedData.whitePieces.b1.blockBlocks, recievedData.whitePieces.b1.isDead);
+            this.pieceData.whitePieces.b2 = new Bishop(recievedData.whitePieces.b2.row, recievedData.whitePieces.b2.col, recievedData.whitePieces.b2.num, recievedData.whitePieces.b2.team, recievedData.whitePieces.b2.possibleMoves, recievedData.whitePieces.b2.blockBlocks, recievedData.whitePieces.b2.isDead);
+            this.pieceData.whitePieces.n1 = new Knight(recievedData.whitePieces.n1.row, recievedData.whitePieces.n1.col, recievedData.whitePieces.n1.num, recievedData.whitePieces.n1.team, recievedData.whitePieces.n1.possibleMoves, recievedData.whitePieces.n1.blockBlocks, recievedData.whitePieces.n1.isDead);
+            this.pieceData.whitePieces.n2 = new Knight(recievedData.whitePieces.n2.row, recievedData.whitePieces.n2.col, recievedData.whitePieces.n2.num, recievedData.whitePieces.n2.team, recievedData.whitePieces.n2.possibleMoves, recievedData.whitePieces.n2.blockBlocks, recievedData.whitePieces.n2.isDead);
+            this.pieceData.whitePieces.p1 = new Pawn(recievedData.whitePieces.p1.row, recievedData.whitePieces.p1.col, recievedData.whitePieces.p1.num, recievedData.whitePieces.p1.team, recievedData.whitePieces.p1.possibleMoves, recievedData.whitePieces.p1.blockBlocks, recievedData.whitePieces.p1.isDead, recievedData.whitePieces.p1.hasMoved);
+            this.pieceData.whitePieces.p2 = new Pawn(recievedData.whitePieces.p2.row, recievedData.whitePieces.p2.col, recievedData.whitePieces.p2.num, recievedData.whitePieces.p2.team, recievedData.whitePieces.p2.possibleMoves, recievedData.whitePieces.p2.blockBlocks, recievedData.whitePieces.p2.isDead, recievedData.whitePieces.p2.hasMoved);
+            this.pieceData.whitePieces.p3 = new Pawn(recievedData.whitePieces.p3.row, recievedData.whitePieces.p3.col, recievedData.whitePieces.p3.num, recievedData.whitePieces.p3.team, recievedData.whitePieces.p3.possibleMoves, recievedData.whitePieces.p3.blockBlocks, recievedData.whitePieces.p3.isDead, recievedData.whitePieces.p3.hasMoved);
+            this.pieceData.whitePieces.p4 = new Pawn(recievedData.whitePieces.p4.row, recievedData.whitePieces.p4.col, recievedData.whitePieces.p4.num, recievedData.whitePieces.p4.team, recievedData.whitePieces.p4.possibleMoves, recievedData.whitePieces.p4.blockBlocks, recievedData.whitePieces.p4.isDead, recievedData.whitePieces.p4.hasMoved);
+            this.pieceData.whitePieces.p5 = new Pawn(recievedData.whitePieces.p5.row, recievedData.whitePieces.p5.col, recievedData.whitePieces.p5.num, recievedData.whitePieces.p5.team, recievedData.whitePieces.p5.possibleMoves, recievedData.whitePieces.p5.blockBlocks, recievedData.whitePieces.p5.isDead, recievedData.whitePieces.p5.hasMoved);
+            this.pieceData.whitePieces.p6 = new Pawn(recievedData.whitePieces.p6.row, recievedData.whitePieces.p6.col, recievedData.whitePieces.p6.num, recievedData.whitePieces.p6.team, recievedData.whitePieces.p6.possibleMoves, recievedData.whitePieces.p6.blockBlocks, recievedData.whitePieces.p6.isDead, recievedData.whitePieces.p6.hasMoved);
+            this.pieceData.whitePieces.p7 = new Pawn(recievedData.whitePieces.p7.row, recievedData.whitePieces.p7.col, recievedData.whitePieces.p7.num, recievedData.whitePieces.p7.team, recievedData.whitePieces.p7.possibleMoves, recievedData.whitePieces.p7.blockBlocks, recievedData.whitePieces.p7.isDead, recievedData.whitePieces.p7.hasMoved);
+            this.pieceData.whitePieces.p8 = new Pawn(recievedData.whitePieces.p8.row, recievedData.whitePieces.p8.col, recievedData.whitePieces.p8.num, recievedData.whitePieces.p8.team, recievedData.whitePieces.p8.possibleMoves, recievedData.whitePieces.p8.blockBlocks, recievedData.whitePieces.p8.isDead, recievedData.whitePieces.p8.hasMoved);
+
+            this.pieceData.blackPieces.k1 = new King(recievedData.blackPieces.k1.row, recievedData.blackPieces.k1.col, recievedData.blackPieces.k1.num, recievedData.blackPieces.k1.team, recievedData.blackPieces.k1.possibleMoves, recievedData.blackPieces.k1.blockBlocks, recievedData.blackPieces.k1.isDead, recievedData.blackPieces.k1.hasMoved);
+            this.pieceData.blackPieces.q1 = new Queen(recievedData.blackPieces.q1.row, recievedData.blackPieces.q1.col, recievedData.blackPieces.q1.num, recievedData.blackPieces.q1.team, recievedData.blackPieces.q1.possibleMoves, recievedData.blackPieces.q1.blockBlocks, recievedData.blackPieces.q1.isDead);
+            this.pieceData.blackPieces.r1 = new Rook(recievedData.blackPieces.r1.row, recievedData.blackPieces.r1.col, recievedData.blackPieces.r1.num, recievedData.blackPieces.r1.team, recievedData.blackPieces.r1.possibleMoves, recievedData.blackPieces.r1.blockBlocks, recievedData.blackPieces.r1.isDead);
+            this.pieceData.blackPieces.r2 = new Rook(recievedData.blackPieces.r2.row, recievedData.blackPieces.r2.col, recievedData.blackPieces.r2.num, recievedData.blackPieces.r2.team, recievedData.blackPieces.r2.possibleMoves, recievedData.blackPieces.r2.blockBlocks, recievedData.blackPieces.r2.isDead);
+            this.pieceData.blackPieces.b1 = new Bishop(recievedData.blackPieces.b1.row, recievedData.blackPieces.b1.col, recievedData.blackPieces.b1.num, recievedData.blackPieces.b1.team, recievedData.blackPieces.b1.possibleMoves, recievedData.blackPieces.b1.blockBlocks, recievedData.blackPieces.b1.isDead);
+            this.pieceData.blackPieces.b2 = new Bishop(recievedData.blackPieces.b2.row, recievedData.blackPieces.b2.col, recievedData.blackPieces.b2.num, recievedData.blackPieces.b2.team, recievedData.blackPieces.b2.possibleMoves, recievedData.blackPieces.b2.blockBlocks, recievedData.blackPieces.b2.isDead);
+            this.pieceData.blackPieces.n1 = new Knight(recievedData.blackPieces.n1.row, recievedData.blackPieces.n1.col, recievedData.blackPieces.n1.num, recievedData.blackPieces.n1.team, recievedData.blackPieces.n1.possibleMoves, recievedData.blackPieces.n1.blockBlocks, recievedData.blackPieces.n1.isDead);
+            this.pieceData.blackPieces.n2 = new Knight(recievedData.blackPieces.n2.row, recievedData.blackPieces.n2.col, recievedData.blackPieces.n2.num, recievedData.blackPieces.n2.team, recievedData.blackPieces.n2.possibleMoves, recievedData.blackPieces.n2.blockBlocks, recievedData.blackPieces.n2.isDead);
+            this.pieceData.blackPieces.p1 = new Pawn(recievedData.blackPieces.p1.row, recievedData.blackPieces.p1.col, recievedData.blackPieces.p1.num, recievedData.blackPieces.p1.team, recievedData.blackPieces.p1.possibleMoves, recievedData.blackPieces.p1.blockBlocks, recievedData.blackPieces.p1.isDead, recievedData.blackPieces.p1.hasMoved);
+            this.pieceData.blackPieces.p2 = new Pawn(recievedData.blackPieces.p2.row, recievedData.blackPieces.p2.col, recievedData.blackPieces.p2.num, recievedData.blackPieces.p2.team, recievedData.blackPieces.p2.possibleMoves, recievedData.blackPieces.p2.blockBlocks, recievedData.blackPieces.p2.isDead, recievedData.blackPieces.p2.hasMoved);
+            this.pieceData.blackPieces.p3 = new Pawn(recievedData.blackPieces.p3.row, recievedData.blackPieces.p3.col, recievedData.blackPieces.p3.num, recievedData.blackPieces.p3.team, recievedData.blackPieces.p3.possibleMoves, recievedData.blackPieces.p3.blockBlocks, recievedData.blackPieces.p3.isDead, recievedData.blackPieces.p3.hasMoved);
+            this.pieceData.blackPieces.p4 = new Pawn(recievedData.blackPieces.p4.row, recievedData.blackPieces.p4.col, recievedData.blackPieces.p4.num, recievedData.blackPieces.p4.team, recievedData.blackPieces.p4.possibleMoves, recievedData.blackPieces.p4.blockBlocks, recievedData.blackPieces.p4.isDead, recievedData.blackPieces.p4.hasMoved);
+            this.pieceData.blackPieces.p5 = new Pawn(recievedData.blackPieces.p5.row, recievedData.blackPieces.p5.col, recievedData.blackPieces.p5.num, recievedData.blackPieces.p5.team, recievedData.blackPieces.p5.possibleMoves, recievedData.blackPieces.p5.blockBlocks, recievedData.blackPieces.p5.isDead, recievedData.blackPieces.p5.hasMoved);
+            this.pieceData.blackPieces.p6 = new Pawn(recievedData.blackPieces.p6.row, recievedData.blackPieces.p6.col, recievedData.blackPieces.p6.num, recievedData.blackPieces.p6.team, recievedData.blackPieces.p6.possibleMoves, recievedData.blackPieces.p6.blockBlocks, recievedData.blackPieces.p6.isDead, recievedData.blackPieces.p6.hasMoved);
+            this.pieceData.blackPieces.p7 = new Pawn(recievedData.blackPieces.p7.row, recievedData.blackPieces.p7.col, recievedData.blackPieces.p7.num, recievedData.blackPieces.p7.team, recievedData.blackPieces.p7.possibleMoves, recievedData.blackPieces.p7.blockBlocks, recievedData.blackPieces.p7.isDead, recievedData.blackPieces.p7.hasMoved);
+            this.pieceData.blackPieces.p8 = new Pawn(recievedData.blackPieces.p8.row, recievedData.blackPieces.p8.col, recievedData.blackPieces.p8.num, recievedData.blackPieces.p8.team, recievedData.blackPieces.p8.possibleMoves, recievedData.blackPieces.p8.blockBlocks, recievedData.blackPieces.p8.isDead, recievedData.blackPieces.p8.hasMoved);
         },
     },
     computed:
