@@ -209,10 +209,10 @@ var app = new Vue({
                 var changedColor;
                 var id;
                 if ((this.gameData.playerTurn && this.gameData.team) || (!this.gameData.playerTurn && !this.gameData.team)){
-                    id = this.findKeyOffPosition(changedSlots[i], pieceData.whitePieces);
+                    id = this.findKeyOffPosition(changedSlots[i], this.pieceData.whitePieces);
                     changedColor = "w";}
                 else{
-                    id = this.findKeyOffPosition(changedSlots[i], pieceData.blackPieces);
+                    id = this.findKeyOffPosition(changedSlots[i], this.pieceData.blackPieces);
                     changedColor = "b";}
                 let colors = ["w", "b"];
                 let pieces = ["q", "k", "n", "b", "r", "p"];
