@@ -464,8 +464,9 @@ var app = new Vue({
         isMyPiece(testBlock) {
             if (this.teamColor() == "w") return this.findPositionInArray(testBlock, this.testData.whitePositions);
             else return this.findPositionInArray(testBlock, this.testData.blackPostions); },
+
         isEmpty(testBlock) {
-            if (this.findPositionInArray(testBlock, this.testData.whitePositions) || findPositionInArray(testBlock, this.testData.blackPostions))
+            if (this.findPositionInArray(testBlock, this.testData.whitePositions) || this.findPositionInArray(testBlock, this.testData.blackPostions))
             return false;
             return true;},
         /* HELPER */ 
