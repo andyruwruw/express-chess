@@ -126,67 +126,74 @@ router.put('/:idNum', async (req, res) => {                                     
             var oppInCheck = false;                                                    // Both values defaulted to false.
             var oppCheckMate = false;
             var stalemate = false;
+            var kingSafe = true;
 
-            if (!(isKingSafe(oppPieces.k1.getPositionObject(), possibleOppMoves)))       h             // If the move put the player in check, or failed make him safe, request for move is denied.
+            if (!(isKingSafe(teamKingPosition, possibleOppMoves))) kingSafe = false; // If the move put the player in check, or failed make him safe, request for move is denied.
+            if (kingSafe)
+            {
+                if (!(isKingSafe(oppKingPosition, possibleTeamMoves)))                     // If Opponent in check, save the data to report.
+                {
+                    oppInCheck = true;
+                    var oppKingPossibleMoves = oppPieces.k1.getPossibleMoves();
+                    if (checkMate(oppKingPossibleMoves, possibleTeamMoves))                     // Checking if the check is a checkmate.
+                    oppCheckMate = true;
+                }
+                if (possibleOppMoves.length == 0)                                          // If opponent has no available moves, stalemate is called.
+                {
+                    stalemate = true;
+                }
+                var whitePieces;
+                var blackPieces;
+                var whiteScore;
+                var blackScore;
+                var whiteCheck = false;
+                var blackCheck = false;
+                var whiteCheckMate = false;
+                var blackCheckMate = false;
+                if (color == "w")
+                {
+                    whitePieces = teamPieces;
+                    blackPieces = oppPieces;
+                    whiteScore = teamScore;
+                    blackScore = oppScore;
+                    blackCheck = oppInCheck;
+                    blackCheckMate = oppCheckMate;
+                }
+                else
+                {
+                    blackPieces = teamPieces;
+                    whitePieces = oppPieces;
+                    blackScore = teamScore;
+                    whiteScore = oppScore;
+                    whiteCheck = oppInCheck;
+                    whiteCheckMate = oppCheckMate;
+                }
+                try {
+                    let data = await Board.updateOne({
+                        _id: req.params.idNum
+                    },
+                    {
+                        $inc: { "serverTurn": 1 },
+                        $set: { "pieceData.whitePieces": whitePieces, "pieceData.blackPieces": blackPieces, "changedSlots": changedSlots, 
+                                "whiteScore": whiteScore, "blackScore": blackScore, "whiteCheck": whiteCheck, "blackCheck": blackCheck,
+                                "whiteCheckMate": whiteCheckMate, "blackCheckMate": blackCheckMate, "stalemate": stalemate, "deadArray": deadArray},
+                    });
+                    res.send(data);
+                } catch (error) {
+                console.log(error);
+                res.sendStatus(500);
+                }
+            }
+            else
             {
                 var returnObject = {data: {_id: "Invalid_Move", nModified : 0, check: 1}};
                 res.send(returnObject);
             }
-            if (!(isKingSafe(oppKingPosition, possibleTeamMoves)))                     // If Opponent in check, save the data to report.
-            {
-                oppInCheck = true;
-                var oppKingPossibleMoves = oppPieces.k1.getPossibleMoves();
-                if (checkMate(oppKingPossibleMoves, possibleTeamMoves))                     // Checking if the check is a checkmate.
-                oppCheckMate = true;
-            }
-            if (possibleOppMoves.length == 0)                                          // If opponent has no available moves, stalemate is called.
-            {
-                stalemate = true;
-            }
-            var whitePieces;
-            var blackPieces;
-            var whiteScore;
-            var blackScore;
-            var whiteCheck = false;
-            var blackCheck = false;
-            var whiteCheckMate = false;
-            var blackCheckMate = false;
-            if (color == "w")
-            {
-                whitePieces = teamPieces;
-                blackPieces = oppPieces;
-                whiteScore = teamScore;
-                blackScore = oppScore;
-                blackCheck = oppInCheck;
-                blackCheckMate = oppCheckMate;
-            }
-            else
-            {
-                blackPieces = teamPieces;
-                whitePieces = oppPieces;
-                blackScore = teamScore;
-                whiteScore = oppScore;
-                whiteCheck = oppInCheck;
-                whiteCheckMate = oppCheckMate;
-            }
-            try {
-                let data = await Board.updateOne({
-                    _id: req.params.idNum
-                },
-                {
-                    $inc: { "serverTurn": 1 },
-                    $set: { "pieceData.whitePieces": whitePieces, "pieceData.blackPieces": blackPieces, "changedSlots": changedSlots, 
-                            "whiteScore": whiteScore, "blackScore": blackScore, "whiteCheck": whiteCheck, "blackCheck": blackCheck,
-                            "whiteCheckMate": whiteCheckMate, "blackCheckMate": blackCheckMate, "stalemate": stalemate, "deadArray": deadArray},
-                });
-                res.send(data);
-            } catch (error) {
-            console.log(error);
-            res.sendStatus(500);
-            }
         }
-        var returnObject = {data: {_id: "Invalid_Move", nModified : 0, check: 0}};
-        res.send(returnObject);
+        else {
+            var returnObject = {data: {_id: "Invalid_Move", nModified : 0, check: 0}};
+            res.send(returnObject);
+        }
     } catch (error) {
     console.log(error);
     res.sendStatus(500);
