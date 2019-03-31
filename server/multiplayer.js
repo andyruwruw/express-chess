@@ -434,20 +434,20 @@ class Piece {
         var testBlock = this.addValues(testBlock, xDirection, yDirection);
         if (!this.isInBoard(testBlock))return true;
         
-        for (position in teamPositions)
+        for (var i = 0; i < teamPositions.length; i++)
         {
-            if (this.isEqual(testBlock, teamPositions[position]))
+            if (this.isEqual(testBlock, teamPositions[i]))
             {
-                teamPositions.splice(position, 1);
+                teamPositions.splice(i, 1);
                 this.blockBlocks.push(testBlock);
                 return true;
             }
         }
-        for (position in oppPostions)
+        for (var i = 0; i < oppPostions.length; i++)
         {
-            if (this.isEqual(testBlock, oppPostions[position]))
+            if (this.isEqual(testBlock, oppPostions[i]))
             {
-                oppPostions.splice(position, 1);
+                oppPostions.splice(i, 1);
                 this.possibleMoves.push(testBlock);
                 return true;
             }
@@ -462,20 +462,20 @@ class Piece {
         var testBlock = this.addValues(testBlock, xDirection, yDirection);
         if (!this.isInBoard(testBlock))return true;
 
-        for (position in teamPositions)
+        for (var i = 0; i < teamPositions.length; i++)
         {
-            if (this.isEqual(testBlock, teamPositions[position]))
+            if (this.isEqual(testBlock, teamPositions[i]))
             {
-                teamPositions.splice(position, 1);
+                teamPositions.splice(i, 1);
                 this.blockBlocks.push(testBlock);
                 return true;
             }
         }
-        for (position in oppPostions)
+        for (var i = 0; i < oppPostions.length; i++)
         {
-            if (this.isEqual(testBlock, oppPostions[position]))
+            if (this.isEqual(testBlock, oppPostions[i]))
             {
-                oppPostions.splice(position, 1);
+                oppPostions.splice(i, 1);
                 this.possibleMoves.push(testBlock);
                 return true;
             }
@@ -626,16 +626,16 @@ class Pawn extends Piece {
         var testBlock = this.addValues(testBlock, xDirection, yDirection);
         if (!isInBoard(testBlock))return true;
 
-        for (position in teamPositions)
+        for (var i = 0; i < teamPositions.length; i++)
         {
-            if (this.isEqual(testBlock, teamPositions[position]))
+            if (this.isEqual(testBlock, teamPositions[i]))
             {
-                teamPositions.splice(position, 1);
+                teamPositions.splice(i, 1);
                 this.blockBlocks.push(testBlock);
                 return true;
             }
         }
-        for (position in oppPostions)
+        for (var i = 0; i < oppPostions.length; i++)
         {
             if (this.isEqual(testBlock, oppPostions[position]))
             {
