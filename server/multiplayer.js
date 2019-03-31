@@ -94,7 +94,7 @@ router.put('/:idNum', async (req, res) => {                                     
         if (moveAccepted)                                                              // The move was valid for that piece.
         {
             var pieceKilled = false;
-            if (!isEmpty(action.move)) {killPiece = getPiece(action.move, oppPieces); pieceKilled = true; deadArray.push(oppcolor + killPiece)}
+            if (!isEmpty(action.move, teamPositions, oppPositions)) {killPiece = getPiece(action.move, oppPieces); pieceKilled = true; deadArray.push(oppcolor + killPiece)}
             if (pieceKilled) teamScore += oppPieces[killPiece].kill();                 // If a piece is killed in the movement, it's set to dead and it's score value is added.
             let keyArray = Object.keys(teamPieces);                     // Getting key values to iterate through pieces object.
             for (var i = 0; i < keyArray.length; i++)                                  // Going through each piece and determining if we need to update its POSSIBLE moves and BLOCKED moves.
@@ -221,8 +221,8 @@ function findPositionInArray(desired, array){
             return true;}
     return false;}
 
-function isEmpty(testBlock, whitePositions, blackPostions) {
-    if (findPositionInArray(testBlock, whitePositions) || findPositionInArray(testBlock, blackPostions))
+function isEmpty(testBlock, teamPositions, oppPositions) {
+    if (findPositionInArray(testBlock, teamPositions) || findPositionInArray(testBlock, oppPositions))
     return false;
     return true;}
 
