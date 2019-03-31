@@ -308,7 +308,7 @@ var app = new Vue({
                     this.gameData.displayedTurn = response.data.serverTurn;
                     this.gameData.whiteScore = response.data.whiteScore;
                     this.gameData.blackScore = response.data.blackScore;
-                    this.gameDate.whiteCheck = response.data.whiteCheck;
+                    this.gameData.whiteCheck = response.data.whiteCheck;
                     this.gameData.blackCheck = response.data.blackCheck;
                     this.gameData.blackWin = response.data.whiteCheckMate;
                     this.gameData.whiteWin = response.data.blackCheckMate;
@@ -343,6 +343,9 @@ var app = new Vue({
                     console.log("Move Approved by Server.");
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.gameData.playerTurn = false;
+                    this.selectData.selectImage = this.oppColor() + "t";
+                    this.setData(this.selectData.selected, this.selectData.unselected);
+                    this.postOppSelection();
                     this.getGameData();                                                                    // Retrieves new data.
                 }
                 else                                                                                // If server declines move.
