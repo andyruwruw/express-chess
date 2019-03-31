@@ -203,7 +203,6 @@ var app = new Vue({
             {
                 var element = document.getElementById(this.blockToString(changedSlots[i * 2]));
                 var elementMove = document.getElementById(this.blockToString(changedSlots[i * 2 + 1]));
-                var changedColor;
                 var id;
                 let colors = ["w", "b"];
                 let pieces = ["q", "k", "n", "b", "r", "p"];
@@ -310,6 +309,7 @@ var app = new Vue({
                     this.setData(this.pieceData.whitePieces, this.convertObject(response.data.pieceData.whitePieces));
                     this.setData(this.pieceData.blackPieces, this.convertObject(response.data.pieceData.blackPieces));
                     var changedSlots = response.data.changedSlots;
+                    console.log(changedSlots);
                     this.refreshChangedBlocks(changedSlots);
                     this.findAllPositions();
                     this.updateDead();
@@ -365,7 +365,7 @@ var app = new Vue({
                     this.serverData.serverMessageText = ("Opponent Moved. Your Turn!");
                     this.gameData.playerTurn = true;
                     this.setData(this.selectData.selected, this.selectData.unselected);
-                    this.selectData.selectImage = this.teamColor + "t";
+                    this.selectData.selectImage = this.teamColor() + "t";
                     this.drawSelection();
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.getGameData();
