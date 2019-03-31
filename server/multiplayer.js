@@ -84,14 +84,10 @@ router.put('/:idNum', async (req, res) => {                                     
         var deadArray = req.body.deadArray;
         var action = req.body.action;                                                  // Preparing requested move data. (Needed to find Piece Key)
         var piece = getPiece(action.selected, teamPieces);                             // Finding Moving Piece Key. 
-        console.log("Piece to Move: " + piece);
         var killPiece;
         var changedSlots = [action.selected, action.move];
-        console.log("To Move: " + changedSlots);   
         var teamPositions = gatherAllPositions(teamPieces);                        // Preparing two arrays with all the piece's locations.
         var oppPositions = gatherAllPositions(oppPieces);     
-        console.log(teamPositions); 
-        console.log(oppPositions);
         if (teamPieces[piece].move(action.move, teamPositions, oppPositions)){                        // Requesting the Move from Piece
         moveAccepted = true; console.log("Move Approved.");}
         if (moveAccepted)                                                              // The move was valid for that piece.

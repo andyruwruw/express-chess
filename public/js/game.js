@@ -327,7 +327,7 @@ var app = new Vue({
         async sendGameData()                                                                    // Following a move, sends data to server.
         {
             try {
-                this.serverMessageText = "Sending Move to Server...";                               // Notifies player of the pending action...
+                this.serverData.serverMessageText = "Sending Move to Server...";                               // Notifies player of the pending action...
                 console.log("Sending Move to Server...");
                 let request = { 
                     team: this.gameData.team,
@@ -339,7 +339,7 @@ var app = new Vue({
                 let response = await axios.put("/api/match/" + this.serverData.gameID, request);
                 if (response.data.nModified == 1)                                                   // If server approves move.
                 {
-                    this.serverMessageText = ("Move Approved by Server.");                              // Notifies player of request resolution.
+                    this.serverData.serverMessageText = ("Move Approved by Server.");                              // Notifies player of request resolution.
                     console.log("Move Approved by Server.");
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.gameData.playerTurn = false;
@@ -347,7 +347,7 @@ var app = new Vue({
                 }
                 else                                                                                // If server declines move.
                 {
-                    this.serverMessageText = ("Move Declined by Server. Submit a Valid Move.");         // Notifies player of request failure.
+                    this.serverData.serverMessageText = ("Move Declined by Server. Submit a Valid Move.");         // Notifies player of request failure.
                     this.playSound(this.SOUNDS.error.sound, this.SOUNDS.error.volume);
                 }
             } catch (error) {
@@ -360,7 +360,7 @@ var app = new Vue({
                 let response = await axios.get("/api/match/" + this.serverData.gameID);
                 if (response.data.serverTurn > this.gameData.displayedTurn)
                 {
-                    this.serverMessageText = ("Opponent Moved. Your Turn!");
+                    this.serverData.serverMessageText = ("Opponent Moved. Your Turn!");
                     this.gameData.playerTurn = true;
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.getGameData();
@@ -675,7 +675,7 @@ var app = new Vue({
         {
             try {
                 await axios.put("/api/selected/" + this.serverData.gameID, {
-                    selected: this.selectImage,
+                    selected: this.selectData.selectImage,
                     pos: this.selectData.selected
                 });
             } catch (error) {
@@ -711,7 +711,7 @@ var app = new Vue({
             this.drawSelection();
 
             if (this.selectData.red != "") this.unselectRedBlockDiv();
-            this.selectRedBlockDiv(blockString)
+            this.selectRedBlockDiv(this.blockToString(selectBlock));
         },
         selectRedBlockDiv(block)
         {
