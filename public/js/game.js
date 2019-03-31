@@ -128,7 +128,7 @@ var app = new Vue({
                 if (this.isEqual(this.selectData.selected, this.selectData.unselected))       // If nothing is selected
                 {
                     console.log("New Selection");
-                    if (this.isEmpty(clickBlock)) return 0;                                             // Or if it's empty, do nothing.
+                    if (this.isEmpty(clickBlock)) {console.log("Empty Selected"); return 0;}                                             // Or if it's empty, do nothing.
                     else if (this.isMyPiece(clickBlock)) this.selectBlock(clickBlock, blockString);     // If it's your piece, select it.
                     else this.throwError("You cannot select your opponent's pieces.");                  // Or if it's your opponent's piece, throw error
                 }
@@ -316,6 +316,8 @@ var app = new Vue({
                     this.setData(this.pieceData.blackPieces, this.convertObject(response.data.pieceData.blackPieces));
                     var changedSlots = response.data.changedSlots;
                     this.refreshChangedBlocks(changedSlots);
+                    this.findBlackPositions();
+                    this.findWhitePositions();
                     this.updateDead();
                 return true;
             } catch (error) {
