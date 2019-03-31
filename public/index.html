@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-
+    
 <head>
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
   <link rel="stylesheet" href="./css/style.css" />
@@ -33,8 +33,8 @@
     <source src="sounds/turn.wav" type="audio/wav">
   </audio>
 </head>
-
-<body onclick="playMusic();">
+<div id="loading"></div>
+<body onclick="playMusic();" onload="loading()">
   <a href="http://andrewdanielyoung.com/" id="homeButton"> </a>
 
 <div id="app">
@@ -46,7 +46,12 @@
     <h1 id="menuTitle" v-if="!matchData.startGame">Express Chess</h1>
     <div id="menuButtons" v-if="!matchData.startGame">
         <button class="add-margin" @click="getMatchMakers">{{findMatchButtonText}}</button>
+        <button class="add-margin" @click="rejoinMatch">REJOIN MATCH</button>
+        <a class="button add-margin" href="./pages/spectate.html">SPECTATE</a>
         <a class="button add-margin" href="./pages/about.html">ABOUT</a>
+    </div>
+    <div id="topDiv" v-if="matchData.rejoin">
+
     </div>
     <div id="topDiv" class="container" v-if="matchData.startGame">
       <div class="third">

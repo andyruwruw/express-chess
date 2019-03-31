@@ -1,3 +1,8 @@
+function loading()
+{
+    document.getElementById("loading").style.display = "none";
+};
+
 var app = new Vue({
     el: '#app',
     data:
@@ -14,6 +19,7 @@ var app = new Vue({
             matchMade: 0,
             startGame: 0,
             findingMatch: 0,
+            rejoin: 0,
         },
         testData:
         {
@@ -637,7 +643,7 @@ var app = new Vue({
         },
         async deleteMatchMaker()
         {
-
+            await axios.delete("/api/queue/" + this.serverData.gameID);
         },
         /* HELPER */ 
         MAKEID() {

@@ -3,38 +3,15 @@
 
 <head>
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/style.css" />
   <title>Express Chess</title>
   <audio id="music">
-      <source src="sounds/music.mp3" type="audio/mpeg">
+      <source src="../sounds/music.mp3" type="audio/mpeg">
     </audio>
-  <audio id="select">
-    <source src="sounds/select.wav" type="audio/wav">
-  </audio>
-  <audio id="unselect">
-    <source src="sounds/unselect.wav" type="audio/wav">
-  </audio>
-  <audio id="error">
-    <source src="sounds/error.wav" type="audio/wav">
-  </audio>
-  <audio id="check">
-    <source src="sounds/check.wav" type="audio/wav">
-  </audio>
-  <audio id="checkmate">   
-    <source src="sounds/checkmate.wav" type="audio/wav">
-  </audio>
-  <audio id="move">
-    <source src="sounds/move.wav" type="audio/wav">
-  </audio>
-  <audio id="matchfound">    
-    <source src="sounds/matchfound.wav" type="audio/wav">
-  </audio>
-  <audio id="turn">
-    <source src="sounds/turn.wav" type="audio/wav">
-  </audio>
 </head>
 
-<body onclick="playMusic();">
+<body onclick="playMusic();"  onload="loading()">
+    <div id="loading"></div>
   <a href="http://andrewdanielyoung.com/" id="homeButton"> </a>
   <div id="app">
     <div class="header">
@@ -43,9 +20,10 @@
       </div>
     </div>
     <p class="about">Express Chess uses Vue for its front end design while implementing Node for a backend server. The server runs a Rest API using Express and Mongo for data storage.</p>
-    <p class="about">All logic for valid movements are done in the back end, while the front end focuses on display and selection. It's still far from done, and some of the logic isn't flawless!</p>
+    <p class="about">All logic for valid movements are done in the back end, while the front end focuses on display and selection.</p>
     <p class="about">Check out the GitHub link at the bottom to see the code in the back end!</p>
     <div id="menuButtons">
+        <a class="button add-margin" href="http://sovereign2.andrewdanielyoung.com/">CHECK OUT MY OTHER GAME</a>
         <a class="button add-margin" href="../index.html">BACK</a>
     </div>
   </div>
