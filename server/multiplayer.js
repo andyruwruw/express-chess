@@ -437,10 +437,10 @@ class Piece {
         return false;
     }
 
-    checkRecursive (xDirection, yDirection, teamPositions, oppPostions, testBlock)
+    checkRecursive (xDirection, yDirection, teamPositions, oppPostions, inputBlock)
     {
-        var testBlock = this.addValues(testBlock, xDirection, yDirection);
-        if (!this.isInBoard(testBlock))return true;
+        var testBlock = this.addValues(inputBlock, xDirection, yDirection);
+        if (!(this.isInBoard(testBlock))) {return true;}
         
         for (var i = 0; i < teamPositions.length; i++)
         {
@@ -461,8 +461,8 @@ class Piece {
             }
         }
         this.possibleMoves.push(testBlock);
-        if (this.checkDiagonal(xDirection, yDirection, teamPositions, oppPostions, testBlock))
-        return true;
+        if (this.checkRecursive(xDirection, yDirection, teamPositions, oppPostions, testBlock))
+        {return true;}
     }
 
     checkOnce(xDirection, yDirection, teamPositions, oppPostions, testBlock)
