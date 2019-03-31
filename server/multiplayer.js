@@ -611,13 +611,13 @@ class Pawn extends Piece {
     findPossibleMoves(teamPositions, oppPostions) {
         this.possibleMoves = [];
         this.blockBlocks = [];
-        this.checkForward(this.rowDirection, 0, teamPositions, oppPostions);
+        this.checkForward(0, this.rowDirection, teamPositions, oppPostions);
         if (!this.hasMoved)
         {
-            this.checkForward(this.rowDirection * 2, 0, teamPositions, oppPostions);
+            this.checkForward(0, this.rowDirection * 2, teamPositions, oppPostions);
         }
-        this.checkKillDiag(this.rowDirection, 1, teamPositions, oppPostions);
-        this.checkKillDiag(this.rowDirection, 1, teamPositions, oppPostions);
+        this.checkKillDiag(1, this.rowDirection, teamPositions, oppPostions);
+        this.checkKillDiag(-1, this.rowDirection, teamPositions, oppPostions);
     }
 
     checkForward(xDirection, yDirection, teamPositions, oppPostions)
@@ -625,9 +625,8 @@ class Pawn extends Piece {
         this.checkOnce(xDirection, yDirection, teamPositions, oppPostions, {row: this.row, col: this.col});
     }
 
-
     checkKillDiag(xDirection, yDirection, teamPositions, oppPostions) {
-        var testBlock = this.addValues(testBlock, xDirection, yDirection);
+        var testBlock = this.addValues({row: this.row, col: this.col}, xDirection, yDirection);
         if (!isInBoard(testBlock))return true;
 
         for (var i = 0; i < teamPositions.length; i++)
