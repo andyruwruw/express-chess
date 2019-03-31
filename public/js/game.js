@@ -446,7 +446,7 @@ var app = new Vue({
             this.testData.whitePositions = [];
             var pieceKeys = Object.keys(this.pieceData.whitePieces);
             for (var i = 0; i < pieceKeys.length; i++){
-                if (!((this.pieceData.whitePieces[pieceKeys[i]]).getStatus())) continue;
+                if (!((this.pieceData.whitePieces[pieceKeys[i]]).getStatus())) {console.log("This one's dead"); continue;}
                 else {
                     var testObject = this.pieceData.whitePieces[pieceKeys[i]].getPositionObject();
                     this.testData.whitePositions.push(testObject);}}
@@ -456,7 +456,7 @@ var app = new Vue({
             this.testData.blackPositions = [];
             var pieceKeys = Object.keys(this.pieceData.blackPieces);
             for (var i = 0; i < pieceKeys.length; i++){
-                if (!((this.pieceData.blackPieces[pieceKeys[i]]).getStatus())) continue;
+                if (!((this.pieceData.blackPieces[pieceKeys[i]]).getStatus())) {console.log("This one's dead"); continue;}
                 else {
                     var testObject = this.pieceData.blackPieces[pieceKeys[i]].getPositionObject();
                     this.testData.blackPositions.push(testObject);}}
@@ -844,6 +844,7 @@ var app = new Vue({
             newData.p7.setData(piecesArray[14].possibleMoves, piecesArray[14].blockBlocks, piecesArray[14].isDead);
             newData.p8 = new Pawn(piecesArray[15].row, piecesArray[15].col, piecesArray[15].num, piecesArray[15].team);
             newData.p8.setData(piecesArray[15].possibleMoves, piecesArray[15].blockBlocks, piecesArray[15].isDead);
+            console.log(newData);
             return newData;
         },
     },
