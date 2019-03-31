@@ -410,7 +410,7 @@ class Piece {
 
     checkForRefresh(changeBlock, teamPositions, oppPostions)
     {
-        for (i = 0; i < this.possibleMoves.length; i++)
+        for (var i = 0; i < this.possibleMoves.length; i++)
         {
             if (this.isEqual(this.possibleMoves[i], changeBlock))
             {
@@ -418,7 +418,7 @@ class Piece {
                 return true;
             }
         }
-        for (i = 0; i < this.blockBlocks; i++)
+        for (var i = 0; i < this.blockBlocks; i++)
         {
             if (this.isEqual(this.blockBlocks[i], changeBlock))
             {
