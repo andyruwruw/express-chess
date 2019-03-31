@@ -203,25 +203,28 @@ var app = new Vue({
             else selectedDiv.classList.add(this.selectData.selectImage);},                           // Then addds the correct Image.
         refreshChangedBlocks(changedSlots)
         {
-            for (var i = 0; i < changedSlots.length; i++)
+            console.log(changedSlots);
+            for (var i = 0; i < changedSlots.length / 2; i++)
             {
-                var element = document.getElementById(this.blockToString(changedSlots[i]));
+                var element = document.getElementById(this.blockToString(changedSlots[i * 2]));
+                var elementMove = document.getElementById(this.blockToString(changedSlots[i * 2 + 1]));
                 var changedColor;
                 var id;
                 if ((this.gameData.playerTurn && this.gameData.team) || (!this.gameData.playerTurn && !this.gameData.team)){
-                    id = this.findKeyOffPosition(changedSlots[i], this.pieceData.whitePieces);
+                    id = this.findKeyOffPosition(changedSlots[i * 2], this.pieceData.whitePieces);
                     changedColor = "w";}
                 else{
-                    id = this.findKeyOffPosition(changedSlots[i], this.pieceData.blackPieces);
+                    id = this.findKeyOffPosition(changedSlots[i * 2], this.pieceData.blackPieces);
                     changedColor = "b";}
                 let colors = ["w", "b"];
                 let pieces = ["q", "k", "n", "b", "r", "p"];
                 for (var k = 0; k < colors.length; k++){						                    // It runs through removing any piece classes.
                     for (var l = 0; l < pieces.length; l++){
                         if (element.classList.contains(colors[k] + pieces[l])) 
-                        element.classList.remove(colors[k] + pieces[l]);}}
-                if (id != "")
-                element.classList.add(changedColor + id);    
+                        element.classList.remove(colors[k] + pieces[l]);
+                        if (elementMove.classList.contains(colors[k] + pieces[l])) 
+                        elementMove.classList.remove(colors[k] + pieces[l]);}}
+                elementMove.classList.add(changedColor + id);    
             }
         },
         updateDead()
@@ -344,13 +347,17 @@ var app = new Vue({
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.gameData.playerTurn = false;
                     this.selectData.selectImage = this.oppColor() + "t";
+                    this.unselectBlock();
                     this.setData(this.selectData.selected, this.selectData.unselected);
                     this.postOppSelection();
                     this.getGameData();                                                                    // Retrieves new data.
                 }
                 else                                                                                // If server declines move.
                 {
-                    this.serverData.serverMessageText = ("Move Declined by Server. Submit a Valid Move.");         // Notifies player of request failure.
+                    if (response.data.check == true)
+                        this.serverData.serverMessageText = ("That Endangers Your King! Submit a Valid Move.");         // Notifies player of request failure.
+                    else
+                        this.serverData.serverMessageText = ("Move Declined by Server. Submit a Valid Move.");         // Notifies player of request failure.
                     this.playSound(this.SOUNDS.error.sound, this.SOUNDS.error.volume);
                 }
             } catch (error) {
