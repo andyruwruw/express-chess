@@ -41,14 +41,8 @@ const match = new Board({
     blackCheckMate: req.body.blackCheckMate,
     stalemate: req.body.stalemate,
     pieceData:{
-        whitePieces: {k1: req.body.pieceData.whitePieces.k1, q1: req.body.pieceData.whitePieces.q1, r1: req.body.pieceData.whitePieces.r1, r2: req.body.pieceData.whitePieces.r2,
-                      b1: req.body.pieceData.whitePieces.b1, b2: req.body.pieceData.whitePieces.b2, n1: req.body.pieceData.whitePieces.n1, n2: req.body.pieceData.whitePieces.n2,
-                      p1: req.body.pieceData.whitePieces.p1, p2: req.body.pieceData.whitePieces.p2, p3: req.body.pieceData.whitePieces.p3, p4: req.body.pieceData.whitePieces.p4,
-                      p5: req.body.pieceData.whitePieces.p5, p6: req.body.pieceData.whitePieces.p6, p7: req.body.pieceData.whitePieces.p7, p8: req.body.pieceData.whitePieces.p8},
-        blackPieces: {k1: req.body.pieceData.blackPieces.k1, q1: req.body.pieceData.blackPieces.q1, r1: req.body.pieceData.blackPieces.r1, r2: req.body.pieceData.blackPieces.r2,
-                      b1: req.body.pieceData.blackPieces.b1, b2: req.body.pieceData.blackPieces.b2, n1: req.body.pieceData.blackPieces.n1, n2: req.body.pieceData.blackPieces.n2,
-                      p1: req.body.pieceData.blackPieces.p1, p2: req.body.pieceData.blackPieces.p2, p3: req.body.pieceData.blackPieces.p3, p4: req.body.pieceData.blackPieces.p4,
-                      p5: req.body.pieceData.blackPieces.p5, p6: req.body.pieceData.blackPieces.p6, p7: req.body.pieceData.blackPieces.p7, p8: req.body.pieceData.blackPieces.p8}},
+        whitePieces: convertObjectFromRecieved(req.body.pieceData.whitePieces),
+        blackPieces: convertObjectFromRecieved(req.body.pieceData.blackPieces),},
     changedSlots: req.body.changedSlots,
     deadArray: req.body.deadArray,
     });
@@ -214,12 +208,12 @@ module.exports = router;
 // Game logic
 
 // =====================================Piece Classes
-function gatherAllPositions(whitePieces){
+function gatherAllPositions(pieceObjects){
     var positions = [];
-    var pieces = Object.values(whitePieces);
-    for (var i = 0; i < pieces.length; i++){
-        if (!((pieces[i]).getStatus())) continue;
-        else {var testObject = pieces[i].getPositionObject();
+    var pieceKeys = Object.keys(pieceObjects);
+    for (var i = 0; i < pieceKeys.length; i++){
+        if (!((pieceObjects[pieceKeys[i]]).getStatus())) continue;
+        else {var testObject = (pieceObjects[pieceKeys[i]]).getPositionObject();
             positions.push(testObject);}}
     return positions;}
 
