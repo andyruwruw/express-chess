@@ -81,7 +81,6 @@ router.put('/:idNum', async (req, res) => {                                     
             teamPieces = convertObject(req.body.pieceData.blackPieces);  
             teamScore = req.body.blackScore;
         }
-        console.log("Team Pieces: " + teamPieces);
         var deadArray = req.body.deadArray;
         var action = req.body.action;                                                  // Preparing requested move data. (Needed to find Piece Key)
         var piece = getPiece(action.selected, teamPieces);                             // Finding Moving Piece Key. 
@@ -252,9 +251,9 @@ function findKeyOffPosition(position, teamPieces)
     for (var i = 0; i < array.length; i++)
     {
         var item = array[i][1];
-        var itemPos = {row: item.row, col: item.col};
+        var itemPos = item.getPositionObject();
         if (isEqual(position, itemPos)){
-            return array[i][0].getPositionObject();
+            return array[i][0];
         }
     }
     return false;
@@ -381,7 +380,7 @@ class Piece {
         return this.blockBlocks;}
 
     move(newPos, teamPositions, oppPostions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
-        for (var i = 0; i < possibleMoves.length; i++)
+        for (var i = 0; i < this.possibleMoves.length; i++)
         {
             if (this.isEqual(this.possibleMoves[i], newPos))
             {
