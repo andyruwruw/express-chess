@@ -88,6 +88,8 @@ router.put('/:idNum', async (req, res) => {                                     
         var action = req.body.action;                                                  // Preparing requested move data. (Needed to find Piece Key)
         var piece = getPiece(action.selected, teamPieces);                             // Finding Moving Piece Key. 
         var killPiece;
+        var pieceKilled = false;
+        if (!isEmpty(action.move, teamPositions, oppPositions)) {killPiece = getPiece(action.move, oppPieces); pieceKilled = true; }
         var changedSlots = [action.selected, action.move];
         var teamPositions = gatherAllPositions(teamPieces);                        // Preparing two arrays with all the piece's locations.
         var oppPositions = gatherAllPositions(oppPieces);     
@@ -96,9 +98,7 @@ router.put('/:idNum', async (req, res) => {                                     
         else {console.log("Move Denied.");}
         if (moveAccepted)                                                              // The move was valid for that piece.
         {
-            var pieceKilled = false;
-            if (!isEmpty(action.move, teamPositions, oppPositions)) {killPiece = getPiece(action.move, oppPieces); pieceKilled = true; deadArray.push(oppcolor + killPiece)}
-            if (pieceKilled) teamScore += oppPieces[killPiece].kill();                 // If a piece is killed in the movement, it's set to dead and it's score value is added.
+            if (pieceKilled) {deadArray.push(oppcolor + killPiece); teamScore += oppPieces[killPiece].kill(); }                // If a piece is killed in the movement, it's set to dead and it's score value is added.
             let keyArray = Object.keys(teamPieces);                     // Getting key values to iterate through pieces object.
             for (var i = 0; i < keyArray.length; i++)                                  // Going through each piece and determining if we need to update its POSSIBLE moves and BLOCKED moves.
             {
@@ -120,18 +120,16 @@ router.put('/:idNum', async (req, res) => {                                     
             
             // Checkmate Variables
             var possibleTeamMoves = gatherPossibleMoves(teamPieces);                   // Array of all possible moves create to for check, checkmate or stalemate
-            var possibleOppMoves = gatherPossibleMoves(oppPieces);
-            var teamKingPosition = teamPieces.k1.getPositionObject();                  // Accessing both King's Positions.
-            var oppKingPosition = oppPieces.k1.getPositionObject();                       
+            var possibleOppMoves = gatherPossibleMoves(oppPieces);                    
             var oppInCheck = false;                                                    // Both values defaulted to false.
             var oppCheckMate = false;
             var stalemate = false;
             var kingSafe = true;
-
-            if (!(isKingSafe(teamKingPosition, possibleOppMoves))) kingSafe = false; // If the move put the player in check, or failed make him safe, request for move is denied.
+            if (!(teamPieces.k1.isKingSafe(possibleOppMoves))) kingSafe = false;
+                                                                                        // If the move put the player in check, or failed make him safe, request for move is denied.
             if (kingSafe)
             {
-                if (!(isKingSafe(oppKingPosition, possibleTeamMoves)))                     // If Opponent in check, save the data to report.
+                if (!(oppPieces.k1.isKingSafe(possibleTeamMoves)))                  // If Opponent in check, save the data to report.
                 {
                     oppInCheck = true;
                     var oppKingPossibleMoves = oppPieces.k1.getPossibleMoves();
@@ -283,10 +281,10 @@ function getPiece(selection, teamPieces)
 
 function gatherPossibleMoves(pieces){
     var possibleMoves = [];
-    var pieces = Object.values(pieces);
-    for (var i = 0; i < pieces.length; i++){
-        if (!((pieces[i]).getStatus())) continue;
-        else {var pieceMoves = pieces[i].getPossibleMoves();
+    var pieceKeys = Object.keys(pieces);
+    for (var i = 0; i < pieceKeys.length; i++){
+        if (!(pieces[pieceKeys[i]].getStatus())) continue;
+        else {var pieceMoves = pieces[pieceKeys[i]].getPossibleMoves();
             possibleMoves.concat(pieceMoves);}}
     return possibleMoves;}
 
@@ -560,6 +558,12 @@ class King extends Piece {
         this.checkStraight(0, 1, teamPositions, oppPostions);
         this.checkStraight(0, -1, teamPositions, oppPostions);
     }
+
+    isKingSafe(oppPossibleMoves){
+    for (var i = 0; i < oppPossibleMoves.length; i++){
+        if (this.isEqual({row: this.row, col: this.col}, oppPossibleMoves[i])) return false;}
+        return true;
+    }
     
     checkStraight(xDirection, yDirection, teamPositions, oppPostions)
     {
@@ -600,10 +604,16 @@ class Knight extends Piece {
 class Pawn extends Piece {
     constructor (row, col, num, team) {
         super(row, col, num, team);
-        if (!team) this.rowDirection = -1;
+        if (team) this.rowDirection = -1;
         else this.rowDirection = 1;
         this.hasMoved = 0;
         this.points = 1;}
+
+    move(newPos, teamPositions, oppPostions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
+        if (super.move(newPos, teamPositions, oppPostions)){
+        this.hasMoved = 1; return true;}
+        else return false;
+    }
 
     checkPromotion()
     {
@@ -665,7 +675,6 @@ class Queen extends Piece {
     constructor (row, col, num, team) {
         super(row, col, num, team);
         this.points = 9;
-
         }
 
     findPossibleMoves(teamPositions, oppPostions) {

@@ -118,13 +118,10 @@ var app = new Vue({
         //=====================================================SELECTION=====================================================
         clickBlock(blockString)                                                             // Runs following a click on the screen.
         {
-            console.log(blockString);
-            console.log(this.gameData.playerTurn);
             if (this.gameData.playerTurn)                                                       // If it's the player's turn
             {
                 this.unselectRedBlockDiv();
                 var clickBlock = this.parseBlock(blockString);
-                console.log(this.selectData.selected);
                 if (this.isEqual(this.selectData.selected, this.selectData.unselected))       // If nothing is selected
                 {
                     console.log("New Selection");
@@ -153,7 +150,6 @@ var app = new Vue({
             this.playSound(this.SOUNDS.select.sound, this.SOUNDS.select.volume);
 
             this.setData(this.selectData.selected, selectBlock);
-            console.log(this.selectData.selected);
 
             this.selectData.selectImage = this.findBlockImage(selectBlock);                     // Adds the photo to the selected section up top.
             this.postOppSelection();                    
@@ -203,7 +199,6 @@ var app = new Vue({
             else selectedDiv.classList.add(this.selectData.selectImage);},                           // Then addds the correct Image.
         refreshChangedBlocks(changedSlots)
         {
-            console.log(changedSlots);
             for (var i = 0; i < changedSlots.length / 2; i++)
             {
                 var element = document.getElementById(this.blockToString(changedSlots[i * 2]));
@@ -344,6 +339,7 @@ var app = new Vue({
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.gameData.playerTurn = false;
                     this.selectData.selectImage = this.oppColor() + "t";
+                    this.drawSelection();
                     this.unselectBlock();
                     this.setData(this.selectData.selected, this.selectData.unselected);
                     this.postOppSelection();
@@ -370,6 +366,8 @@ var app = new Vue({
                     this.serverData.serverMessageText = ("Opponent Moved. Your Turn!");
                     this.gameData.playerTurn = true;
                     this.setData(this.selectData.selected, this.selectData.unselected);
+                    this.selectData.selectImage = this.teamColor + "t";
+                    this.drawSelection();
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.getGameData();
                 }
@@ -437,32 +435,36 @@ var app = new Vue({
             this.findWhitePositions();
             this.findBlackPositions();
             var keys = Object.keys(this.pieceData.blackPieces);
-            for (key in keys){
-                this.pieceData.whitePieces[keys[key]].findPossibleMoves(this.testData.blackPostions, this.testData.whitePositions)}
+            for (var i = 0; i < keys.length; i++){
+                this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.blackPostions, this.testData.whitePositions)}
             keys = Object.keys(this.pieceData.whitePieces);
-            for (key in keys){
-                this.pieceData.whitePieces[keys[key]].findPossibleMoves(this.testData.blackPostions, this.testData.whitePositions)}
+            for (var i = 0; i < keys.length; i++){
+                this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.blackPostions, this.testData.whitePositions)}
         },
         /* HELPER */ 
         findWhitePositions(){
             this.testData.whitePositions = [];
-            var pieces = Object.values(this.pieceData.whitePieces);
-            for (piece in pieces){
-                if (!((pieces[piece]).getStatus())) continue;
-                    var testObject = ((pieces[piece]).getPositionObject());
-                    this.testData.whitePositions.push(testObject);}},
+            var pieceKeys = Object.keys(this.pieceData.whitePieces);
+            for (var i = 0; i < pieceKeys.length; i++){
+                if (!((this.pieceData.whitePieces[pieceKeys[i]]).getStatus())) continue;
+                else {
+                    var testObject = this.pieceData.whitePieces[pieceKeys[i]].getPositionObject();
+                    this.testData.whitePositions.push(testObject);}}
+        },
         /* HELPER */ 
         findBlackPositions(){
-            this.testData.blackPostions = [];
-            var pieces = Object.values(this.pieceData.blackPieces);
-            for (piece in pieces){
-                if (!((pieces[piece]).getStatus())) continue;
-                else {var testObject = pieces[piece].getPositionObject();
-                    this.testData.blackPostions.push(testObject);}}},
+            this.testData.blackPositions = [];
+            var pieceKeys = Object.keys(this.pieceData.blackPieces);
+            for (var i = 0; i < pieceKeys.length; i++){
+                if (!((this.pieceData.blackPieces[pieceKeys[i]]).getStatus())) continue;
+                else {
+                    var testObject = this.pieceData.blackPieces[pieceKeys[i]].getPositionObject();
+                    this.testData.blackPositions.push(testObject);}}
+        },
         /* HELPER */ 
         findPositionInArray(desired, array){
-            for (item in array){
-                if (this.isEqual(desired, array[item]))
+            for (var i = 0; i < array.length; i++){
+                if (this.isEqual(desired, array[i]))
                     return true;}
             return false;},
         /* HELPER */ 
@@ -696,7 +698,6 @@ var app = new Vue({
         {
             try {
                 let response = await axios.get("/api/selected/" + this.serverData.gameID);
-                console.log(response);
                 if (this.selectData.oppSelectionDif != response.data.selected)
                 {
                     this.serverData.serverMessageText = ("Opponent is thinking!");
