@@ -89,10 +89,10 @@ router.put('/:idNum', async (req, res) => {                                     
         var piece = getPiece(action.selected, teamPieces);                             // Finding Moving Piece Key. 
         var killPiece;
         var pieceKilled = false;
+        var teamPositions = gatherAllPositions(teamPieces);                        // Preparing two arrays with all the piece's locations.
+        var oppPositions = gatherAllPositions(oppPieces);
         if (!isEmpty(action.move, teamPositions, oppPositions)) {killPiece = getPiece(action.move, oppPieces); pieceKilled = true; }
         var changedSlots = [action.selected, action.move];
-        var teamPositions = gatherAllPositions(teamPieces);                        // Preparing two arrays with all the piece's locations.
-        var oppPositions = gatherAllPositions(oppPieces);     
         if (teamPieces[piece].move(action.move, teamPositions, oppPositions)){                        // Requesting the Move from Piece
         moveAccepted = true; console.log("Move Approved.");}
         else {console.log("Move Denied.");}
