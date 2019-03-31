@@ -311,8 +311,7 @@ var app = new Vue({
                     this.setData(this.pieceData.blackPieces, this.convertObject(response.data.pieceData.blackPieces));
                     var changedSlots = response.data.changedSlots;
                     this.refreshChangedBlocks(changedSlots);
-                    this.findBlackPositions();
-                    this.findWhitePositions();
+                    this.findAllPositions();
                     this.updateDead();
                 return true;
             } catch (error) {
@@ -404,6 +403,7 @@ var app = new Vue({
                 };
                 let upload = await axios.post('/api/match', match);
                 this.serverData.serverMessageText = ("You're white! It's you're turn first.");
+                this.findAllPositions();
                 this.createOppSelection();
                 this.createChatRoom();
                 this.matchData.startGame = true;
@@ -460,6 +460,11 @@ var app = new Vue({
                 else {
                     var testObject = this.pieceData.blackPieces[pieceKeys[i]].getPositionObject();
                     this.testData.blackPositions.push(testObject);}}
+        },
+        findAllPositions()
+        {
+            this.findBlackPositions();
+            this.findWhitePositions();
         },
         /* HELPER */ 
         findPositionInArray(desired, array){
@@ -520,6 +525,7 @@ var app = new Vue({
                 this.gameData.opp = 0;
                 this.matchData.startGame = true;
                 this.gameData.gameStart = true;
+                this.findAllPositions();
                 let response = await axios.put("/api/queue/" + this.matchMaker._id, {
                     playerNum: 2
                 });
