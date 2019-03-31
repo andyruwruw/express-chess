@@ -69,17 +69,20 @@ router.put('/:idNum', async (req, res) => {                                     
         var teamPieces;
         var oppPieces;
         var teamScore;
+        var oppScore;
         if (color == "w")                                                             // Gathering both team's piece objects. (Needed to find Piece Key)
         {
             teamPieces = convertObject(req.body.pieceData.whitePieces);                              
             oppPieces = convertObject(req.body.pieceData.blackPieces);  
             teamScore = req.body.whiteScore;
+            oppScore = req.body.blackScore;
         }
         else
         {
             oppPieces = convertObject(req.body.pieceData.whitePieces); 
             teamPieces = convertObject(req.body.pieceData.blackPieces);  
             teamScore = req.body.blackScore;
+            oppScore = req.body.whiteScore;
         }
         var deadArray = req.body.deadArray;
         var action = req.body.action;                                                  // Preparing requested move data. (Needed to find Piece Key)
