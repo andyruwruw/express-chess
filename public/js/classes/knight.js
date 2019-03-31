@@ -8,10 +8,14 @@ class Knight extends Piece {
     findPossibleMoves(teamPositions, oppPostions) {
         this.possibleMoves = [];
         this.blockBlocks = [];
-        this.checkKnightL(2, 5, teamPositions, oppPostions);
-        this.checkKnightL(-2, -5, teamPositions, oppPostions);
-        this.checkKnightL(-2, 5, teamPositions, oppPostions);
-        this.checkKnightL(2, -5, teamPositions, oppPostions);
+        this.checkKnightL(1, 2, teamPositions, oppPostions);
+        this.checkKnightL(2, 1, teamPositions, oppPostions);
+        this.checkKnightL(2, -1, teamPositions, oppPostions);
+        this.checkKnightL(1, -2, teamPositions, oppPostions);
+        this.checkKnightL(-1, -2, teamPositions, oppPostions);
+        this.checkKnightL(-2, -1, teamPositions, oppPostions);
+        this.checkKnightL(-2, 1, teamPositions, oppPostions);
+        this.checkKnightL(-1, 2, teamPositions, oppPostions);
     }
 
     checkKnightL(xDirection, yDirection, teamPositions, oppPostions)

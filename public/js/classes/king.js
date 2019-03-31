@@ -1,4 +1,3 @@
-
 class King extends Piece {
     constructor (row, col, num, team) {
         super(row, col, num, team);
@@ -17,6 +16,12 @@ class King extends Piece {
         this.checkStraight(-1, 0, teamPositions, oppPostions);
         this.checkStraight(0, 1, teamPositions, oppPostions);
         this.checkStraight(0, -1, teamPositions, oppPostions);
+    }
+
+    isKingSafe(oppPossibleMoves){
+    for (var i = 0; i < oppPossibleMoves.length; i++){
+        if (this.isEqual({row: this.row, col: this.col}, oppPossibleMoves[i])) return false;}
+        return true;
     }
     
     checkStraight(xDirection, yDirection, teamPositions, oppPostions)

@@ -1,4 +1,3 @@
-
 class Rook extends Piece {
     constructor (row, col, num, team) {
         super(row, col, num, team);
