@@ -77,20 +77,20 @@ button
 .optionButton
 {
   display: block;
-  width: 140px;
+  width: 107px;
   margin: 0 auto;
   background-color: rgba(95, 88, 156, 0.747);
   border: 0px solid rgba(0,0,0,0);
 
   font-family: 'Germania One', cursive;
-  font-size: 150%;
+  font-size: 113%;
 }
 #top-bottom
 {
   position: absolute;
   display: flex;
   left: 0px;
-  bottom: 70px;
+  bottom: 60px;
   width: 100%;
   justify-content: space-evenly;
   align-items: baseline;
@@ -175,8 +175,8 @@ a.button:hover
 {
   display: flex;
   margin: 0 auto;
-  width: 750px;
-  height: 230px;
+  width: 562px;
+  height: 172px;
   background-color: rgba(95, 88, 156, 0.747);
   border: 1px solid black;
   margin-bottom: 50px;
@@ -192,8 +192,8 @@ a.button:hover
   display: block;
   margin-left: 75px;
   margin-right: 75px;
-  width: 375px;
-  height: 520px;
+  width: 280px;
+  height: 390px;
   background-color: rgba(95, 88, 156, 0.747);
   border: 1px solid black;
   border-radius: 20px;
@@ -219,22 +219,22 @@ a.button:hover
   display: block;
   background-repeat: no-repeat;
   background-size: cover;
-  width: 75px;
-  height: 75px;
+  width: 57px;
+  height: 57px;
   margin: 0 auto;
 }
 #gameID {
-  font-size: 130%;
+  font-size: 98%;
   color: white;
   font-family: 'Cairo', sans-serif;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   font-weight: bolder;
   margin-top: 0px;
   background-color: rgba(95, 88, 156, 0.747);
   padding-left: 5px;
   padding-right: 5px;
-  width: 300px;
+  width: 225px;
   display: block;
 }
 .dead
@@ -242,10 +242,10 @@ a.button:hover
   display: block;
   background-repeat: no-repeat;
   background-size: cover;
-  width: 60px;
+  width: 45px;
   text-align: right;
-  font-size: 200%;
-  height: 60px;
+  font-size: 150%;
+  height: 45px;
   margin-right: 11.875px;
   margin-left: 11.875px;
 }
@@ -261,21 +261,21 @@ a.button:hover
   background-image: url("../images/sh.png");
   background-repeat: no-repeat;
   background-size: cover;
-  width: 275px;
-  height: 275px;
+  width: 206px;
+  height: 206px;
   margin: 0 auto;
   margin-top: 50px;
   margin-bottom: 0px;
 }
 #turn
 {
-  font-size: 300%;
+  font-size: 225%;
   margin: 0px;
 }
 h2
 {
   color: rgb(172, 170, 170);
-  font-size: 170%;
+  font-size: 127%;
 }
 #g
 {
@@ -284,7 +284,7 @@ h2
 h1
 {
   color: white;
-  font-size: 230%;
+  font-size: 172%;
   margin-top: 10px;
 }
 h4
@@ -359,7 +359,7 @@ p
   color: rgba(255, 255, 255, 0.671);
   text-align: center;
   margin-top: 0px;
-  font-size: 140%;
+  font-size: 105%;
   font-family: 'Cairo', sans-serif;
 }
 .form
@@ -377,23 +377,23 @@ p
 #textbox
 {
   display: block;
-  height: 40px;
-  width: 225px;
+  height: 30px;
+  width: 168px;
   margin: 0;
   background-color: rgba(163, 163, 163, 0.541);
   border: 0px;
   margin-right: 15px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  font-size: 130%;
+  font-size: 98%;
   color: white;
 }
 #send
 {
   display: block;
   margin: 0px;
-  height: 40px;
-  width: 80px;
-  font-size: 150%;
+  height: 32px;
+  width: 60px;
+  font-size: 113%;
   background-color: rgba(114, 104, 207, 0.747);
 }
 #chat
@@ -457,8 +457,8 @@ p
 .block
 {
   display: block;
-  width: 65px;
-  height: 65px;
+  width: 50px;
+  height: 50px;
   background-size: cover;
 }
 .container
@@ -474,7 +474,7 @@ p
 }
 .add-more-top-margin
 {
-  margin-top: 30px;
+  margin-top: 15px;
 }
 .messageDetails
 {
