@@ -16,19 +16,19 @@ mongoose.connect('mongodb://localhost:27017/chess', {
   useNewUrlParser: true
 });
 
-const matchmaker = require("./Express-Chess/server/matchmaker.js");
+const matchmaker = require("./matchmaker.js");
 app.use("/api/queue", matchmaker);
 
-const selected = require("./Express-Chess/server/selected.js");
+const selected = require("./selected.js");
 app.use("/api/selected", selected);
 
-const multiplayer = require("./Express-Chess/server/multiplayer.js");
+const multiplayer = require("./multiplayer.js");
 app.use("/api/match", multiplayer);
 
-const chat = require("./Express-Chess/server/chat.js");
+const chat = require("./chat.js");
 app.use("/api/chat", chat);
 
-const active = require("./Express-Chess/server/active.js");
+const active = require("./active.js");
 app.use("/api/active", active);
 
 app.listen(3000, () => console.log('Server listening on port 3000!'));
