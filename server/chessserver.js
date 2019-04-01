@@ -28,7 +28,7 @@ app.use("/api/match", multiplayer);
 const chat = require("./Express-Chess/server/chat.js");
 app.use("/api/chat", chat);
 
-const chat = require("./Express-Chess/server/active.js");
+const active = require("./Express-Chess/server/active.js");
 app.use("/api/active", active);
 
 app.listen(3000, () => console.log('Server listening on port 3000!'));
