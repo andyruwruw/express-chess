@@ -8,6 +8,7 @@ var app = new Vue({
     el: '#app',
     data:
     {
+        notDoneDisplay: false,
         matchMaker: {
             _id: "",
             roomNum: 0,
@@ -1132,6 +1133,7 @@ var app = new Vue({
             this.selectData.songChange = true;
             playMusic();
         },
+        
     },
     computed:
     {
@@ -1186,9 +1188,16 @@ var app = new Vue({
         gameIDButton()
         {
             return "Game ID: " + this.serverData.gameID;
-        }
+        },
 
-        
+        notDone()
+        {
+            if (this.notDoneDisplay)
+            {
+                return "WORKING ON THIS";
+            }
+            return "REJOIN MATCH";
+        }
     },
 });
 

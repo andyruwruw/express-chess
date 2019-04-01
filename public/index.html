@@ -73,7 +73,7 @@
     <h1 id="menuTitle" v-if="!matchData.startGame">Express Chess</h1>
     <div id="menuButtons" v-if="!matchData.startGame">
         <button class="add-margin" @click="getMatchMakers">{{findMatchButtonText}}</button>
-        <button class="add-margin" @click="rejoinMatch">REJOIN MATCH</button>
+        <button class="add-margin" @mouseover="notDoneDisplay = true" @mouseleave="notDoneDisplay = false" @click="rejoinMatch">{{notDone}}</button>
         <a class="button add-margin" href="./pages/spectate.html">SPECTATE</a>
         <a class="button add-margin" href="./pages/about.html">ABOUT</a>
     </div>
