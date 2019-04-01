@@ -290,15 +290,16 @@ h1
 h4
 {
   color: rgb(172, 170, 170);
-  font-size: 110%;
+  font-size: 100%;
   padding-top: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
   margin-top: 5px;
 }
 h5
 {
   color: rgb(172, 170, 170);
   margin-top: 5px;
+  margin-bottom: 4px;
 }
 .center
 {
@@ -328,7 +329,7 @@ h5
 p
 {
   margin: 0px;
-  padding-bottom: 10px;
+  padding-bottom: 5px;
   overflow-wrap: break-word;
 }
 .message

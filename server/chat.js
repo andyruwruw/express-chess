@@ -32,7 +32,7 @@ router.put('/:idNum', async (req, res) => { // Update with new Selection
             $push : {
                 chats : {
                     $each : [req.body.message],
-                    $slice: -4
+                    $slice: -3
                 }
             }
         });

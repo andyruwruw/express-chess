@@ -140,7 +140,7 @@ var app = new Vue({
         continuousTasks()                                                                   // Actions taken regardless of who's turn it is.
         {
             this.getChatRoom();
-            if (this.chatData.messageText.length > 75) this.messageText = this.messageText.substring(0,75);
+            if (this.chatData.messageText.length > 50) this.messageText = this.messageText.substring(0,50);
         },
         //=====================================================SELECTION=====================================================
         clickBlock(blockString)                                                             // Runs following a click on the screen.
@@ -843,25 +843,28 @@ var app = new Vue({
         async messageChatRoom()
         {
             try {
-                var time = new Date();
-                var hours = time.getHours();
-                var dayTime = " AM";
-                if (hours > 12) 
+                if (this.chatData.messageText != "")
                 {
-                    hours = hours - 12;
-                    dayTime = " PM";
+                    var time = new Date();
+                    var hours = time.getHours();
+                    var dayTime = " AM";
+                    if (hours > 12) 
+                    {
+                        hours = hours - 12;
+                        dayTime = " PM";
+                    }
+                    var extraZero = "";
+                    if (time.getMinutes() < 10) extraZero = "0"
+                    var timeString = hours + ":" + extraZero + time.getMinutes() + dayTime;
+                    var color = "White";
+                    if (this.teamColor()  == "b") color = "Black";
+                    let response = await axios.put("/api/chat/" + this.serverData.gameID, {
+                        message: {text: this.chatData.messageText, time: timeString, usr: color}
+                    });
+                    this.chatData.messageText = "";
+                    this.getChatRoom();
+                    return true;
                 }
-                var extraZero = "";
-                if (time.getMinutes() < 10) extraZero = "0"
-                var timeString = hours + ":" + extraZero + time.getMinutes() + dayTime;
-                var color = "White";
-                if (this.teamColor()  == "b") color = "Black";
-                let response = await axios.put("/api/chat/" + this.serverData.gameID, {
-                    message: {text: this.chatData.messageText, time: timeString, usr: color}
-                });
-                this.chatData.messageText = "";
-                this.getChatRoom();
-                return true;
             } catch (error) {
                 console.log(error);
             }
