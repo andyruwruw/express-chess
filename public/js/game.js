@@ -2,6 +2,7 @@ function loading()
 {
     document.getElementById("loading").style.display = "none";
 };
+var music = "orionstheme";
 
 var app = new Vue({
     el: '#app',
@@ -25,6 +26,10 @@ var app = new Vue({
         {
             whitePositions: [],
             blackPostions: [],
+            whiteBlocked: [],
+            blackBlocked: [],
+            whitePossible: [],
+            blackPossible: [],
         },
         gameData:
         {
@@ -56,6 +61,9 @@ var app = new Vue({
             unselected: {row: -1, col: -1},
             oppSelectionDif: "",
             assist: true,
+            showSong: false,
+            gameCopy: false,
+            songChange: false,
         },
         serverData:
         {
@@ -97,8 +105,10 @@ var app = new Vue({
             check: {sound: "check", volume: .7},
             checkmate: {sound: "checkmate", volume: .7},
             move: {sound: "move", volume: .7},
-            matchfound: {sound: "matchfound", volume: .2},
-            turn: {sound: "turn", volume: .7}},
+            matchfound: {sound: "matchfound", volume: .1},
+            turn: {sound: "turn", volume: .7},
+            end: {sound: "end", volume: .7},
+            stalemate: {sound: "stalemate", volume: .7}},
     },
     methods:
     {
@@ -193,6 +203,9 @@ var app = new Vue({
                             console.log(piece);
                         }
                     }
+                    this.pieceData.whitePieces[piece].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions);
+
+                    if (piece == "k1") {this.getBlackBlocked(); this.getBlackPossible();this.pieceData.whitePieces.k1.removeUnsafeMoves(this.testData.blackBlocked, this.testData.blackPossible);}
                     var possible = this.pieceData.whitePieces[piece].getPossibleMoves();
                     for (var i = 0; i < possible.length; i++)
                     {
@@ -217,6 +230,8 @@ var app = new Vue({
                             console.log(piece);
                         }
                     }
+                    this.pieceData.blackPieces[piece].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions);
+                    if (piece == "k1") {this.getWhiteBlocked(); this.getWhitePossible();this.pieceData.blackPieces.k1.removeUnsafeMoves(this.testData.whiteBlocked, this.testData.whitePossible);}
                     var possible = this.pieceData.blackPieces[piece].getPossibleMoves();
                     for (var i = 0; i < possible.length; i++)
                     {
@@ -231,6 +246,54 @@ var app = new Vue({
                 }
             }
         },
+        getWhiteBlocked()
+        {
+            this.testData.whiteBlocked = [];
+            let keys = Object.keys(this.pieceData.whitePieces);
+            for (var i = 0; i < keys.length; i++)
+            {
+                if (!(this.pieceData.whitePieces[keys[i]].getStatus())) continue;
+                this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions);
+                this.testData.whiteBlocked = this.testData.whiteBlocked.concat(this.pieceData.whitePieces[keys[i]].getblockBlocks());
+            }
+        },
+        getBlackBlocked()
+        {
+            this.testData.blackBlocked = [];
+            let keys = Object.keys(this.pieceData.blackPieces);
+            for (var i = 0; i < keys.length; i++)
+            {
+                if (!(this.pieceData.blackPieces[keys[i]].getStatus())) continue;
+                this.pieceData.blackPieces[keys[i]].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions);
+                this.testData.blackBlocked = this.testData.blackBlocked.concat(this.pieceData.blackPieces[keys[i]].getblockBlocks());
+            }
+        },
+        getWhitePossible()
+        {
+            this.testData.whitePossible = [];
+            let keys = Object.keys(this.pieceData.whitePieces);
+            for (var i = 0; i < keys.length; i++)
+            {
+                if (!(this.pieceData.whitePieces[keys[i]].getStatus())) continue;
+                this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions);
+                this.testData.whitePossible = this.testData.whitePossible.concat(this.pieceData.whitePieces[keys[i]].getPossibleMoves());
+            }
+        },
+        getBlackPossible()
+        {
+            this.testData.blackPossible = [];
+            let keys = Object.keys(this.pieceData.blackPieces);
+            for (var i = 0; i < keys.length; i++)
+            {
+                if (!(this.pieceData.blackPieces[keys[i]].getStatus())) continue;
+                this.pieceData.blackPieces[keys[i]].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions);
+                this.testData.blackPossible = this.testData.blackPossible.concat(this.pieceData.blackPieces[keys[i]].getPossibleMoves());
+            }
+        },
+
+
+
+
         unColorPossible()
         {
             for (var i = 0; i < this.selectData.possible.length; i++)
@@ -246,13 +309,17 @@ var app = new Vue({
         },
         toggleAssistSelect()
         {
+            this.playSound(this.SOUNDS.select.sound, this.SOUNDS.select.volume);
+            var element = document.getElementById("moveAssist");
             if (this.selectData.assist)
             {
+                element.style.color = "rgb(70,70,70)";
                 this.selectData.assist = false;
                 this.unColorPossible();
             }
             else
             {
+                element.style.color = "white";
                 this.selectData.assist = true;
                 if (!(this.isEqual(this.selectData.selected, this.selectData.unselected)))
                 {
@@ -297,8 +364,16 @@ var app = new Vue({
                 for (var l = 0; l < pieces.length; l++){
                     if (selectedDiv.classList.contains(colors[k] + pieces[l])) 
                     selectedDiv.classList.remove(colors[k] + pieces[l]);}}
-            if (this.selectData.selectImage == "") selectedDiv.classList.add("wt");
-            else selectedDiv.classList.add(this.selectData.selectImage);},                           // Then addds the correct Image.
+
+            if (this.selectData.selectImage.charAt(0) == this.teamColor() && !this.gameData.playerTurn)
+            {
+                selectedDiv.classList.add(this.oppColor() + "t");
+            } 
+            else
+            {
+                selectedDiv.classList.add(this.selectData.selectImage);
+            }
+        },                    // Then addds the correct Image.
         refreshChangedBlocks(changedSlots)
         {
             for (var i = 0; i < changedSlots.length / 2; i++)
@@ -402,6 +477,7 @@ var app = new Vue({
                     this.gameData.displayedTurn = response.data.serverTurn;
                     this.gameData.whiteScore = response.data.whiteScore;
                     this.gameData.blackScore = response.data.blackScore;
+                    this.unselectCheckBlock();
                     this.gameData.whiteCheck = response.data.whiteCheck;
                     this.gameData.blackCheck = response.data.blackCheck;
                     this.gameData.blackWin = response.data.whiteCheckMate;
@@ -412,6 +488,7 @@ var app = new Vue({
                     var changedSlots = response.data.changedSlots;
                     this.refreshChangedBlocks(changedSlots);
                     this.findAllPositions();
+                    if (this.gameData.whiteCheck || this.gameData.blackCheck) this.selectCheckBlock();
                     this.updateDead();
                 return true;
             } catch (error) {
@@ -444,10 +521,10 @@ var app = new Vue({
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.gameData.playerTurn = false;
                     this.selectData.selectImage = this.oppColor() + "t";
+                    this.postOppSelection();
                     this.drawSelection();
                     this.unselectBlock();
                     this.setData(this.selectData.selected, this.selectData.unselected);
-                    //this.postOppSelection();
                     this.getGameData();                                                                    // Retrieves new data.
                 }
                 else                                                                                // If server declines move.
@@ -472,6 +549,7 @@ var app = new Vue({
                     this.gameData.playerTurn = true;
                     this.setData(this.selectData.selected, this.selectData.unselected);
                     this.selectData.selectImage = this.teamColor() + "t";
+                    this.unselectRedBlockDiv();
                     this.drawSelection();
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.getGameData();
@@ -635,6 +713,7 @@ var app = new Vue({
         async getMatchMakers()
         {
             try {
+                this.playSound(this.SOUNDS.select.sound, this.SOUNDS.select.volume);
                 if (this.matchData.findingMatch)
                 {
                     this.matchData.findingMatch = 0;
@@ -866,6 +945,82 @@ var app = new Vue({
                 this.selectData.red = "";
             }
         },
+        selectCheckBlock()
+        {
+            if (this.gameData.whiteCheck)
+            {
+                var kingPos = this.pieceData.whitePieces.k1.getPositionObject();
+                var keys = Object.keys(this.pieceData.blackPieces);
+                var dangerousBlock;
+                var done = 0;
+                for (var i = 0; i < keys.length; i++)
+                {
+                    this.pieceData.blackPieces[keys[i]].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions);
+                    var possible = this.pieceData.blackPieces[keys[i]].getPossibleMoves();
+                    for (var j = 0; j < possible.length; j++)
+                    {
+                        
+                        if (this.isEqual(possible[j], kingPos))
+                        {
+                            dangerousBlock = keys[i];
+                            console.log("Found at: " + dangerousBlock);
+                            done = 1;
+                            break;
+                        }
+                    }
+                    if (done)
+                    {
+                        break;
+                    }
+                }
+                console.log(dangerousBlock);
+                var id = this.blockToString(this.pieceData.blackPieces[dangerousBlock].getPositionObject());
+                var element = document.getElementById(id);
+                if (!element.classList.contains("check"))
+                element.classList.add("check");
+                this.selectData.check = id;
+            }
+            if (this.gameData.blackCheck)
+            {
+                var kingPos = this.pieceData.blackPieces.k1.getPositionObject();
+                var keys = Object.keys(this.pieceData.whitePieces);
+                var dangerousBlock;
+                var done = 0;
+                for (var i = 0; i < keys.length; i++)
+                {
+                    this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions);
+                    var possible = this.pieceData.whitePieces[keys[i]].getPossibleMoves();
+                    for (var j = 0; j < possible.length; j++)
+                    {
+                        if (this.isEqual(possible[j], kingPos))
+                        {
+                            var id = this.blockToString(this.pieceData.whitePieces[keys[i]].getPositionObject());
+                            var element = document.getElementById(id);
+                            if (!element.classList.contains("check"))
+                            element.classList.add("check");
+                            this.selectData.check = id;
+                            done = 1;
+                            break;
+                        }
+                    }
+                    if (done)
+                    {
+                        break;
+                    }
+                }
+
+            }
+        },
+        unselectCheckBlock()
+        {
+            if (this.selectData.check != "")
+            {
+                var element = document.getElementById(this.selectData.check);
+                if (element.classList.contains("check"))
+                element.classList.remove("check");
+                this.selectData.check = "";
+            }
+        },
         //=====================================================MISC=====================================================
         /* HELPER */ 
         playSound(sound, volume){
@@ -902,7 +1057,7 @@ var app = new Vue({
             return "w";
         },
         oppColor(){
-            if (this.gameData.team) return "w";
+            if (this.gameData.team) {return "w";}
             return "b";
         },
         findKeyOffPosition(position, teamPieces)
@@ -964,6 +1119,16 @@ var app = new Vue({
             this.pieceData.blackPieces.p7 = new Pawn(recievedData.blackPieces.p7.row, recievedData.blackPieces.p7.col, recievedData.blackPieces.p7.num, recievedData.blackPieces.p7.team, recievedData.blackPieces.p7.possibleMoves, recievedData.blackPieces.p7.blockBlocks, recievedData.blackPieces.p7.isDead, recievedData.blackPieces.p7.hasMoved);
             this.pieceData.blackPieces.p8 = new Pawn(recievedData.blackPieces.p8.row, recievedData.blackPieces.p8.col, recievedData.blackPieces.p8.num, recievedData.blackPieces.p8.team, recievedData.blackPieces.p8.possibleMoves, recievedData.blackPieces.p8.blockBlocks, recievedData.blackPieces.p8.isDead, recievedData.blackPieces.p8.hasMoved);
         },
+        changeSong()
+        {
+            pauseMusic();
+            this.playSound(this.SOUNDS.select.sound, this.SOUNDS.select.volume);
+            var songs = ["orionstheme", "lowfi", "bach", "wouh", "outkast", "chopin", "bluemantique", "minecraft",];
+            var currIndex = songs.indexOf(music);
+            music = songs[(currIndex + 1) % songs.length];
+            this.selectData.songChange = true;
+            playMusic();
+        },
     },
     computed:
     {
@@ -979,14 +1144,17 @@ var app = new Vue({
                 this.gameData.blackWin ||
                 this.gameData.stale) return "Total Moves";
             if (this.gameData.playerTurn) return "Your Move";
-            else if (this.teamColor() == "b") return "Black's Move";
-            else return "White's Move";
+            else if (this.teamColor() == "b") return "White's Move";
+            else return "Black's Move";
         },
         winningCalc()
         {
-            if (this.gameData.whiteWin) return "WHITE WINS.";
-            if (this.gameData.blackWin) return "BLACK WINS.";
-            if (this.gameData.stalemate) return "STALEMATE.";
+            if (this.gameData.whiteWin) {
+                this.playSound(this.SOUNDS.end.sound, this.SOUNDS.end.volume);this.gameOver(); return "WHITE WINS.";}
+            if (this.gameData.blackWin) {
+                this.playSound(this.SOUNDS.end.sound, this.SOUNDS.end.volume);this.gameOver(); return "BLACK WINS.";}
+            if (this.gameData.stalemate) {
+                this.playSound(this.SOUNDS.stalemate.sound, this.SOUNDS.stalemate.volume);this.gameOver(); return "STALEMATE";}
             const STRINGS = ["Dominating", "Winning", "Smarter", "Better", "Superior", "Destroying"];
             var returnString = STRINGS[Math.floor(Math.random() * 100 % STRINGS.length)];
             if (this.gameData.whiteScore > this.gameData.blackScore) return "White is " + returnString + "!";
@@ -996,17 +1164,43 @@ var app = new Vue({
         serverMessage()
         {
             return this.serverData.serverMessageText;
+        },
+        currmusic()
+        {
+            if (this.selectData.showSong)
+            {   
+                if (this.selectData.songChange)
+                {
+                    this.selectData.songChange = false;
+                }
+                var songs = ["orionstheme", "lowfi", "bach", "wouh", "outkast", "chopin", "bluemantique", "minecraft",];
+                var returns = ["Orions Theme", "Motions", "Bach", "Wouh", "Outkast", "Chopin", "Bluemantique", "Minecraft"];
+                var currIndex = songs.indexOf(music);
+                return returns[currIndex];
+            }
+            return "CHANGE SONG";
+        },
+        gameIDButton()
+        {
+            return "Game ID: " + this.serverData.gameID;
         }
+
         
     },
 });
 
 function playMusic()
 {
-	var media = document.getElementById("music");
+	var media = document.getElementById(music);
 	media.volume = .2;
 	const playPromise = media.play();
 	if (playPromise !== null){
 		playPromise.catch(() => { media.play(); })
 	}
+}
+
+function pauseMusic()
+{
+    var media = document.getElementById(music);
+    const playPromise = media.pause();
 }

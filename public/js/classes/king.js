@@ -29,7 +29,7 @@ class King extends Piece {
         }
     }
 
-    removeUnsafeMoves(opponentBlockedMoves)
+    removeUnsafeMoves(opponentBlockedMoves, opponentPossibleMoves)
     {
         var newPossible = [];
         for (var j = 0; j < this.possibleMoves.length; j++)
@@ -38,6 +38,14 @@ class King extends Piece {
             for (var i = 0; i < opponentBlockedMoves.length; i++)
             {
                 if ((this.isEqual(this.possibleMoves[j], opponentBlockedMoves[i])))
+                {
+                    blocked = true;
+                    break;
+                }
+            }
+            for (var i = 0; i < opponentPossibleMoves.length; i++)
+            {
+                if ((this.isEqual(this.possibleMoves[j], opponentPossibleMoves[i])))
                 {
                     blocked = true;
                     break;

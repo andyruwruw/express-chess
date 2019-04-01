@@ -37,7 +37,7 @@ class Pawn extends Piece {
         this.possibleMoves = [];
         this.blockBlocks = [];
         this.checkForward(0, this.rowDirection, teamPositions, oppPositions);
-        if (!this.hasMoved)
+        if (!((this.row > 1 && !this.team) || (this.row < 6 && this.team)))
         {
             this.checkForward(0, this.rowDirection * 2, teamPositions, oppPositions);
         }
