@@ -746,7 +746,7 @@ class Pawn extends Piece {
 
     checkForward(xDirection, yDirection, teamPositions, oppPositions)
     {
-        this.checkOnce(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
+        this.checkOncePawn(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
 
     checkKillDiag(xDirection, yDirection, teamPositions, oppPositions) {
@@ -773,7 +773,33 @@ class Pawn extends Piece {
         }  
         return true;
     }
+
+    checkOncePawn(xDirection, yDirection, teamPositions, oppPositions, currPos)
+    {
+        var testBlock = this.addValues(currPos, xDirection, yDirection);
+        if (!this.isInBoard(testBlock)) return true;
+
+        for (var i = 0; i < teamPositions.length; i++)
+        {
+            if (this.isEqual(testBlock, teamPositions[i]))
+            {
+                this.blockBlocks.push(testBlock);
+                return true;
+            }
+        }
+        for (var i = 0; i < oppPositions.length; i++)
+        {
+            if (this.isEqual(testBlock, oppPositions[i]))
+            {
+                this.blockBlocks.push(testBlock);
+                return true;
+            }
+        }
+        this.possibleMoves.push(testBlock);
+        return true;
+    }
 }
+
 
 class Queen extends Piece {
     constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
