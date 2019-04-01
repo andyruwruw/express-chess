@@ -50,6 +50,7 @@ body
 #menuButtons
 {
   margin-top: 3%;
+  margin-bottom: 100px;
 }
 #loading
 {
@@ -102,12 +103,17 @@ button
 p.about
 {
   display: block;
+  margin-top: 20px;
+  background: rgba(114, 104, 207, 0.2);
+  line-height: 150%;
   width: 50%;
   word-wrap: normal;
   text-align: center;
   margin: 0 auto;
+  margin-top: 50px;
   color: white;
   font-size: 150%;
+
 }
 a.button
 {
@@ -315,6 +321,7 @@ h5
   width: 50%;
   height: 100%;
 }
+
 .centered
 {
   display: block;

@@ -19,12 +19,20 @@
         <h1>Express Chess</h1>
       </div>
     </div>
+    <a class="add-bottom button add-margin" href="../index.html">BACK</a>
+    <a class="button add-margin" href="http://sovereign2.andrewdanielyoung.com/">CHECK OUT MY OTHER GAME</a>
+    <p class="about">Get Someone to Play with You or Open Two Windows to Check it Out!</p>
     <p class="about">Express Chess uses Vue for its front end design while implementing Node for a backend server. The server runs a Rest API using Express and Mongo for data storage.</p>
     <p class="about">All logic for valid movements are done in the back end, while the front end focuses on display and selection.</p>
+    <p class="about">I honestly didn't expect this project to take as much time as it did. Started pile of papers with different process' mapped out, but was thrown quite a few curve balls. I ended up putting a hundred hours into a prior version and decided to trash it all and refactor.</p>
+    <p class="about">The earlier version sent board data back and forth, an array of arrays marked with each position. The backend would read the positions and debate if moves were allowed.</p>
+    <p class="about">That system turned out to be easy to send the data back and forth, but harder for calculating checkmates and possible moves. In the end I created classes for each piece and shared their positions, possible moves, and where they were blocked</p>
+    <p class="about">This new method not only gave me a useful list of possible moves, but allowed me to only recalculate a pieces data when a position in its possible moves or blocked spaces was changed.</p>
+    <p class="about">Further issues pursued as I realized I couldn't send the full objects to my API, but instead had to process it into it's core data, to be reset as an object on either side.</p>
+    <p class="about">Creating the logic for this game was a blast, and I had loads of fun!</p>
     <p class="about">Check out the GitHub link at the bottom to see the code in the back end!</p>
     <div id="menuButtons">
-        <a class="button add-margin" href="http://sovereign2.andrewdanielyoung.com/">CHECK OUT MY OTHER GAME</a>
-        <a class="button add-margin" href="../index.html">BACK</a>
+      <a class="add-bottom button add-margin" href="../index.html">BACK</a>
     </div>
   </div>
 
