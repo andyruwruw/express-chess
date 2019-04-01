@@ -713,12 +713,6 @@ class Pawn extends Piece {
         return data;
     }
 
-    move(newPos, teamPositions, oppPositions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
-        if (super.move(newPos, teamPositions, oppPositions)){
-        this.hasMoved = 1; return true;}
-        else return false;
-    }
-
     checkPromotion()
     {
         if (this.rowDirection < 0 && row == 0)
@@ -735,16 +729,16 @@ class Pawn extends Piece {
     findPossibleMoves(teamPositions, oppPositions) {
         this.possibleMoves = [];
         this.blockBlocks = [];
-        this.checkForward(0, this.rowDirection, teamPositions, oppPositions);
-        if (!this.hasMoved)
+        this.checkForwardPawn(0, this.rowDirection, teamPositions, oppPositions);
+        if ((this.team && this.row == 6) || (!this.team && this.row == 1))
         {
-            this.checkForward(0, this.rowDirection * 2, teamPositions, oppPositions);
+            this.checkForwardPawn(0, this.rowDirection * 2, teamPositions, oppPositions);
         }
         this.checkKillDiag(1, this.rowDirection, teamPositions, oppPositions);
         this.checkKillDiag(-1, this.rowDirection, teamPositions, oppPositions);
     }
 
-    checkForward(xDirection, yDirection, teamPositions, oppPositions)
+    checkForwardPawn(xDirection, yDirection, teamPositions, oppPositions)
     {
         this.checkOncePawn(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
@@ -757,7 +751,6 @@ class Pawn extends Piece {
         {
             if (this.isEqual(testBlock, teamPositions[i]))
             {
-                teamPositions.splice(i, 1);
                 this.blockBlocks.push(testBlock);
                 return true;
             }
@@ -766,11 +759,11 @@ class Pawn extends Piece {
         {
             if (this.isEqual(testBlock, oppPositions[i]))
             {
-                oppPositions.splice(i, 1);
                 this.possibleMoves.push(testBlock);
                 return true;
             }
         }  
+	this.blockBlocks.push(testBlock);
         return true;
     }
 
