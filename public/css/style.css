@@ -331,6 +331,7 @@ p
   margin: 0px;
   padding-bottom: 5px;
   overflow-wrap: break-word;
+  line-height: 100%;
 }
 .message
 {

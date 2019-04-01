@@ -140,7 +140,7 @@ var app = new Vue({
         continuousTasks()                                                                   // Actions taken regardless of who's turn it is.
         {
             this.getChatRoom();
-            if (this.chatData.messageText.length > 50) this.messageText = this.messageText.substring(0,50);
+            if (this.chatData.messageText.length > 50) this.chatData.messageText = this.chatData.messageText.substring(0,50);
         },
         //=====================================================SELECTION=====================================================
         clickBlock(blockString)                                                             // Runs following a click on the screen.
