@@ -1,9 +1,9 @@
 class Bishop extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, Overload) {
         super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
         this.type = "b";
-        this.points = 3;
-        }
+        console.log("SET TYPE: " + this.type);
+        this.points = 3;}
 
     findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
         super.findPossibleMoves();

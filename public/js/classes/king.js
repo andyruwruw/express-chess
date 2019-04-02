@@ -1,7 +1,8 @@
 class King extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, hasMoved) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, hasMoved, Overload) {
         super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
         this.type = "k";
+        console.log("SET TYPE: " + this.type);
         this.hasMoved = hasMoved;
         this.points = 100;
         }
@@ -29,15 +30,16 @@ class King extends Piece {
         }
     }
 
-    removeUnsafeMoves(opponentBlockedMoves)
+    removeUnsafeMoves(opponentBlockedMoves, oppPossibleMoves)
     {
+        var nonos = opponentBlockedMoves.concat(oppPossibleMoves);
         var newPossible = [];
         for (var j = 0; j < this.possibleMoves.length; j++)
         {
             var blocked = false;
-            for (var i = 0; i < opponentBlockedMoves.length; i++)
+            for (var i = 0; i < nonos.length; i++)
             {
-                if ((this.isEqual(this.possibleMoves[j], opponentBlockedMoves[i])))
+                if ((this.isEqual(this.possibleMoves[j], nonos[i])))
                 {
                     blocked = true;
                     break;

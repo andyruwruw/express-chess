@@ -1,9 +1,10 @@
 class Pawn extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, Overload) {
         super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
         if (team) this.rowDirection = -1;
         else this.rowDirection = 1;
         this.type = "p";
+        console.log("SET TYPE: " + this.type);
         this.points = 1;}
 
     getSendObject()

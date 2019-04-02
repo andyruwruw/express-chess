@@ -1,7 +1,9 @@
 class Queen extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, Overload) {
         super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
+        if (team) console.log("hey");
         this.type = "q";
+        console.log("SUP");
         this.points = 9;
         }
 

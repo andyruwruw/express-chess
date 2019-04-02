@@ -1,9 +1,9 @@
 class Rook extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, Overload) {
         super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
         this.type = "r";
-        this.points = 5;
-        }
+        console.log("SET TYPE: " + this.type);
+        this.points = 5;}
 
     getSendObject()
     {

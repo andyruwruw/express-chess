@@ -77,27 +77,29 @@ var app = new Vue({
         chatData:
         {
             messages: [],
+            pastmessages: [],
             messageText: "",
             messageBool: false,
+            justSent: false,
         },
         pieceData:
         {
-            whitePieces: {k1: new King(0, 4, 1, 0, sD(1,"wk1"), sD(2,"wk1"), [], 0),   q1: new Queen(0, 3, 1, 0, sD(1,"wq1"), sD(2,"wq1"), [], 0),  
-                          r1: new Rook(0, 0, 1, 0, sD(1,"wr1"), sD(2,"wr1"), [], 0),   r2: new Rook(0, 7, 2, 0, sD(1,"wr2"), sD(2,"wr2"), [], 0), 
-                          b1: new Bishop(0, 2, 1, 0, sD(1,"wb1"), sD(2,"wb1"), [], 0), b2: new Bishop(0, 5, 2, 0, sD(1,"wb2"), sD(2,"wb2"), [], 0), 
-                          n1: new Knight(0, 1, 1, 0, sD(1,"wn1"), sD(2,"wn1"), [], 0), n2: new Knight(0, 6, 2, 0, sD(1,"wn2"), sD(2,"wn2"), [], 0), 
-                          p1: new Pawn(1, 0, 1, 0, sD(1,"wp1"), sD(2,"wp1"), [], 0),   p2: new Pawn(1, 1, 2, 0, sD(1,"wp2"), sD(2,"wp2"), [], 0),   
-                          p3: new Pawn(1, 2, 3, 0, sD(1,"wp3"), sD(2,"wp3"), [], 0),   p4: new Pawn(1, 3, 4, 0, sD(1,"wp4"), sD(2,"wp4"), [], 0), 
-                          p5: new Pawn(1, 4, 5, 0, sD(1,"wp5"), sD(2,"wp5"), [], 0),   p6: new Pawn(1, 5, 6, 0, sD(1,"wp6"), sD(2,"wp6"), [], 0),   
-                          p7: new Pawn(1, 6, 7, 0, sD(1,"wp7"), sD(2,"wp7"), [], 0),   p8: new Pawn(1, 7, 8, 0, sD(1,"wp8"), sD(2,"wp8"), [], 0)},
-            blackPieces: {k1: new King(7, 4, 1, 1, sD(1,"bk1"), sD(2,"bk1"), [], 0),   q1: new Queen(7, 3, 1, 1, sD(1,"bq1"), sD(2,"bq1"), [], 0),  
-                          r1: new Rook(7, 0, 1, 1, sD(1,"br1"), sD(2,"br1"), [], 0),   r2: new Rook(7, 7, 2, 1, sD(1,"br2"), sD(2,"br2"), [], 0), 
-                          b1: new Bishop(7, 2, 1, 1, sD(1,"bb1"), sD(2,"bb1"), [], 0), b2: new Bishop(7, 5, 2, 1, sD(1,"bb2"), sD(2,"bb2"), [], 0), 
-                          n1: new Knight(7, 1, 1, 1, sD(1,"bn1"), sD(2,"bn1"), [], 0), n2: new Knight(7, 6, 2, 1, sD(1,"bn2"), sD(2,"bn2"), [], 0), 
-                          p1: new Pawn(6, 0, 1, 1, sD(1,"bp1"), sD(2,"bp1"), [], 0),   p2: new Pawn(6, 1, 2, 1, sD(1,"bp2"), sD(2,"bp2"), [], 0),   
-                          p3: new Pawn(6, 2, 3, 1, sD(1,"bp3"), sD(2,"bp3"), [], 0),   p4: new Pawn(6, 3, 4, 1, sD(1,"bp4"), sD(2,"bp4"), [], 0), 
-                          p5: new Pawn(6, 4, 5, 1, sD(1,"bp5"), sD(2,"bp5"), [], 0),   p6: new Pawn(6, 5, 6, 1, sD(1,"bp6"), sD(2,"bp6"), [], 0),   
-                          p7: new Pawn(6, 6, 7, 1, sD(1,"bp7"), sD(2,"bp7"), [], 0),   p8: new Pawn(6, 7, 8, 1, sD(1,"bp8"), sD(2,"bp8"), [], 0)},
+            whitePieces: {k1: new King(0, 4, 1, 0, sD(1,"wk1"), sD(2,"wk1"), [], 0, 1),   q1: new Queen(0, 3, 1, 0, sD(1,"wq1"), sD(2,"wq1"), [], 0, 1),  
+                          r1: new Rook(0, 0, 1, 0, sD(1,"wr1"), sD(2,"wr1"), [], 0, 1),   r2: new Rook(0, 7, 2, 0, sD(1,"wr2"), sD(2,"wr2"), [], 0, 1), 
+                          b1: new Bishop(0, 2, 1, 0, sD(1,"wb1"), sD(2,"wb1"), [], 0, 1), b2: new Bishop(0, 5, 2, 0, sD(1,"wb2"), sD(2,"wb2"), [], 0, 1), 
+                          n1: new Knight(0, 1, 1, 0, sD(1,"wn1"), sD(2,"wn1"), [], 0, 1), n2: new Knight(0, 6, 2, 0, sD(1,"wn2"), sD(2,"wn2"), [], 0, 1), 
+                          p1: new Pawn(1, 0, 1, 0, sD(1,"wp1"), sD(2,"wp1"), [], 0, 1),   p2: new Pawn(1, 1, 2, 0, sD(1,"wp2"), sD(2,"wp2"), [], 0, 1),   
+                          p3: new Pawn(1, 2, 3, 0, sD(1,"wp3"), sD(2,"wp3"), [], 0, 1),   p4: new Pawn(1, 3, 4, 0, sD(1,"wp4"), sD(2,"wp4"), [], 0, 1), 
+                          p5: new Pawn(1, 4, 5, 0, sD(1,"wp5"), sD(2,"wp5"), [], 0, 1),   p6: new Pawn(1, 5, 6, 0, sD(1,"wp6"), sD(2,"wp6"), [], 0, 1),   
+                          p7: new Pawn(1, 6, 7, 0, sD(1,"wp7"), sD(2,"wp7"), [], 0, 1),   p8: new Pawn(1, 7, 8, 0, sD(1,"wp8"), sD(2,"wp8"), [], 0, 1)},
+            blackPieces: {k1: new King(7, 4, 1, 1, sD(1,"bk1"), sD(2,"bk1"), [], 0, 1),   q1: new Queen(7, 3, 1, 1, sD(1,"bq1"), sD(2,"bq1"), [], 0, 1),  
+                          r1: new Rook(7, 0, 1, 1, sD(1,"br1"), sD(2,"br1"), [], 0, 1),   r2: new Rook(7, 7, 2, 1, sD(1,"br2"), sD(2,"br2"), [], 0, 1), 
+                          b1: new Bishop(7, 2, 1, 1, sD(1,"bb1"), sD(2,"bb1"), [], 0, 1), b2: new Bishop(7, 5, 2, 1, sD(1,"bb2"), sD(2,"bb2"), [], 0, 1), 
+                          n1: new Knight(7, 1, 1, 1, sD(1,"bn1"), sD(2,"bn1"), [], 0, 1), n2: new Knight(7, 6, 2, 1, sD(1,"bn2"), sD(2,"bn2"), [], 0, 1), 
+                          p1: new Pawn(6, 0, 1, 1, sD(1,"bp1"), sD(2,"bp1"), [], 0, 1),   p2: new Pawn(6, 1, 2, 1, sD(1,"bp2"), sD(2,"bp2"), [], 0, 1),   
+                          p3: new Pawn(6, 2, 3, 1, sD(1,"bp3"), sD(2,"bp3"), [], 0, 1),   p4: new Pawn(6, 3, 4, 1, sD(1,"bp4"), sD(2,"bp4"), [], 0, 1), 
+                          p5: new Pawn(6, 4, 5, 1, sD(1,"bp5"), sD(2,"bp5"), [], 0, 1),   p6: new Pawn(6, 5, 6, 1, sD(1,"bp6"), sD(2,"bp6"), [], 0, 1),   
+                          p7: new Pawn(6, 6, 7, 1, sD(1,"bp7"), sD(2,"bp7"), [], 0, 1),   p8: new Pawn(6, 7, 8, 1, sD(1,"bp8"), sD(2,"bp8"), [], 0, 1)},
         },
         SOUNDS: { 
             select: {sound: "select", volume: .7},
@@ -109,7 +111,9 @@ var app = new Vue({
             matchfound: {sound: "matchfound", volume: .1},
             turn: {sound: "turn", volume: .7},
             end: {sound: "end", volume: .7},
-            stalemate: {sound: "stalemate", volume: .7}},
+            stalemate: {sound: "stalemate", volume: .7},
+            chat: {sound: "chat", volume: .5},
+            sendchat: {sound: "sendchat", volume: .5}},
     },
     methods:
     {
@@ -201,12 +205,15 @@ var app = new Vue({
                         if (this.isEqual(this.pieceData.whitePieces[keys[i]].getPositionObject(), block))
                         {
                             var piece = keys[i];
-                            console.log(piece);
+                            break;
                         }
                     }
-                    this.pieceData.whitePieces[piece].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions);
+                    this.pieceData.whitePieces[piece].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions, this.pieceData.blackPieces[piece].getPositionObject());
 
-                    if (piece == "k1") {this.getBlackBlocked(); this.getBlackPossible();this.pieceData.whitePieces.k1.removeUnsafeMoves(this.testData.blackBlocked, this.testData.blackPossible);}
+                    if (piece == "k1") {
+                        this.getBlackBlocked(this.pieceData.whitePieces[piece].getPositionObject()); 
+                        this.getBlackPossible(this.pieceData.whitePieces[piece].getPositionObject());
+                        this.pieceData.whitePieces.k1.removeUnsafeMoves(this.testData.blackBlocked, this.testData.blackPossible);}
                     var possible = this.pieceData.whitePieces[piece].getPossibleMoves();
                     for (var i = 0; i < possible.length; i++)
                     {
@@ -231,8 +238,13 @@ var app = new Vue({
                             console.log(piece);
                         }
                     }
-                    this.pieceData.blackPieces[piece].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions);
-                    if (piece == "k1") {this.getWhiteBlocked(); this.getWhitePossible();this.pieceData.blackPieces.k1.removeUnsafeMoves(this.testData.whiteBlocked, this.testData.whitePossible);}
+                    this.pieceData.blackPieces[piece].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions, this.pieceData.blackPieces[piece].getPositionObject());
+                    if (piece == "k1") {
+                        this.getWhiteBlocked(this.pieceData.blackPieces[piece].getPositionObject()); 
+                        this.getWhitePossible(this.pieceData.blackPieces[piece].getPositionObject());
+
+                        this.pieceData.blackPieces.k1.removeUnsafeMoves(this.testData.whiteBlocked, this.testData.whitePossible);
+                    }
                     var possible = this.pieceData.blackPieces[piece].getPossibleMoves();
                     for (var i = 0; i < possible.length; i++)
                     {
@@ -247,54 +259,54 @@ var app = new Vue({
                 }
             }
         },
-        getWhiteBlocked()
+        getWhiteBlocked(kingPos)
         {
             this.testData.whiteBlocked = [];
             let keys = Object.keys(this.pieceData.whitePieces);
             for (var i = 0; i < keys.length; i++)
             {
                 if (!(this.pieceData.whitePieces[keys[i]].getStatus())) continue;
-                this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions);
+                this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions, kingPos);
                 this.testData.whiteBlocked = this.testData.whiteBlocked.concat(this.pieceData.whitePieces[keys[i]].getblockBlocks());
+                console.log(keys[i]);
+                console.log(this.pieceData.whitePieces[keys[i]].getpathBlocks());
+                this.testData.whiteBlocked = this.testData.whiteBlocked.concat(this.pieceData.whitePieces[keys[i]].getpathBlocks());
             }
         },
-        getBlackBlocked()
+        getBlackBlocked(kingPos)
         {
             this.testData.blackBlocked = [];
             let keys = Object.keys(this.pieceData.blackPieces);
             for (var i = 0; i < keys.length; i++)
             {
                 if (!(this.pieceData.blackPieces[keys[i]].getStatus())) continue;
-                this.pieceData.blackPieces[keys[i]].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions);
+                this.pieceData.blackPieces[keys[i]].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions, kingPos);
                 this.testData.blackBlocked = this.testData.blackBlocked.concat(this.pieceData.blackPieces[keys[i]].getblockBlocks());
+                this.testData.blackBlocked = this.testData.blackBlocked.concat(this.pieceData.blackPieces[keys[i]].getpathBlocks());
             }
         },
-        getWhitePossible()
+        getWhitePossible(kingPos)
         {
             this.testData.whitePossible = [];
             let keys = Object.keys(this.pieceData.whitePieces);
             for (var i = 0; i < keys.length; i++)
             {
                 if (!(this.pieceData.whitePieces[keys[i]].getStatus())) continue;
-                this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions);
+                this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions, kingPos);
                 this.testData.whitePossible = this.testData.whitePossible.concat(this.pieceData.whitePieces[keys[i]].getPossibleMoves());
             }
         },
-        getBlackPossible()
+        getBlackPossible(kingPos)
         {
             this.testData.blackPossible = [];
             let keys = Object.keys(this.pieceData.blackPieces);
             for (var i = 0; i < keys.length; i++)
             {
                 if (!(this.pieceData.blackPieces[keys[i]].getStatus())) continue;
-                this.pieceData.blackPieces[keys[i]].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions);
+                this.pieceData.blackPieces[keys[i]].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions, kingPos);
                 this.testData.blackPossible = this.testData.blackPossible.concat(this.pieceData.blackPieces[keys[i]].getPossibleMoves());
             }
         },
-
-
-
-
         unColorPossible()
         {
             for (var i = 0; i < this.selectData.possible.length; i++)
@@ -484,12 +496,13 @@ var app = new Vue({
                     this.gameData.blackWin = response.data.whiteCheckMate;
                     this.gameData.whiteWin = response.data.blackCheckMate;
                     this.gameData.stalemate = response.data.stalemate;
+                    if (this.gameData.blackWin || this.gameData.whiteWin || this.gameData.stalemate) this.gameOver();
                     this.gameData.deadArray = response.data.deadArray;
                     this.convertObjectFromRecieved(response.data.pieceData);
                     var changedSlots = response.data.changedSlots;
                     this.refreshChangedBlocks(changedSlots);
                     this.findAllPositions();
-                    if (this.gameData.whiteCheck || this.gameData.blackCheck) this.selectCheckBlock();
+                    if (this.gameData.whiteCheck || this.gameData.blackCheck) {console.log("WE HAVE A CHECK");this.selectCheckBlock();}
                     this.updateDead();
                 return true;
             } catch (error) {
@@ -514,6 +527,7 @@ var app = new Vue({
                     whiteScore: this.gameData.whiteScore,
                     blackScore: this.gameData.blackScore,
                 };
+                console.log(request.pieceData.whitePieces);
                 let response = await axios.put("/api/match/" + this.serverData.gameID, request);
                 if (response.data.nModified == 1)                                                   // If server approves move.
                 {
@@ -547,13 +561,13 @@ var app = new Vue({
                 if (response.data.serverTurn > this.gameData.displayedTurn)
                 {
                     this.serverData.serverMessageText = ("Opponent Moved. Your Turn!");
-                    this.gameData.playerTurn = true;
                     this.setData(this.selectData.selected, this.selectData.unselected);
                     this.selectData.selectImage = this.teamColor() + "t";
                     this.unselectRedBlockDiv();
                     this.drawSelection();
                     this.playSound(this.SOUNDS.move.sound, this.SOUNDS.move.volume);
                     this.getGameData();
+                    this.gameData.playerTurn = true;
                 }
             } catch (error) {
                 console.log(error);
@@ -579,6 +593,7 @@ var app = new Vue({
                     changedSlots: [],
                     deadArray: [],
                 };
+                
                 let upload = await axios.post('/api/match', match);
                 this.serverData.serverMessageText = ("You're white! It's you're turn first.");
                 this.findAllPositions();
@@ -834,12 +849,49 @@ var app = new Vue({
         async getChatRoom()
         {
             let response = await axios.get("/api/chat/" + this.serverData.gameID);
-            //console.log(response);
             this.chatData.messages = response.data.chats;
             if (this.chatData.messages.length > 0)
             {
                 this.chatData.messageBool = true;
             }
+            if (this.chatData.messages.length != this.chatData.pastmessages.length)
+            {
+                if (this.chatData.justSent)
+                {
+                    this.chatData.justSent = false;
+                    this.chatData.pastmessages = this.chatData.messages;
+                    this.playSound(this.SOUNDS.sendchat.sound, this.SOUNDS.sendchat.volume);
+                }
+                else
+                {
+                    this.newChat();
+                }
+            }
+            else
+            {
+                for (var i = 0; i < this.chatData.messages.length; i++)
+                {
+                    if (this.chatData.messages[i].text != this.chatData.pastmessages[i].text)
+                    {
+                        if (this.chatData.justSent)
+                        {
+                            this.chatData.justSent = false;
+                            this.chatData.pastmessages = this.chatData.messages;
+                            this.playSound(this.SOUNDS.sendchat.sound, this.SOUNDS.sendchat.volume);
+                        }
+                        else
+                        {
+                            this.newChat();
+                        }
+                    }
+                }
+            }
+
+        },
+        newChat()
+        {
+            this.playSound(this.SOUNDS.chat.sound, this.SOUNDS.chat.volume);
+            this.chatData.pastmessages = this.chatData.messages;
         },
         async messageChatRoom()
         {
@@ -863,6 +915,7 @@ var app = new Vue({
                         message: {text: this.chatData.messageText, time: timeString, usr: color}
                     });
                     this.chatData.messageText = "";
+                    this.chatData.justSent = true;
                     this.getChatRoom();
                     return true;
                 }
@@ -959,11 +1012,10 @@ var app = new Vue({
                 var done = 0;
                 for (var i = 0; i < keys.length; i++)
                 {
-                    this.pieceData.blackPieces[keys[i]].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions);
+                    this.pieceData.blackPieces[keys[i]].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions, kingPos);
                     var possible = this.pieceData.blackPieces[keys[i]].getPossibleMoves();
                     for (var j = 0; j < possible.length; j++)
                     {
-                        
                         if (this.isEqual(possible[j], kingPos))
                         {
                             dangerousBlock = keys[i];
@@ -992,7 +1044,7 @@ var app = new Vue({
                 var done = 0;
                 for (var i = 0; i < keys.length; i++)
                 {
-                    this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions);
+                    this.pieceData.whitePieces[keys[i]].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions, kingPos);
                     var possible = this.pieceData.whitePieces[keys[i]].getPossibleMoves();
                     for (var j = 0; j < possible.length; j++)
                     {
@@ -1079,74 +1131,74 @@ var app = new Vue({
         {
             this.gameData.playerTurn = false;
         },
-        convertObjectToSend(piecesData)
+        convertObjectToSend(pieceData)
         {
             var result = new Object();
-            var keys = Object.keys(piecesData);
+            var keys = Object.keys(pieceData);
             for (var i = 0; i < keys.length; i++){
-                result[keys[i]] = piecesData[keys[i]].getSendObject();}
+                result[keys[i]] = pieceData[keys[i]].getSendObject();}
             return result;
         },
         convertObjectFromRecieved(recievedData)
         {
-            this.piecesData.whitePieces = new Object();
+            this.pieceData.whitePieces = new Object();
             var keys = Object.keys(recievedData.whitePieces);
             for (var i = 0; i < keys.length; i++)
             {
                 switch (recievedData.whitePieces[keys[i]].type) {
                     case "k":
-                        this.piecesData.whitePieces[keys[i]] = new King(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                        this.pieceData.whitePieces[keys[i]] = new King(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
                             recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead, recievedData.whitePieces[keys[i]].hasMoved);
                         break;
                     case "q":
-                        this.piecesData.whitePieces[keys[i]] = new Queen(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                        this.pieceData.whitePieces[keys[i]] = new Queen(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
                             recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead);
                         break;
                     case "r":
-                        this.piecesData.whitePieces[keys[i]] = new Rook(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                        this.pieceData.whitePieces[keys[i]] = new Rook(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
                             recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead);
                         break;
                     case "b":
-                        this.piecesData.whitePieces[keys[i]] = new Bishop(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                        this.pieceData.whitePieces[keys[i]] = new Bishop(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
                             recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead);
                         break;
                     case "n":
-                        this.piecesData.whitePieces[keys[i]] = new Knight(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                        this.pieceData.whitePieces[keys[i]] = new Knight(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
                             recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead);
                         break;
                     case "p":
-                        this.piecesData.whitePieces[keys[i]] = new Pawn(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                        this.pieceData.whitePieces[keys[i]] = new Pawn(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
                             recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead);
                         break;
                 }
             }
-            this.piecesData.blackPieces = new Object();
+            this.pieceData.blackPieces = new Object();
             var keys = Object.keys(recievedData.blackPieces);
             for (var i = 0; i < keys.length; i++)
             {
                 switch (recievedData.blackPieces[keys[i]].type) {
                     case "k":
-                        this.piecesData.blackPieces[keys[i]] = new King(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                        this.pieceData.blackPieces[keys[i]] = new King(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
                             recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead, recievedData.blackPieces[keys[i]].hasMoved);
                         break;
                     case "q":
-                        this.piecesData.blackPieces[keys[i]] = new Queen(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                        this.pieceData.blackPieces[keys[i]] = new Queen(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
                             recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead);
                         break;
                     case "r":
-                        this.piecesData.blackPieces[keys[i]] = new Rook(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                        this.pieceData.blackPieces[keys[i]] = new Rook(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
                             recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead);
                         break;
                     case "b":
-                        this.piecesData.blackPieces[keys[i]] = new Bishop(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                        this.pieceData.blackPieces[keys[i]] = new Bishop(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
                             recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead);
                         break;
                     case "n":
-                        this.piecesData.blackPieces[keys[i]] = new Knight(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                        this.pieceData.blackPieces[keys[i]] = new Knight(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
                             recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead);
                         break;
                     case "p":
-                        this.piecesData.blackPieces[keys[i]] = new Pawn(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                        this.pieceData.blackPieces[keys[i]] = new Pawn(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
                             recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead);
                         break;
                 }
@@ -1189,6 +1241,10 @@ var app = new Vue({
                 this.playSound(this.SOUNDS.end.sound, this.SOUNDS.end.volume);this.gameOver(); return "BLACK WINS.";}
             if (this.gameData.stalemate) {
                 this.playSound(this.SOUNDS.stalemate.sound, this.SOUNDS.stalemate.volume);this.gameOver(); return "STALEMATE";}
+            if (this.gameData.whiteCheck) {
+                this.playSound(this.SOUNDS.check.sound, this.SOUNDS.check.volume);return "WHITE IN CHECK";}
+            if (this.gameData.blackCheck) {
+                this.playSound(this.SOUNDS.check.sound, this.SOUNDS.check.volume);return "BLACK IN CHECK";}
             const STRINGS = ["Dominating", "Winning", "Smarter", "Better", "Superior", "Destroying"];
             var returnString = STRINGS[Math.floor(Math.random() * 100 % STRINGS.length)];
             if (this.gameData.whiteScore > this.gameData.blackScore) return "White is " + returnString + "!";

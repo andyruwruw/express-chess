@@ -18,6 +18,7 @@ class Piece {
         data.col = this.col;
         data.team = this.team;
         data.num = this.num;
+        data.type = this.type;
         data.possibleMoves = this.possibleMoves;
         data.blockBlocks = this.blockBlocks;
         data.pathBlocks = this.pathBlocks;
@@ -117,7 +118,7 @@ class Piece {
                 this.possibleMoves.push(testBlock);
                 if (this.isEqual(testBlock, enemyKingPos))
                 {
-                    var onePast = this.addValues(inputBlock, xDirection, yDirection);
+                    var onePast = this.addValues(testBlock, xDirection, yDirection);
                     this.pathBlocks.push(onePast);
                 }
                 return true;

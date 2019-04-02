@@ -1,7 +1,8 @@
 class Knight extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, Overload) {
         super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
         this.type = "n";
+        console.log("SET TYPE: " + this.type);
         this.points = 3;
         }
 

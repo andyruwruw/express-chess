@@ -67,7 +67,8 @@ router.put('/:idNum', async (req, res) => {                                     
         if (color == "w")                                                             // Gathering both team's piece objects. (Needed to find Piece Key)
         {
             teamPieces = convertObjectFromRecieved(req.body.pieceData.whitePieces);                              
-            oppPieces = convertObjectFromRecieved(req.body.pieceData.blackPieces); 
+            oppPieces = convertObjectFromRecieved(req.body.pieceData.blackPieces);
+            console.log(teamPieces); 
             teamScore = req.body.whiteScore;
             oppScore = req.body.blackScore;
         }
@@ -75,6 +76,7 @@ router.put('/:idNum', async (req, res) => {                                     
         {
             oppPieces = convertObjectFromRecieved(req.body.pieceData.whitePieces); 
             teamPieces = convertObjectFromRecieved(req.body.pieceData.blackPieces);
+            console.log(teamPieces);
             teamScore = req.body.blackScore;
             oppScore = req.body.whiteScore;
         }
@@ -100,8 +102,8 @@ router.put('/:idNum', async (req, res) => {                                     
 
         var teamBlocked = gatherBlockedMoves(teamPieces);
         var oppBlocked = gatherBlockedMoves(oppPieces);
-        teamPieces.k1.removeUnsafeMoves(oppBlocked);
-        oppPieces.k1.removeUnsafeMoves(teamBlocked);
+        teamPieces.k1.removeUnsafeMoves(oppBlocked, possibleOppMoves);
+        oppPieces.k1.removeUnsafeMoves(teamBlocked, possibleTeamMoves);
 
         if (teamPieces[piece].move(action.move, teamPositions, oppPositions, oppKingPos)){                        // Requesting the Move from Piece
         moveAccepted = true; console.log("Move Approved.");}
@@ -109,7 +111,7 @@ router.put('/:idNum', async (req, res) => {                                     
         if (moveAccepted)                                                              // The move was valid for that piece.
         {
             if (pieceKilled) {deadArray.push(oppcolor + killPiece); teamScore += oppPieces[killPiece].kill(); }                // If a piece is killed in the movement, it's set to dead and it's score value is added.
-            if (piece.charAt(0) == p && teamPieces[piece].checkPromotion())
+            if (piece.charAt(0) == "p" && teamPieces[piece].checkPromotion())
             {
                 var position = teamPieces[piece].getPositionObject();
                 var keys = Object.keys(teamPieces);
@@ -162,8 +164,9 @@ router.put('/:idNum', async (req, res) => {                                     
                 if (!(oppPieces.k1.isKingSafe(possibleTeamMoves)))                  // If Opponent in check, save the data to report.
                 {
                     oppInCheck = true;
+                    possibleTeamMoves = gatherPossibleMoves(teamPieces);
                     teamBlocked = gatherBlockedMoves(teamPieces);
-                    oppPieces.k1.removeUnsafeMoves(teamBlocked);
+                    oppPieces.k1.removeUnsafeMoves(teamBlocked, possibleTeamMoves);
                     var oppKingPossibleMoves = oppPieces.k1.getPossibleMoves();
                     var dangeringPiece = findDangeringPiece(oppPieces.k1.getPositionObject(), teamPieces);
                     var dangeringPath = findDangeringPath(oppPieces.k1.getPositionObject(), dangeringPiece);
@@ -281,12 +284,6 @@ function isEqual(a, b){
         if (a[propName] !== b[propName]) return false;}
     return true;
 }
-function setData(a, b){
-    var aProps = Object.keys(a);
-    for (var i = 0; i < aProps.length; i++) {
-        var propName = aProps[i];
-        a[propName] = b[propName]}
-}
 
 function findKeyOffPosition(position, teamPieces)
 {
@@ -368,6 +365,8 @@ function convertObjectFromRecieved(recievedData){
     var keys = Object.keys(recievedData);
     for (var i = 0; i < keys.length; i++)
     {
+        console.log(keys[i]);
+        console.log(recievedData[keys[i]]);
         switch (recievedData[keys[i]].type) {
             case "k":
                 pieces[keys[i]] = new King(recievedData[keys[i]].row, recievedData[keys[i]].col, recievedData[keys[i]].num, recievedData[keys[i]].team, recievedData[keys[i]].possibleMoves, 
@@ -486,6 +485,7 @@ class Piece {
         data.col = this.col;
         data.team = this.team;
         data.num = this.num;
+        data.type = this.type;
         data.possibleMoves = this.possibleMoves;
         data.blockBlocks = this.blockBlocks;
         data.pathBlocks = this.pathBlocks;
@@ -585,7 +585,7 @@ class Piece {
                 this.possibleMoves.push(testBlock);
                 if (this.isEqual(testBlock, enemyKingPos))
                 {
-                    var onePast = this.addValues(inputBlock, xDirection, yDirection);
+                    var onePast = this.addValues(testBlock, xDirection, yDirection);
                     this.pathBlocks.push(onePast);
                 }
                 return true;
@@ -705,15 +705,16 @@ class King extends Piece {
         }
     }
 
-    removeUnsafeMoves(opponentBlockedMoves)
+    removeUnsafeMoves(opponentBlockedMoves, oppPossibleMoves)
     {
+        var nonos = opponentBlockedMoves.concat(oppPossibleMoves);
         var newPossible = [];
         for (var j = 0; j < this.possibleMoves.length; j++)
         {
             var blocked = false;
-            for (var i = 0; i < opponentBlockedMoves.length; i++)
+            for (var i = 0; i < nonos.length; i++)
             {
-                if ((this.isEqual(this.possibleMoves[j], opponentBlockedMoves[i])))
+                if ((this.isEqual(this.possibleMoves[j], nonos[i])))
                 {
                     blocked = true;
                     break;
@@ -730,8 +731,7 @@ class King extends Piece {
     isKingSafe(oppPossibleMoves){
     for (var i = 0; i < oppPossibleMoves.length; i++){
         if (this.isEqual({row: this.row, col: this.col}, oppPossibleMoves[i])) return false;}
-        {console.log("IN CHECK");
-        return true;}
+        return true;
     }
     
     checkStraight(xDirection, yDirection, teamPositions, oppPositions)
@@ -786,7 +786,7 @@ class Pawn extends Piece {
     }
 
     checkPromotion(){
-        if ((this.rowDirection < 0 && row == 0) || (this.rowDirection > 0 && row == 7)){return true;}return false;}
+        if ((this.rowDirection < 0 && this.row == 0) || (this.rowDirection > 0 && this.row == 7)){return true;}return false;}
 
     findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
         super.findPossibleMoves();
