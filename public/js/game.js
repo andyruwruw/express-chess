@@ -2,6 +2,10 @@ function loading()
 {
     document.getElementById("loading").style.display = "none";
 };
+function nowloading()
+{
+    document.getElementById("loading").style.display = "block";
+};
 var music = "orionstheme";
 
 var app = new Vue({
@@ -70,7 +74,7 @@ var app = new Vue({
         {
             gameID: "",
             serverMessageText: "",
-            opponentAFK: 10,
+            opponentAFK: 5,
             intervalspeed: 1000,
             interval: 0,
         },
@@ -100,6 +104,14 @@ var app = new Vue({
                           p3: new Pawn(6, 2, 3, 1, sD(1,"bp3"), sD(2,"bp3"), [], 0, 1),   p4: new Pawn(6, 3, 4, 1, sD(1,"bp4"), sD(2,"bp4"), [], 0, 1), 
                           p5: new Pawn(6, 4, 5, 1, sD(1,"bp5"), sD(2,"bp5"), [], 0, 1),   p6: new Pawn(6, 5, 6, 1, sD(1,"bp6"), sD(2,"bp6"), [], 0, 1),   
                           p7: new Pawn(6, 6, 7, 1, sD(1,"bp7"), sD(2,"bp7"), [], 0, 1),   p8: new Pawn(6, 7, 8, 1, sD(1,"bp8"), sD(2,"bp8"), [], 0, 1)},
+        },
+        trackerData:
+        {
+            playerNum: 0,
+            afkOpp: 10,
+            playerNum: 1,
+            rejoinText: "Enter a Game ID.",
+            disconnected: false,
         },
         SOUNDS: { 
             select: {sound: "select", volume: .7},
@@ -145,6 +157,7 @@ var app = new Vue({
         continuousTasks()                                                                   // Actions taken regardless of who's turn it is.
         {
             this.getChatRoom();
+            this.afkCheck();
             if (this.chatData.messageText.length > 50) this.chatData.messageText = this.chatData.messageText.substring(0,50);
         },
         //=====================================================SELECTION=====================================================
@@ -419,6 +432,71 @@ var app = new Vue({
                 }
             }
         },
+        refreshWholeBoard()
+        {
+            for (var i = 0; i < 8; i++)
+            {
+                for (var j = 0; j < 8; j++)
+                {
+                    var id = i + "-" + j;
+                    
+                    var element = document.getElementById(id);
+                    let colors = ["w", "b"];
+                    let pieces = ["q", "k", "n", "b", "r", "p"];
+                    for (var k = 0; k < colors.length; k++){						                    // It runs through removing any piece classes.
+                        for (var l = 0; l < pieces.length; l++){
+                            if (element.classList.contains(colors[k] + pieces[l])) {
+                            element.classList.remove(colors[k] + pieces[l]);}
+                            }
+                        }
+                }
+            }
+            var keys = Object.keys(this.pieceData.whitePieces);
+            for (var i = 0; i < keys.length; i++)
+            {
+                console.log(keys[i]);
+                console.log(this.pieceData.whitePieces[keys[i]]);
+                if (this.pieceData.whitePieces[keys[i]].getStatus())
+                {
+                    var block = this.pieceData.whitePieces[keys[i]].getPositionObject();
+                    var id = this.blockToString(block);
+                    console.log(id);
+                    var piece = "w" + keys[i].charAt(0);
+                    var element = document.getElementById(id);
+                    console.log(piece);
+                    if (!element.classList.contains(piece))
+                    {
+                        element.classList.add(piece);
+                        console.log("ADDED");
+                    }
+                    else
+                    {
+                        console.log("already/");
+                    }
+                }
+                else{
+                    console.log(":DAED");
+                }
+            }
+            keys = Object.keys(this.pieceData.blackPieces);
+            for (var i = 0; i < keys.length; i++)
+            {
+                console.log(keys[i]);
+                if (this.pieceData.blackPieces[keys[i]].getStatus())
+                {
+                    var block = this.pieceData.blackPieces[keys[i]].getPositionObject();
+                    var id = this.blockToString(block);
+                    console.log(id);
+                    var piece = "b" + keys[i].charAt(0);
+                    var element = document.getElementById(id);
+                    console.log(piece);
+                    if (!element.classList.contains(piece))
+                    {
+                        element.classList.add(piece);
+                    }
+                }
+            }
+        },
         updateDead()
         {
             var wDead = document.getElementById("wDead");
@@ -613,6 +691,8 @@ var app = new Vue({
                 this.findAllPositions();
                 this.createOppSelection();
                 this.createChatRoom();
+                this.createAFKCheck();
+                this.trackerData.playerNum = 0;
                 this.matchData.startGame = true;
                 this.gameData.gameStart = true;
                 this.gameData.playerTurn = true;
@@ -708,24 +788,168 @@ var app = new Vue({
         afkCheck()
         {
             this.checkAFKCheck();
-            this.changeAFKCheck();
         },
         async createAFKCheck()
         {
-
+            try {
+                let tracker = await axios.post('/api/active', {
+                    _id: this.serverData.gameID,
+                    player1: 1,
+                    player2: 0,
+                    playerNum: 2,
+                    server: false,
+                    inactive: 10,
+                    });
+            } catch (error) {
+                console.log(error);
+            }
         },
         async checkAFKCheck()
         {
+            try {
+                let tracker = await axios.get("/api/active/" + this.serverData.gameID);
+                if ((!this.gameData.team && tracker.data.player2 && !tracker.data.player1) ||
+                (this.gameData.team && !tracker.data.player2 && tracker.data.player1))
+                {
+                    console.log("Mu friend is here");
+                    this.trackerData.afkOpp = 5;
+                    if (this.trackerData.disconnected)
+                    {
+                        this.playSound(this.SOUNDS.matchfound.sound, this.SOUNDS.matchfound.volume);
+                        this.serverData.serverMessageText = "Opponent reconnected!";
+                        this.trackerData.disconnected = false;
+                        this.trackerData.playerNum = 2;
+                    }
+                    this.changeAFKCheck();
+                    return true;
+                }
+                else
+                {
+                    console.log("ware HE go!");
 
+                    if (this.trackerData.afkOpp > 0)
+                    {
+                        this.trackerData.afkOpp -= 1;
+                    }
+                    else
+                    {
+                        if (!this.trackerData.disconnected)
+                        {
+                            console.log("ohhh been so longgg");
+                            this.playSound(this.SOUNDS.error.sound, this.SOUNDS.error.volume);
+                            this.trackerData.playerNum = 1;
+                            this.trackerData.disconnected = true;
+
+                        }
+                        this.serverData.serverMessageText = "Opponent has disconnected. Have them join by Game ID";
+                        this.missingOpp();
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        async missingOpp()
+        {
+            console.log("Whenn we me friend come home");
+                if (this.gameData.team)
+                {
+                    await axios.put("/api/active/" + this.matchMaker._id, {
+                        player1: false,
+                        player2: true,
+                        playerNum: 1,
+                        turn: this.gameData.playerTurn,
+                        server: false,
+                        inactive: 10,
+                    });
+                }
+                else if (!this.gameData.team)
+                {
+                    await axios.put("/api/active/" + this.matchMaker._id, {
+                        player1: true,
+                        player2: false,
+                        playerNum: 1,
+                        turn: this.gameData.playerTurn,
+                        server: false,
+                        inactive: 10,
+                    });
+                }
+        },
+        async rejoin()
+        {
+            try {
+                console.log("TTEMPTING");
+                
+                let tracker = await axios.get("/api/active/" + this.serverData.gameID);
+                if (tracker.data.playerNum < 2)
+                {
+                    nowloading();
+                    this.matchData.rejoin = false;
+                    if (!tracker.data.player1)
+                    {
+                        this.trackerData.playerNum = 2;
+                        this.gameData.team = 0;
+                        this.gameData.opp = 1;
+                    }
+                    else
+                    {
+                        this.trackerData.playerNum = 2;
+                        this.gameData.team = 1;
+                        this.gameData.opp = 0;
+                    }
+                    if (tracker.data.turn == 0)
+                    {
+                        this.gameData.playerTurn = true;
+                    }
+                    this.changeAFKCheck();
+                    this.matchData.startGame = true;
+                    this.gameData.gameStart = true;
+                    await this.getGameData();
+                    this.refreshWholeBoard();
+                    this.serverData.interval = setInterval(this.intervalMethod, this.serverData.intervalspeed);
+                    loading();
+                    return true;
+                }
+            } catch (error) {
+                this.trackerData.rejoinText = "Not a valid Game ID.";
+            }
         },
         async changeAFKCheck()
         {
-
+            try {
+                this.trackerData.afkOpp = 5;
+                if (this.gameData.team)
+                {
+                    let response = await axios.put("/api/active/" + this.serverData.gameID, {
+                        player1: false,
+                        player2: true,
+                        playerNum: 2,
+                        turn: this.gameData.playerTurn,
+                        server: false,
+                        inactive: 10
+                    });
+                }
+                else if (!this.gameData.team)
+                {
+                    let response = await axios.put("/api/active/" + this.serverData.gameID, {
+                        player1: true,
+                        player2: false,
+                        playerNum: 2,
+                        turn: this.gameData.playerTurn,
+                        server: false,
+                        inactive: 10
+                    });
+                }
+                return true;
+            } catch (error) {
+                console.log(error);
+            }
         },
         //=====================================================MATCH MAKING=====================================================
 
         async respondToMatch() {
             try {
+
                 this.matchData.matchFound = 1;
                 this.gameData.team = 1;
                 this.gameData.opp = 0;
@@ -743,6 +967,7 @@ var app = new Vue({
         async getMatchMakers()
         {
             try {
+                this.matchData.rejoin = false;
                 this.playSound(this.SOUNDS.select.sound, this.SOUNDS.select.volume);
                 if (this.matchData.findingMatch)
                 {
@@ -810,6 +1035,7 @@ var app = new Vue({
         async checkMatchMaker()
         {
             try {
+                this.matchData.rejoin = false;
                 let match = await axios.get("/api/queue/" + this.serverData.gameID);
                 this.matchMaker.playerNum = match.data.playerNum;
                 if (this.matchMaker.playerNum > 1)
@@ -843,10 +1069,6 @@ var app = new Vue({
             for (var i = 0; i < 10; i++)
             text += possible.charAt(Math.floor(Math.random() * possible.length));
             return text;},
-        rejoinMatch()
-        {
-
-        },
 
         //=====================================================CHAT ROOM=====================================================
         async createChatRoom()
@@ -1293,9 +1515,9 @@ var app = new Vue({
 
         notDone()
         {
-            if (this.notDoneDisplay)
+            if (this.matchData.rejoin)
             {
-                return "WORKING ON THIS";
+                return "GO BACK";
             }
             return "REJOIN MATCH";
         }

@@ -4,7 +4,12 @@ const router = express.Router();
 
 const activeSchema = new mongoose.Schema({
     _id: String,
-	toggle: Number
+    player1: Boolean,
+    player2: Boolean,
+    playerNum: Number,
+    turn: Number,
+    server: Boolean,
+    inactive: Number,
 });
 
 const Active = mongoose.model('Active', activeSchema);
@@ -12,7 +17,12 @@ const Active = mongoose.model('Active', activeSchema);
 router.post('/', async (req, res) => {   // Create a new Selection
     const tracker = new Active({
     _id: req.body._id,
-    toggle: req.body.toggle
+    player1: req.body.player1,
+    player2: req.body.player2,
+    playerNum: req.body.playerNum,
+    turn: req.body.turn,
+    server: req.body.server,
+    inactive: req.body.inactive
     });
     try {
         await tracker.save();
@@ -29,7 +39,7 @@ router.put('/:idNum', async (req, res) => { // Update with new Selection
             _id: req.params.idNum
         },
         {
-            $set: { "toggle": req.body.toggle},
+            $set: { "player1": req.body.player1, "player2": req.body.player2, "playerNum": req.body.playerNum, "turn": req.body.turn, "server": req.body.server, "inactive": req.body.inactive},
         });
         res.send("Success.");
   } catch (error) {
@@ -59,6 +69,16 @@ router.delete('/:idNum', async (req, res) => { // Delete selection object after 
     console.log(error);
     res.sendStatus(500);
   }
+});
+
+router.get('/', async (req, res) => {	// GET AVAILABLE MATCHES
+	try {
+		let trackers = await Active.find();
+		res.send(trackers);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
 });
 
 module.exports = router;

@@ -77,15 +77,20 @@
       </div>
     </div>
     <h1 id="menuTitle" v-if="!matchData.startGame">Express Chess</h1>
+    <div id="addid" v-if="matchData.rejoin">
+      <h1>{{this.trackerData.rejoinText}}</h1>
+      <div class="form">
+        <input v-model="serverData.gameID" id="gameidtext" placeholder="Game ID">
+        <button @click="rejoin" id="send">Join</button>
+      </div>
+    </div>
     <div id="menuButtons" v-if="!matchData.startGame">
-        <button class="add-margin" @click="getMatchMakers">{{findMatchButtonText}}</button>
-        <button class="add-margin" @mouseover="notDoneDisplay = true" @mouseleave="notDoneDisplay = false" @click="rejoinMatch">{{notDone}}</button>
-        <a class="button add-margin" href="./pages/spectate.html">SPECTATE</a>
-        <a class="button add-margin" href="./pages/about.html">ABOUT</a>
+        <button class="add-margin" v-if="!matchData.rejoin" @click="getMatchMakers">{{findMatchButtonText}}</button>
+        <button class="add-margin" @click="matchData.rejoin = !matchData.rejoin;">{{notDone}}</button>
+        <a class="button add-margin" v-if="!matchData.rejoin" href="./pages/spectate.html">SPECTATE</a>
+        <a class="button add-margin" v-if="!matchData.rejoin"href="./pages/about.html">ABOUT</a>
     </div>
-    <div id="topDiv" v-if="matchData.rejoin">
-
-    </div>
+ 
     <div id="topDiv" class="container" v-if="matchData.startGame">
       <div class="third">
           <h1>Current Turn</h1>
@@ -104,7 +109,7 @@
       
     </div>
     <div class="container wrap" v-if="matchData.startGame">
-      <div class="sideDiv" id="stats">
+      <div class="two sideDiv" id="stats">
         <h2 class="center">Captures</h2>
         <div class="add-top-margin container">
           <div class="col">
@@ -136,7 +141,7 @@
         <button id="gameID">{{gameIDButton}}</button>
         </div>
       </div>
-      <div id="board" v-if="!gameData.team">
+      <div class="one" id="board" v-if="!gameData.team">
         <div class="container">
           <div @click="clickBlock('7-0')" class="br block white" id="7-0"></div>
           <div @click="clickBlock('7-1')" class="bn block black" id="7-1"></div>
@@ -218,7 +223,7 @@
           <div @click="clickBlock('0-7')" class="wr block white" id="0-7"></div>
         </div>
       </div>
-      <div id="board" v-if="gameData.team">
+      <div class="one" id="board" v-if="gameData.team">
         <div class="container">
           <div @click="clickBlock('0-7')" class="wr block white" id="0-7"></div>
           <div @click="clickBlock('0-6')" class="wn block black" id="0-6"></div>
@@ -300,7 +305,7 @@
           <div @click="clickBlock('7-0')" class="br block white" id="7-0"></div>
         </div>
       </div>
-      <div class="sideDiv" id="chat">
+      <div class="three sideDiv" id="chat">
         <h2 class="center">Chat</h2>
         <div v-if="!chatData.messages.length" id="noplayermessages"></div>
         <div class="message" v-for="message in chatData.messages">  
