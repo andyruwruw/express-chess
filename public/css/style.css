@@ -455,9 +455,16 @@ p
 }
 .check
 {
-  background-color: rgb(255, 93, 93) !important;
+  background-color: rgb(255, 93, 93);
 }
-
+.check.possible
+{
+  background-color: rgb(134, 49, 214) !important;
+}
+.check.possible:hover
+{
+  background-color: rgb(145, 79, 206) !important;
+}
 .losses
 {
   margin-top: 10px;

@@ -199,16 +199,18 @@ var app = new Vue({
                 if (!this.gameData.team)
                 {
                     var keys = Object.keys(this.pieceData.whitePieces);
+                    console.log(keys);
                     var piece;
                     for (var i = 0; i < keys.length; i++)
                     {
                         if (this.isEqual(this.pieceData.whitePieces[keys[i]].getPositionObject(), block))
                         {
                             var piece = keys[i];
+                            console.log(piece);
                             break;
                         }
                     }
-                    this.pieceData.whitePieces[piece].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions, this.pieceData.blackPieces[piece].getPositionObject());
+                    this.pieceData.whitePieces[piece].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions, this.pieceData.blackPieces.k1.getPositionObject());
 
                     if (piece == "k1") {
                         this.getBlackBlocked(this.pieceData.whitePieces[piece].getPositionObject()); 
@@ -235,10 +237,10 @@ var app = new Vue({
                         if (this.isEqual(this.pieceData.blackPieces[keys[i]].getPositionObject(), block))
                         {
                             var piece = keys[i];
-                            console.log(piece);
+                            break;
                         }
                     }
-                    this.pieceData.blackPieces[piece].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions, this.pieceData.blackPieces[piece].getPositionObject());
+                    this.pieceData.blackPieces[piece].findPossibleMoves(this.testData.blackPositions, this.testData.whitePositions, this.pieceData.blackPieces.k1.getPositionObject());
                     if (piece == "k1") {
                         this.getWhiteBlocked(this.pieceData.blackPieces[piece].getPositionObject()); 
                         this.getWhitePossible(this.pieceData.blackPieces[piece].getPositionObject());
@@ -403,7 +405,18 @@ var app = new Vue({
                         element.classList.remove(colors[k] + pieces[l]);}
                         if (elementMove.classList.contains(colors[k] + pieces[l])) 
                         elementMove.classList.remove(colors[k] + pieces[l]);}}
-                elementMove.classList.add(id);    
+                if (id == "wp" && changedSlots[1].row == 7)
+                {
+                    elementMove.classList.add("wq");
+                }
+                else if (id == "bp" && changedSlots[1].row == 0)
+                {
+                    elementMove.classList.add("bq");
+                }
+                else
+                {
+                    elementMove.classList.add(id);  
+                }
             }
         },
         updateDead()
@@ -498,6 +511,8 @@ var app = new Vue({
                     this.gameData.stalemate = response.data.stalemate;
                     if (this.gameData.blackWin || this.gameData.whiteWin || this.gameData.stalemate) this.gameOver();
                     this.gameData.deadArray = response.data.deadArray;
+                    console.log("THESE IS THELHKW");
+                    console.log(response.data.pieceData);
                     this.convertObjectFromRecieved(response.data.pieceData);
                     var changedSlots = response.data.changedSlots;
                     this.refreshChangedBlocks(changedSlots);
@@ -527,7 +542,6 @@ var app = new Vue({
                     whiteScore: this.gameData.whiteScore,
                     blackScore: this.gameData.blackScore,
                 };
-                console.log(request.pieceData.whitePieces);
                 let response = await axios.put("/api/match/" + this.serverData.gameID, request);
                 if (response.data.nModified == 1)                                                   // If server approves move.
                 {
@@ -1142,6 +1156,8 @@ var app = new Vue({
         convertObjectFromRecieved(recievedData)
         {
             this.pieceData.whitePieces = new Object();
+            console.log("HERES WHAT I GOT BOR");
+            console.log(recievedData.whitePieces);
             var keys = Object.keys(recievedData.whitePieces);
             for (var i = 0; i < keys.length; i++)
             {

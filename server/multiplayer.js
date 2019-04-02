@@ -15,14 +15,8 @@ const boardSchema = new mongoose.Schema({
     blackCheckMate: false,
     stalemate: false,
     pieceData:{
-        whitePieces: {k1: Object, q1: Object, r1: Object, r2: Object, 
-                      b1: Object, b2: Object, n1: Object, n2: Object, 
-                      p1: Object, p2: Object, p3: Object, p4: Object, 
-                      p5: Object, p6: Object, p7: Object, p8: Object},
-        blackPieces: {k1: Object, q1: Object, r1: Object, r2: Object, 
-                      b1: Object, b2: Object, n1: Object, n2: Object, 
-                      p1: Object, p2: Object, p3: Object, p4: Object, 
-                      p5: Object, p6: Object, p7: Object, p8: Object},},
+        whitePieces: Object,
+        blackPieces: Object},
     changedSlots: [],
     deadArray: [],
 });
@@ -58,8 +52,9 @@ const match = new Board({
 router.put('/:idNum', async (req, res) => {                                         // Function Updates Game Data with Player Move.
     try {
         var moveAccepted = false;
-        var color = teamColor(req.body.team);                                         // Getting the moving piece's team. (Needed to find Piece Key without looking through both teams)
-        var oppcolor = oppColor(req.body.team);
+        var team = req.body.team;
+        var color = teamColor(team);                                         // Getting the moving piece's team. (Needed to find Piece Key without looking through both teams)
+        var oppcolor = oppColor(team);
         var teamPieces;
         var oppPieces;
         var teamScore;
@@ -123,11 +118,14 @@ router.put('/:idNum', async (req, res) => {                                     
                         queenNum += 1;
                     }
                 }
+                var num = queenNum + 1;
+                var newQueen = "q" + num;
                 delete teamPieces[piece];
-                teamPieces["q" + (queenNum + 1)] = new Queen(position.row, position.col, (queenNum + 1), req.body.team, [], [], [], 0);
+                teamPieces[newQueen] = new Queen(position.row, position.col, (queenNum + 1), team, [], [], [], 0);
                 teamPositions = gatherAllPositions(teamPieces);
                 oppPositions = gatherAllPositions(oppPieces);
-                teamPieces["q" + (queenNum + 1)].findPossibleMoves(teamPositions, oppPositions, oppKingPos);
+                teamPieces[newQueen].findPossibleMoves(teamPositions, oppPositions, oppKingPos);
+                console.log(teamPieces[newQueen].getPossibleMoves());
             }
             teamPositions = gatherAllPositions(teamPieces);
             oppPositions = gatherAllPositions(oppPieces);
@@ -493,6 +491,11 @@ class Piece {
         return data;
     }
 
+    getType()
+    {
+        return this.type;
+    }
+
     getPositionObject() {
         var position = {row: this.row, col: this.col};
         return position;}
@@ -771,7 +774,7 @@ class Knight extends Piece {
 }
 
 class Pawn extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, Overload) {
         super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
         if (team) this.rowDirection = -1;
         else this.rowDirection = 1;
@@ -785,13 +788,23 @@ class Pawn extends Piece {
         return data;
     }
 
-    checkPromotion(){
-        if ((this.rowDirection < 0 && this.row == 0) || (this.rowDirection > 0 && this.row == 7)){return true;}return false;}
+    checkPromotion()
+    {
+        if (this.rowDirection < 0 && this.row == 0)
+        {
+            return true;
+        }
+        if (this.rowDirection > 0 && this.row == 7)
+        {
+            return true;
+        }
+        return false;
+    }
 
     findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
         super.findPossibleMoves();
-        this.checkForwardPawn(0, this.rowDirection, teamPositions, oppPositions);
-        if ((this.team && this.row == 6) || (!this.team && this.row == 1))
+        var notBlocked = this.checkForwardPawn(0, this.rowDirection, teamPositions, oppPositions);
+        if (((this.team && this.row == 6) || (!this.team && this.row == 1)) && notBlocked)
         {
             this.checkForwardPawn(0, this.rowDirection * 2, teamPositions, oppPositions);
         }
@@ -801,7 +814,7 @@ class Pawn extends Piece {
 
     checkForwardPawn(xDirection, yDirection, teamPositions, oppPositions)
     {
-        this.checkOncePawn(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
+        return this.checkOncePawn(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
 
     checkKillDiag(xDirection, yDirection, teamPositions, oppPositions) {
@@ -831,14 +844,14 @@ class Pawn extends Piece {
     checkOncePawn(xDirection, yDirection, teamPositions, oppPositions, currPos)
     {
         var testBlock = this.addValues(currPos, xDirection, yDirection);
-        if (!this.isInBoard(testBlock)) return true;
+        if (!this.isInBoard(testBlock)) return false;
 
         for (var i = 0; i < teamPositions.length; i++)
         {
             if (this.isEqual(testBlock, teamPositions[i]))
             {
                 this.blockBlocks.push(testBlock);
-                return true;
+                return false;
             }
         }
         for (var i = 0; i < oppPositions.length; i++)
@@ -846,7 +859,7 @@ class Pawn extends Piece {
             if (this.isEqual(testBlock, oppPositions[i]))
             {
                 this.blockBlocks.push(testBlock);
-                return true;
+                return false;
             }
         }
         this.possibleMoves.push(testBlock);
