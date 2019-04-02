@@ -13,17 +13,9 @@ var app = new Vue({
     data:
     {
         notDoneDisplay: false,
-        matchMaker: {
-            _id: "",
-            roomNum: 0,
-            playerNum: 1,
-            gameId: "",
-        },
         matchData:
         {
             matchFound: 0,
-            matchMade: 0,
-            startGame: 0,
             findingMatch: 0,
             rejoin: 0,
         },
@@ -88,7 +80,7 @@ var app = new Vue({
         },
         pieceData:
         {
-            whitePieces: {k1: new King(0, 4, 1, 0, sD(1,"wk1"), sD(2,"wk1"), [], 0, 0),   q1: new Queen(0, 3, 1, 0, sD(1,"wq1"), sD(2,"wq1"), [], 0, 1),  
+            whitePieces: {k1: new King(0, 4, 1, 0, sD(1,"wk1"), sD(2,"wk1"), [], 0, 1),   q1: new Queen(0, 3, 1, 0, sD(1,"wq1"), sD(2,"wq1"), [], 0, 1),  
                           r1: new Rook(0, 0, 1, 0, sD(1,"wr1"), sD(2,"wr1"), [], 0, 1),   r2: new Rook(0, 7, 2, 0, sD(1,"wr2"), sD(2,"wr2"), [], 0, 1), 
                           b1: new Bishop(0, 2, 1, 0, sD(1,"wb1"), sD(2,"wb1"), [], 0, 1), b2: new Bishop(0, 5, 2, 0, sD(1,"wb2"), sD(2,"wb2"), [], 0, 1), 
                           n1: new Knight(0, 1, 1, 0, sD(1,"wn1"), sD(2,"wn1"), [], 0, 1), n2: new Knight(0, 6, 2, 0, sD(1,"wn2"), sD(2,"wn2"), [], 0, 1), 
@@ -96,7 +88,7 @@ var app = new Vue({
                           p3: new Pawn(1, 2, 3, 0, sD(1,"wp3"), sD(2,"wp3"), [], 0, 1),   p4: new Pawn(1, 3, 4, 0, sD(1,"wp4"), sD(2,"wp4"), [], 0, 1), 
                           p5: new Pawn(1, 4, 5, 0, sD(1,"wp5"), sD(2,"wp5"), [], 0, 1),   p6: new Pawn(1, 5, 6, 0, sD(1,"wp6"), sD(2,"wp6"), [], 0, 1),   
                           p7: new Pawn(1, 6, 7, 0, sD(1,"wp7"), sD(2,"wp7"), [], 0, 1),   p8: new Pawn(1, 7, 8, 0, sD(1,"wp8"), sD(2,"wp8"), [], 0, 1)},
-            blackPieces: {k1: new King(7, 4, 1, 1, sD(1,"bk1"), sD(2,"bk1"), [], 0, 0),   q1: new Queen(7, 3, 1, 1, sD(1,"bq1"), sD(2,"bq1"), [], 0, 1),  
+            blackPieces: {k1: new King(7, 4, 1, 1, sD(1,"bk1"), sD(2,"bk1"), [], 0, 1),   q1: new Queen(7, 3, 1, 1, sD(1,"bq1"), sD(2,"bq1"), [], 0, 1),  
                           r1: new Rook(7, 0, 1, 1, sD(1,"br1"), sD(2,"br1"), [], 0, 1),   r2: new Rook(7, 7, 2, 1, sD(1,"br2"), sD(2,"br2"), [], 0, 1), 
                           b1: new Bishop(7, 2, 1, 1, sD(1,"bb1"), sD(2,"bb1"), [], 0, 1), b2: new Bishop(7, 5, 2, 1, sD(1,"bb2"), sD(2,"bb2"), [], 0, 1), 
                           n1: new Knight(7, 1, 1, 1, sD(1,"bn1"), sD(2,"bn1"), [], 0, 1), n2: new Knight(7, 6, 2, 1, sD(1,"bn2"), sD(2,"bn2"), [], 0, 1), 
@@ -132,23 +124,14 @@ var app = new Vue({
         //=====================================================ORDER=====================================================
         intervalMethod(){                                                                   // Runs every second, differs depending on turn.
             if (this.gameData.gameStart){
-                if (this.gameData.playerTurn) this.awaitingPlayer();
-                else this.awaitingOpponent();
-                this.continuousTasks();}
-            else if (this.matchData.findingMatch)
-            {
-                this.checkMatchMaker();
+                this.awaitingOpponent();
+                this.continuousTasks();
             }
-        },
-
-        awaitingPlayer()                                                                    // Actions taken while player turn is valid.
-        {
-            this.serverData.serverMessageText = ("Submit a Valid Move.");
         },
 
         awaitingOpponent()                                                                  // Actions taken while opponent turn is active.
         {
-            this.serverData.serverMessageText = ("Awaiting Opponent...");
+            this.serverData.serverMessageText = ("Awaiting move.");
             this.getOppSelection();
             this.drawSelection();
             this.checkGameData();
@@ -156,49 +139,35 @@ var app = new Vue({
 
         continuousTasks()                                                                   // Actions taken regardless of who's turn it is.
         {
-            this.getChatRoom();
-            this.afkCheck();
-            if (this.chatData.messageText.length > 50) this.chatData.messageText = this.chatData.messageText.substring(0,50);
+            if (this.byID)
+            {
+                this.getChatRoom();
+                if (this.chatData.messageText.length > 50) this.chatData.messageText = this.chatData.messageText.substring(0,50);
+            }
+            else
+            {
+                if (this.chatData.messageText.length > 0) this.chatData.messageText = "";
+            }
         },
         //=====================================================SELECTION=====================================================
         clickBlock(blockString)                                                             // Runs following a click on the screen.
         {
-            if (this.gameData.playerTurn)                                                       // If it's the player's turn
-            {
+
                 this.unselectRedBlockDiv();
                 var blockData = this.parseBlock(blockString);
                 if (this.isEqual(this.selectData.selected, this.selectData.unselected))       // If nothing is selected
                 {
-                    console.log("New Selection");
-                    if (this.isEmpty(blockData)) {console.log("Empty Selected"); return 0;}                                             // Or if it's empty, do nothing.
-                    else if (this.isMyPiece(blockData)) this.selectBlock(blockData, blockString);     // If it's your piece, select it.
-                    else this.throwError("You cannot select your opponent's pieces.");                  // Or if it's your opponent's piece, throw error
+                    this.selectBlock(blockData, blockString);     // If it's your piece, select it.                // Or if it's your opponent's piece, throw error
                 }
                 else                                                                                // If a piece is already selected.
-                {
-                    if (this.isMyPiece(blockData))                                                     // If next selection is your piece as well, unselect all.
-                        this.unselectBlock(blockData, blockString);
-                    else                                                                                // Or if next selection is not your piece, check if you can move there.
-                    {
-                        this.setData(this.selectData.move, blockData);
-                        this.sendGameData();
-                    }
-                }
-            }
-            else this.throwError("Wait for your turn to select a piece!");                           // Or if it's not your turn, throw error.
+                {                                            // If next selection is your piece as well, unselect all.
+                    this.unselectBlock(blockData, blockString);
+                }                         // Or if it's not your turn, throw error.
         },
         /* HELPER */ 
         selectBlock(selectBlock, blockString)                                               // Player selects a block.
-        {
-            console.log("Selecting Block");
-            this.serverData.serverMessageText = "Piece Selected.";                            // Notifies player.
+        {                         // Notifies player.
             this.playSound(this.SOUNDS.select.sound, this.SOUNDS.select.volume);
-
-            this.setData(this.selectData.selected, selectBlock);
-
-            this.selectData.selectImage = this.findBlockImage(selectBlock);                     // Adds the photo to the selected section up top.
-            this.postOppSelection();                    
-            this.drawSelection();
             this.colorPossible(selectBlock);
 
             if (this.selectData.blue != "") this.unselectBlueBlockDiv();                        // If something is already lit up as selected, undo it.
@@ -225,39 +194,9 @@ var app = new Vue({
                     }
                     this.pieceData.whitePieces[piece].findPossibleMoves(this.testData.whitePositions, this.testData.blackPositions, this.pieceData.blackPieces.k1.getPositionObject());
 
-                    if (piece == "k1") 
-                    {
+                    if (piece == "k1") {
                         this.getBlackBlocked(this.pieceData.whitePieces[piece].getPositionObject()); 
                         this.getBlackPossible(this.pieceData.whitePieces[piece].getPositionObject());
-                        if (!this.pieceData.whitePieces[piece].getHasMoved())
-                        {
-                            if (this.isEqual(this.pieceData.whitePieces.r1.getPositionObject(), {row: 0, col: 0}) && 
-                            this.isEmpty({row: 0, col: 1}) && this.isEmpty({row: 0, col: 2}) && this.isEmpty({row: 0, col: 3}) &&
-                            !this.findPositionInArray({row: 0, col: 2}, this.testData.blackPossible) && 
-                            !this.findPositionInArray({row: 0, col: 3}, this.testData.blackPossible))
-                            {
-                                var id = "0-2";
-                                this.selectData.possible.push(id);
-                                var element = document.getElementById(id);
-                                if (!(element.classList.contains("possible")))
-                                {
-                                    element.classList.add("possible");
-                                }
-                            }
-                            if (this.isEqual(this.pieceData.whitePieces.r2.getPositionObject(), {row: 0, col: 7}) && 
-                            this.isEmpty({row: 0, col: 6}) && this.isEmpty({row: 0, col: 5}) &&
-                            !this.findPositionInArray({row: 0, col: 5}, this.testData.blackPossible) && 
-                            !this.findPositionInArray({row: 0, col: 6}, this.testData.blackPossible))
-                            {
-                                var id = "0-6";
-                                this.selectData.possible.push(id);
-                                var element = document.getElementById(id);
-                                if (!(element.classList.contains("possible")))
-                                {
-                                    element.classList.add("possible");
-                                }
-                            }
-                        }
                         this.pieceData.whitePieces.k1.removeUnsafeMoves(this.testData.blackBlocked, this.testData.blackPossible);}
                     var possible = this.pieceData.whitePieces[piece].getPossibleMoves();
                     for (var i = 0; i < possible.length; i++)
@@ -287,35 +226,7 @@ var app = new Vue({
                     if (piece == "k1") {
                         this.getWhiteBlocked(this.pieceData.blackPieces[piece].getPositionObject()); 
                         this.getWhitePossible(this.pieceData.blackPieces[piece].getPositionObject());
-                        if (!this.pieceData.blackPieces[piece].getHasMoved())
-                        {
-                            if (this.isEqual(this.pieceData.blackPieces.r1.getPositionObject(), {row: 7, col: 0}) && 
-                            this.isEmpty({row: 7, col: 1}) && this.isEmpty({row: 7, col: 2}) && this.isEmpty({row: 7, col: 3}) &&
-                            !this.findPositionInArray({row: 7, col: 2}, this.testData.whitePossible) && 
-                            !this.findPositionInArray({row: 7, col: 3}, this.testData.whitePossible))
-                            {
-                                var id = "7-2";
-                                this.selectData.possible.push(id);
-                                var element = document.getElementById(id);
-                                if (!(element.classList.contains("possible")))
-                                {
-                                    element.classList.add("possible");
-                                }
-                            }
-                            if (this.isEqual(this.pieceData.blackPieces.r2.getPositionObject(), {row: 7, col: 7}) && 
-                            this.isEmpty({row: 7, col: 6}) && this.isEmpty({row: 7, col: 5}) &&
-                            !this.findPositionInArray({row: 7, col: 5}, this.testData.whitePossible) && 
-                            !this.findPositionInArray({row: 7, col: 6}, this.testData.whitePossible))
-                            {
-                                var id = "7-6";
-                                this.selectData.possible.push(id);
-                                var element = document.getElementById(id);
-                                if (!(element.classList.contains("possible")))
-                                {
-                                    element.classList.add("possible");
-                                }
-                            }
-                        }
+
                         this.pieceData.blackPieces.k1.removeUnsafeMoves(this.testData.whiteBlocked, this.testData.whitePossible);
                     }
                     var possible = this.pieceData.blackPieces[piece].getPossibleMoves();

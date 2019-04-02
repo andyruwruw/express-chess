@@ -1,8 +1,7 @@
 class King extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, hasMoved, Overload) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, hasMoved) {
         super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
         this.type = "k";
-        console.log("SET TYPE: " + this.type);
         this.hasMoved = hasMoved;
         this.points = 100;
         }
@@ -14,20 +13,31 @@ class King extends Piece {
         return data;
     }
 
+    move(newPos, teamPositions, oppPositions, enemyKingPos)
+    {
+        var move = super.move(newPos, teamPositions, oppPositions, enemyKingPos);
+        if (move)
+        {
+            this.hasMoved = true;
+        }
+        return move;
+    }
+
     findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
         super.findPossibleMoves();
         this.checkDiagonal(1, 1, teamPositions, oppPositions);
         this.checkDiagonal(-1, -1, teamPositions, oppPositions);
         this.checkDiagonal(-1, 1, teamPositions, oppPositions);
         this.checkDiagonal(1, -1, teamPositions, oppPositions);
-        this.checkStraight(1, 0, teamPositions, oppPositions);
+        var right = this.checkStraight(1, 0, teamPositions, oppPositions);
         this.checkStraight(-1, 0, teamPositions, oppPositions);
-        this.checkStraight(0, 1, teamPositions, oppPositions);
+        var left = this.checkStraight(0, 1, teamPositions, oppPositions);
         this.checkStraight(0, -1, teamPositions, oppPositions);
-        for (var i = 0; i < this.possibleMoves.length; i++)
-        {
-            console.log("King can move: " + this.possibleMoves[i].row + " " + this.possibleMoves[i].col);
-        }
+    }
+
+    getHasMoved()
+    {
+        return this.hasMoved;
     }
 
     removeUnsafeMoves(opponentBlockedMoves, oppPossibleMoves)
@@ -56,17 +66,16 @@ class King extends Piece {
     isKingSafe(oppPossibleMoves){
     for (var i = 0; i < oppPossibleMoves.length; i++){
         if (this.isEqual({row: this.row, col: this.col}, oppPossibleMoves[i])) return false;}
-        {console.log("IN CHECK");
-        return true;}
+        return true;
     }
     
     checkStraight(xDirection, yDirection, teamPositions, oppPositions)
     {
-        this.checkOnce(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
+        return this.checkOnce(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
     
     checkDiagonal(xDirection, yDirection, teamPositions, oppPositions)
     {
         this.checkOnce(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
-}
+} 

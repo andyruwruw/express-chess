@@ -102,7 +102,47 @@ router.put('/:idNum', async (req, res) => {                                     
 
         if (teamPieces[piece].move(action.move, teamPositions, oppPositions, oppKingPos)){                        // Requesting the Move from Piece
         moveAccepted = true; console.log("Move Approved.");}
-        else {console.log("Move Denied.");}
+        else if (piece.charAt(0) == "k")
+        {
+            console.log("Checking for caslte");
+            if (!teamPieces.k1.getHasMoved())
+            {
+                console.log("He hsasn't moved yet");
+                var possible;
+                if (color == "w")
+                {
+                    console.log("he white");
+                    possible = [{row: 0, col: 2}, {row: 0, col: 6}];
+                }
+                else
+                {
+                    console.log("he black");
+                    possible = [{row: 7, col: 2}, {row: 0, col: 6}];
+                }
+                if (isEmpty(action.move, teamPositions, oppPositions))
+                {
+                    console.log("The sapce is empty");
+                    if (isEqual(action.move, possible[0]) && isEqual(teamPieces.r1.getPositionObject(), {row: possible[0].row, col: 0}) && isEmpty({row: possible[0].row, col: 1}, teamPositions, oppPositions) && isEmpty({row: possible[0].row, col: 3}, teamPositions, oppPositions))
+                    {
+                        console.log("ok moving him left");
+                        teamPieces.k1.setPosition(action.move.row, action.move.col, teamPositions, oppPositions, oppKingPos);
+                        teamPieces.r1.setPosition(action.move.row, action.move.col + 1, teamPositions, oppPositions, oppKingPos);
+                        changedSlots.push({row: possible[0].row, col: 0});
+                        changedSlots.push({row: possible[0].row, col: 3});
+                        moveAccepted = true;
+                    }
+                    if (isEqual(action.move, possible[1]) && isEqual(teamPieces.r2.getPositionObject(), {row: possible[0].row, col: 7}) && isEmpty({row: possible[0].row, col: 5}, teamPositions, oppPositions))
+                    {
+                        console.log("ok moving him right;")
+                        teamPieces.k1.setPosition(action.move.row, action.move.col, teamPositions, oppPositions, oppKingPos);
+                        teamPieces.r2.setPosition(action.move.row, action.move.col - 1, teamPositions, oppPositions, oppKingPos);
+                        changedSlots.push({row: possible[0].row, col: 7});
+                        changedSlots.push({row: possible[0].row, col: 5});
+                        moveAccepted = true;
+                    }
+                }
+            }
+        }
         if (moveAccepted)                                                              // The move was valid for that piece.
         {
             if (pieceKilled) {deadArray.push(oppcolor + killPiece); teamScore += oppPieces[killPiece].kill(); }                // If a piece is killed in the movement, it's set to dead and it's score value is added.
@@ -476,6 +516,13 @@ class Piece {
         this.isDead = isDead;
         }
 
+    setPosition(row, col, teamPositions, oppPositions, enemeyKingPos)
+    {
+        this.row = row;
+        this.col = col;
+        this.findPossibleMoves(teamPositions, oppPositions, enemeyKingPos);
+    }
+
     getSendObject()
     {
         var data = new Object();
@@ -602,14 +649,14 @@ class Piece {
     checkOnce(xDirection, yDirection, teamPositions, oppPositions, currPos)
     {
         var testBlock = this.addValues(currPos, xDirection, yDirection);
-        if (!this.isInBoard(testBlock)) return true;
+        if (!this.isInBoard(testBlock)) return false;
 
         for (var i = 0; i < teamPositions.length; i++)
         {
             if (this.isEqual(testBlock, teamPositions[i]))
             {
                 this.blockBlocks.push(testBlock);
-                return true;
+                return false;
             }
         }
         for (var i = 0; i < oppPositions.length; i++)
@@ -617,7 +664,7 @@ class Piece {
             if (this.isEqual(testBlock, oppPositions[i]))
             {
                 this.possibleMoves.push(testBlock);
-                return true;
+                return false;
             }
         }
         this.possibleMoves.push(testBlock);
@@ -692,20 +739,31 @@ class King extends Piece {
         return data;
     }
 
+    move(newPos, teamPositions, oppPositions, enemyKingPos)
+    {
+        var move = super.move(newPos, teamPositions, oppPositions, enemyKingPos);
+        if (move)
+        {
+            this.hasMoved = true;
+        }
+        return move;
+    }
+
     findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
         super.findPossibleMoves();
         this.checkDiagonal(1, 1, teamPositions, oppPositions);
         this.checkDiagonal(-1, -1, teamPositions, oppPositions);
         this.checkDiagonal(-1, 1, teamPositions, oppPositions);
         this.checkDiagonal(1, -1, teamPositions, oppPositions);
-        this.checkStraight(1, 0, teamPositions, oppPositions);
+        var right = this.checkStraight(1, 0, teamPositions, oppPositions);
         this.checkStraight(-1, 0, teamPositions, oppPositions);
-        this.checkStraight(0, 1, teamPositions, oppPositions);
+        var left = this.checkStraight(0, 1, teamPositions, oppPositions);
         this.checkStraight(0, -1, teamPositions, oppPositions);
-        for (var i = 0; i < this.possibleMoves.length; i++)
-        {
-            console.log("King can move: " + this.possibleMoves[i].row + " " + this.possibleMoves[i].col);
-        }
+    }
+
+    getHasMoved()
+    {
+        return this.hasMoved;
     }
 
     removeUnsafeMoves(opponentBlockedMoves, oppPossibleMoves)
@@ -739,7 +797,7 @@ class King extends Piece {
     
     checkStraight(xDirection, yDirection, teamPositions, oppPositions)
     {
-        this.checkOnce(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
+        return this.checkOnce(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
     
     checkDiagonal(xDirection, yDirection, teamPositions, oppPositions)

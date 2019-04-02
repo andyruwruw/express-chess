@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const axios = require('axios')
 
 const app = express();
 app.use(bodyParser.json());
@@ -8,7 +7,7 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 
-app.use(express.static('../public'));
+//app.use(express.static('../public'));
 
 const mongoose = require('mongoose');
 
@@ -81,7 +80,7 @@ setInterval(deleteInactive, 10000);
 */
 
 
-app.listen(8000, () => console.log('Server listening on port 3000!'));
+app.listen(3000, () => console.log('Server listening on port 3000!'));
 
 /*
 var port = process.env.PORT || 3000;
