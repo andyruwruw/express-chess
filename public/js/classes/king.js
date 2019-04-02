@@ -1,6 +1,7 @@
 class King extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead, hasMoved) {
-        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, hasMoved) {
+        super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
+        this.type = "k";
         this.hasMoved = hasMoved;
         this.points = 100;
         }
@@ -12,9 +13,8 @@ class King extends Piece {
         return data;
     }
 
-    findPossibleMoves(teamPositions, oppPositions) {
-        this.possibleMoves = [];
-        this.blockBlocks = [];
+    findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
+        super.findPossibleMoves();
         this.checkDiagonal(1, 1, teamPositions, oppPositions);
         this.checkDiagonal(-1, -1, teamPositions, oppPositions);
         this.checkDiagonal(-1, 1, teamPositions, oppPositions);
@@ -29,7 +29,7 @@ class King extends Piece {
         }
     }
 
-    removeUnsafeMoves(opponentBlockedMoves, opponentPossibleMoves)
+    removeUnsafeMoves(opponentBlockedMoves)
     {
         var newPossible = [];
         for (var j = 0; j < this.possibleMoves.length; j++)
@@ -38,14 +38,6 @@ class King extends Piece {
             for (var i = 0; i < opponentBlockedMoves.length; i++)
             {
                 if ((this.isEqual(this.possibleMoves[j], opponentBlockedMoves[i])))
-                {
-                    blocked = true;
-                    break;
-                }
-            }
-            for (var i = 0; i < opponentPossibleMoves.length; i++)
-            {
-                if ((this.isEqual(this.possibleMoves[j], opponentPossibleMoves[i])))
                 {
                     blocked = true;
                     break;

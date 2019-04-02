@@ -1,12 +1,12 @@
 class Knight extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
-        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
+        this.type = "n";
         this.points = 3;
         }
 
-    findPossibleMoves(teamPositions, oppPositions) {
-        this.possibleMoves = [];
-        this.blockBlocks = [];
+    findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
+        super.findPossibleMoves();
         this.checkKnightL(1, 2, teamPositions, oppPositions);
         this.checkKnightL(2, 1, teamPositions, oppPositions);
         this.checkKnightL(2, -1, teamPositions, oppPositions);

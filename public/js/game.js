@@ -1089,39 +1089,68 @@ var app = new Vue({
         },
         convertObjectFromRecieved(recievedData)
         {
-            this.pieceData.whitePieces.k1 = new King(recievedData.whitePieces.k1.row, recievedData.whitePieces.k1.col, recievedData.whitePieces.k1.num, recievedData.whitePieces.k1.team, recievedData.whitePieces.k1.possibleMoves, recievedData.whitePieces.k1.blockBlocks, recievedData.whitePieces.k1.isDead, recievedData.whitePieces.k1.hasMoved);
-            this.pieceData.whitePieces.q1 = new Queen(recievedData.whitePieces.q1.row, recievedData.whitePieces.q1.col, recievedData.whitePieces.q1.num, recievedData.whitePieces.q1.team, recievedData.whitePieces.q1.possibleMoves, recievedData.whitePieces.q1.blockBlocks, recievedData.whitePieces.q1.isDead);
-            this.pieceData.whitePieces.r1 = new Rook(recievedData.whitePieces.r1.row, recievedData.whitePieces.r1.col, recievedData.whitePieces.r1.num, recievedData.whitePieces.r1.team, recievedData.whitePieces.r1.possibleMoves, recievedData.whitePieces.r1.blockBlocks, recievedData.whitePieces.r1.isDead);
-            this.pieceData.whitePieces.r2 = new Rook(recievedData.whitePieces.r2.row, recievedData.whitePieces.r2.col, recievedData.whitePieces.r2.num, recievedData.whitePieces.r2.team, recievedData.whitePieces.r2.possibleMoves, recievedData.whitePieces.r2.blockBlocks, recievedData.whitePieces.r2.isDead);
-            this.pieceData.whitePieces.b1 = new Bishop(recievedData.whitePieces.b1.row, recievedData.whitePieces.b1.col, recievedData.whitePieces.b1.num, recievedData.whitePieces.b1.team, recievedData.whitePieces.b1.possibleMoves, recievedData.whitePieces.b1.blockBlocks, recievedData.whitePieces.b1.isDead);
-            this.pieceData.whitePieces.b2 = new Bishop(recievedData.whitePieces.b2.row, recievedData.whitePieces.b2.col, recievedData.whitePieces.b2.num, recievedData.whitePieces.b2.team, recievedData.whitePieces.b2.possibleMoves, recievedData.whitePieces.b2.blockBlocks, recievedData.whitePieces.b2.isDead);
-            this.pieceData.whitePieces.n1 = new Knight(recievedData.whitePieces.n1.row, recievedData.whitePieces.n1.col, recievedData.whitePieces.n1.num, recievedData.whitePieces.n1.team, recievedData.whitePieces.n1.possibleMoves, recievedData.whitePieces.n1.blockBlocks, recievedData.whitePieces.n1.isDead);
-            this.pieceData.whitePieces.n2 = new Knight(recievedData.whitePieces.n2.row, recievedData.whitePieces.n2.col, recievedData.whitePieces.n2.num, recievedData.whitePieces.n2.team, recievedData.whitePieces.n2.possibleMoves, recievedData.whitePieces.n2.blockBlocks, recievedData.whitePieces.n2.isDead);
-            this.pieceData.whitePieces.p1 = new Pawn(recievedData.whitePieces.p1.row, recievedData.whitePieces.p1.col, recievedData.whitePieces.p1.num, recievedData.whitePieces.p1.team, recievedData.whitePieces.p1.possibleMoves, recievedData.whitePieces.p1.blockBlocks, recievedData.whitePieces.p1.isDead, recievedData.whitePieces.p1.hasMoved);
-            this.pieceData.whitePieces.p2 = new Pawn(recievedData.whitePieces.p2.row, recievedData.whitePieces.p2.col, recievedData.whitePieces.p2.num, recievedData.whitePieces.p2.team, recievedData.whitePieces.p2.possibleMoves, recievedData.whitePieces.p2.blockBlocks, recievedData.whitePieces.p2.isDead, recievedData.whitePieces.p2.hasMoved);
-            this.pieceData.whitePieces.p3 = new Pawn(recievedData.whitePieces.p3.row, recievedData.whitePieces.p3.col, recievedData.whitePieces.p3.num, recievedData.whitePieces.p3.team, recievedData.whitePieces.p3.possibleMoves, recievedData.whitePieces.p3.blockBlocks, recievedData.whitePieces.p3.isDead, recievedData.whitePieces.p3.hasMoved);
-            this.pieceData.whitePieces.p4 = new Pawn(recievedData.whitePieces.p4.row, recievedData.whitePieces.p4.col, recievedData.whitePieces.p4.num, recievedData.whitePieces.p4.team, recievedData.whitePieces.p4.possibleMoves, recievedData.whitePieces.p4.blockBlocks, recievedData.whitePieces.p4.isDead, recievedData.whitePieces.p4.hasMoved);
-            this.pieceData.whitePieces.p5 = new Pawn(recievedData.whitePieces.p5.row, recievedData.whitePieces.p5.col, recievedData.whitePieces.p5.num, recievedData.whitePieces.p5.team, recievedData.whitePieces.p5.possibleMoves, recievedData.whitePieces.p5.blockBlocks, recievedData.whitePieces.p5.isDead, recievedData.whitePieces.p5.hasMoved);
-            this.pieceData.whitePieces.p6 = new Pawn(recievedData.whitePieces.p6.row, recievedData.whitePieces.p6.col, recievedData.whitePieces.p6.num, recievedData.whitePieces.p6.team, recievedData.whitePieces.p6.possibleMoves, recievedData.whitePieces.p6.blockBlocks, recievedData.whitePieces.p6.isDead, recievedData.whitePieces.p6.hasMoved);
-            this.pieceData.whitePieces.p7 = new Pawn(recievedData.whitePieces.p7.row, recievedData.whitePieces.p7.col, recievedData.whitePieces.p7.num, recievedData.whitePieces.p7.team, recievedData.whitePieces.p7.possibleMoves, recievedData.whitePieces.p7.blockBlocks, recievedData.whitePieces.p7.isDead, recievedData.whitePieces.p7.hasMoved);
-            this.pieceData.whitePieces.p8 = new Pawn(recievedData.whitePieces.p8.row, recievedData.whitePieces.p8.col, recievedData.whitePieces.p8.num, recievedData.whitePieces.p8.team, recievedData.whitePieces.p8.possibleMoves, recievedData.whitePieces.p8.blockBlocks, recievedData.whitePieces.p8.isDead, recievedData.whitePieces.p8.hasMoved);
-
-            this.pieceData.blackPieces.k1 = new King(recievedData.blackPieces.k1.row, recievedData.blackPieces.k1.col, recievedData.blackPieces.k1.num, recievedData.blackPieces.k1.team, recievedData.blackPieces.k1.possibleMoves, recievedData.blackPieces.k1.blockBlocks, recievedData.blackPieces.k1.isDead, recievedData.blackPieces.k1.hasMoved);
-            this.pieceData.blackPieces.q1 = new Queen(recievedData.blackPieces.q1.row, recievedData.blackPieces.q1.col, recievedData.blackPieces.q1.num, recievedData.blackPieces.q1.team, recievedData.blackPieces.q1.possibleMoves, recievedData.blackPieces.q1.blockBlocks, recievedData.blackPieces.q1.isDead);
-            this.pieceData.blackPieces.r1 = new Rook(recievedData.blackPieces.r1.row, recievedData.blackPieces.r1.col, recievedData.blackPieces.r1.num, recievedData.blackPieces.r1.team, recievedData.blackPieces.r1.possibleMoves, recievedData.blackPieces.r1.blockBlocks, recievedData.blackPieces.r1.isDead);
-            this.pieceData.blackPieces.r2 = new Rook(recievedData.blackPieces.r2.row, recievedData.blackPieces.r2.col, recievedData.blackPieces.r2.num, recievedData.blackPieces.r2.team, recievedData.blackPieces.r2.possibleMoves, recievedData.blackPieces.r2.blockBlocks, recievedData.blackPieces.r2.isDead);
-            this.pieceData.blackPieces.b1 = new Bishop(recievedData.blackPieces.b1.row, recievedData.blackPieces.b1.col, recievedData.blackPieces.b1.num, recievedData.blackPieces.b1.team, recievedData.blackPieces.b1.possibleMoves, recievedData.blackPieces.b1.blockBlocks, recievedData.blackPieces.b1.isDead);
-            this.pieceData.blackPieces.b2 = new Bishop(recievedData.blackPieces.b2.row, recievedData.blackPieces.b2.col, recievedData.blackPieces.b2.num, recievedData.blackPieces.b2.team, recievedData.blackPieces.b2.possibleMoves, recievedData.blackPieces.b2.blockBlocks, recievedData.blackPieces.b2.isDead);
-            this.pieceData.blackPieces.n1 = new Knight(recievedData.blackPieces.n1.row, recievedData.blackPieces.n1.col, recievedData.blackPieces.n1.num, recievedData.blackPieces.n1.team, recievedData.blackPieces.n1.possibleMoves, recievedData.blackPieces.n1.blockBlocks, recievedData.blackPieces.n1.isDead);
-            this.pieceData.blackPieces.n2 = new Knight(recievedData.blackPieces.n2.row, recievedData.blackPieces.n2.col, recievedData.blackPieces.n2.num, recievedData.blackPieces.n2.team, recievedData.blackPieces.n2.possibleMoves, recievedData.blackPieces.n2.blockBlocks, recievedData.blackPieces.n2.isDead);
-            this.pieceData.blackPieces.p1 = new Pawn(recievedData.blackPieces.p1.row, recievedData.blackPieces.p1.col, recievedData.blackPieces.p1.num, recievedData.blackPieces.p1.team, recievedData.blackPieces.p1.possibleMoves, recievedData.blackPieces.p1.blockBlocks, recievedData.blackPieces.p1.isDead, recievedData.blackPieces.p1.hasMoved);
-            this.pieceData.blackPieces.p2 = new Pawn(recievedData.blackPieces.p2.row, recievedData.blackPieces.p2.col, recievedData.blackPieces.p2.num, recievedData.blackPieces.p2.team, recievedData.blackPieces.p2.possibleMoves, recievedData.blackPieces.p2.blockBlocks, recievedData.blackPieces.p2.isDead, recievedData.blackPieces.p2.hasMoved);
-            this.pieceData.blackPieces.p3 = new Pawn(recievedData.blackPieces.p3.row, recievedData.blackPieces.p3.col, recievedData.blackPieces.p3.num, recievedData.blackPieces.p3.team, recievedData.blackPieces.p3.possibleMoves, recievedData.blackPieces.p3.blockBlocks, recievedData.blackPieces.p3.isDead, recievedData.blackPieces.p3.hasMoved);
-            this.pieceData.blackPieces.p4 = new Pawn(recievedData.blackPieces.p4.row, recievedData.blackPieces.p4.col, recievedData.blackPieces.p4.num, recievedData.blackPieces.p4.team, recievedData.blackPieces.p4.possibleMoves, recievedData.blackPieces.p4.blockBlocks, recievedData.blackPieces.p4.isDead, recievedData.blackPieces.p4.hasMoved);
-            this.pieceData.blackPieces.p5 = new Pawn(recievedData.blackPieces.p5.row, recievedData.blackPieces.p5.col, recievedData.blackPieces.p5.num, recievedData.blackPieces.p5.team, recievedData.blackPieces.p5.possibleMoves, recievedData.blackPieces.p5.blockBlocks, recievedData.blackPieces.p5.isDead, recievedData.blackPieces.p5.hasMoved);
-            this.pieceData.blackPieces.p6 = new Pawn(recievedData.blackPieces.p6.row, recievedData.blackPieces.p6.col, recievedData.blackPieces.p6.num, recievedData.blackPieces.p6.team, recievedData.blackPieces.p6.possibleMoves, recievedData.blackPieces.p6.blockBlocks, recievedData.blackPieces.p6.isDead, recievedData.blackPieces.p6.hasMoved);
-            this.pieceData.blackPieces.p7 = new Pawn(recievedData.blackPieces.p7.row, recievedData.blackPieces.p7.col, recievedData.blackPieces.p7.num, recievedData.blackPieces.p7.team, recievedData.blackPieces.p7.possibleMoves, recievedData.blackPieces.p7.blockBlocks, recievedData.blackPieces.p7.isDead, recievedData.blackPieces.p7.hasMoved);
-            this.pieceData.blackPieces.p8 = new Pawn(recievedData.blackPieces.p8.row, recievedData.blackPieces.p8.col, recievedData.blackPieces.p8.num, recievedData.blackPieces.p8.team, recievedData.blackPieces.p8.possibleMoves, recievedData.blackPieces.p8.blockBlocks, recievedData.blackPieces.p8.isDead, recievedData.blackPieces.p8.hasMoved);
+            this.piecesData.whitePieces = new Object();
+            var keys = Object.keys(recievedData.whitePieces);
+            for (var i = 0; i < keys.length; i++)
+            {
+                switch (recievedData.whitePieces[keys[i]].type) {
+                    case "k":
+                        this.piecesData.whitePieces[keys[i]] = new King(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                            recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead, recievedData.whitePieces[keys[i]].hasMoved);
+                        break;
+                    case "q":
+                        this.piecesData.whitePieces[keys[i]] = new Queen(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                            recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead);
+                        break;
+                    case "r":
+                        this.piecesData.whitePieces[keys[i]] = new Rook(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                            recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead);
+                        break;
+                    case "b":
+                        this.piecesData.whitePieces[keys[i]] = new Bishop(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                            recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead);
+                        break;
+                    case "n":
+                        this.piecesData.whitePieces[keys[i]] = new Knight(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                            recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead);
+                        break;
+                    case "p":
+                        this.piecesData.whitePieces[keys[i]] = new Pawn(recievedData.whitePieces[keys[i]].row, recievedData.whitePieces[keys[i]].col, recievedData.whitePieces[keys[i]].num, recievedData.whitePieces[keys[i]].team, recievedData.whitePieces[keys[i]].possibleMoves, 
+                            recievedData.whitePieces[keys[i]].blockBlocks, recievedData.whitePieces[keys[i]].pathBlocks, recievedData.whitePieces[keys[i]].isDead);
+                        break;
+                }
+            }
+            this.piecesData.blackPieces = new Object();
+            var keys = Object.keys(recievedData.blackPieces);
+            for (var i = 0; i < keys.length; i++)
+            {
+                switch (recievedData.blackPieces[keys[i]].type) {
+                    case "k":
+                        this.piecesData.blackPieces[keys[i]] = new King(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                            recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead, recievedData.blackPieces[keys[i]].hasMoved);
+                        break;
+                    case "q":
+                        this.piecesData.blackPieces[keys[i]] = new Queen(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                            recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead);
+                        break;
+                    case "r":
+                        this.piecesData.blackPieces[keys[i]] = new Rook(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                            recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead);
+                        break;
+                    case "b":
+                        this.piecesData.blackPieces[keys[i]] = new Bishop(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                            recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead);
+                        break;
+                    case "n":
+                        this.piecesData.blackPieces[keys[i]] = new Knight(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                            recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead);
+                        break;
+                    case "p":
+                        this.piecesData.blackPieces[keys[i]] = new Pawn(recievedData.blackPieces[keys[i]].row, recievedData.blackPieces[keys[i]].col, recievedData.blackPieces[keys[i]].num, recievedData.blackPieces[keys[i]].team, recievedData.blackPieces[keys[i]].possibleMoves, 
+                            recievedData.blackPieces[keys[i]].blockBlocks, recievedData.blackPieces[keys[i]].pathBlocks, recievedData.blackPieces[keys[i]].isDead);
+                        break;
+                }
+            }
         },
         changeSong()
         {

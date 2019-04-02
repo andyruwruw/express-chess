@@ -1,5 +1,5 @@
 class Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
         this.row = row;
         this.col = col;
         this.team = team;
@@ -7,6 +7,7 @@ class Piece {
         this.num = num;
         this.possibleMoves = possibleMoves;
         this.blockBlocks = blockBlocks;
+        this.pathBlocks = pathBlocks;
         this.isDead = isDead;
         }
 
@@ -19,6 +20,7 @@ class Piece {
         data.num = this.num;
         data.possibleMoves = this.possibleMoves;
         data.blockBlocks = this.blockBlocks;
+        data.pathBlocks = this.pathBlocks;
         data.isDead = this.isDead;
         return data;
     }
@@ -33,15 +35,18 @@ class Piece {
     getblockBlocks() {
         return this.blockBlocks;}
 
-    move(newPos, teamPositions, oppPositions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
-        this.findPossibleMoves(teamPositions, oppPositions);
+    getpathBlocks(){
+        return this.pathBlocks;}
+
+    move(newPos, teamPositions, oppPositions, enemyKingPos) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
+        this.findPossibleMoves(teamPositions, oppPositions, enemyKingPos);
         for (var i = 0; i < this.possibleMoves.length; i++)
         {
             if (this.isEqual(this.possibleMoves[i], newPos))
             {
                 this.row = newPos.row;
                 this.col = newPos.col;
-                this.findPossibleMoves(teamPositions, oppPositions);
+                this.findPossibleMoves(teamPositions, oppPositions, enemyKingPos);
                 return true;}
         }
         console.log("MOVE FAILED");
@@ -60,14 +65,14 @@ class Piece {
         return true;
     }
 
-    checkForRefresh(changeBlock, teamPositions, oppPositions)
+    checkForRefresh(changeBlock, teamPositions, oppPositions, enemyKingPos)
     {
         for (var i = 0; i < this.possibleMoves.length; i++)
         {
             if (this.isEqual(this.possibleMoves[i], changeBlock))
             {
                 console.log("FINDING NEW POSITIONS");
-                this.findPossibleMoves(teamPositions, oppPositions);
+                this.findPossibleMoves(teamPositions, oppPositions, enemyKingPos);
                 return true;
             }
         }
@@ -76,14 +81,23 @@ class Piece {
             if (this.isEqual(this.blockBlocks[i], changeBlock))
             {
                 console.log("UNBLOCKED");
-                this.findPossibleMoves(teamPositions, oppPositions);
+                this.findPossibleMoves(teamPositions, oppPositions, enemyKingPos);
+                return true;
+            }
+        }
+        for (var i = 0; i < this.pathBlocks.length; i++)
+        {
+            if (this.isEqual(this.pathBlocks[i], changeBlock))
+            {
+                console.log("PATH CHANGED");
+                this.findPossibleMoves(teamPositions, oppPositions, enemyKingPos);
                 return true;
             }
         }
         return false;
     }
 
-    checkRecursive (xDirection, yDirection, teamPositions, oppPositions, inputBlock)
+    checkRecursive (xDirection, yDirection, teamPositions, oppPositions, inputBlock, enemyKingPos)
     {
         var testBlock = this.addValues(inputBlock, xDirection, yDirection);
         if (!(this.isInBoard(testBlock))) {return true;}
@@ -101,11 +115,16 @@ class Piece {
             if (this.isEqual(testBlock, oppPositions[i]))
             {
                 this.possibleMoves.push(testBlock);
+                if (this.isEqual(testBlock, enemyKingPos))
+                {
+                    var onePast = this.addValues(inputBlock, xDirection, yDirection);
+                    this.pathBlocks.push(onePast);
+                }
                 return true;
             }
         }
         this.possibleMoves.push(testBlock);
-        if (this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, testBlock))
+        if (this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, testBlock, enemyKingPos))
         {return true;}
     }
 
@@ -156,5 +175,12 @@ class Piece {
     addValues(block, x, y)
     {
         return {row: block.row + y, col: block.col + x};
+    }
+
+    findPossibleMoves()
+    {
+        this.possibleMoves = [];
+        this.blockBlocks = [];
+        this.pathBlocks = [];
     }
 }

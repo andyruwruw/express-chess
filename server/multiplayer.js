@@ -67,38 +67,66 @@ router.put('/:idNum', async (req, res) => {                                     
         if (color == "w")                                                             // Gathering both team's piece objects. (Needed to find Piece Key)
         {
             teamPieces = convertObjectFromRecieved(req.body.pieceData.whitePieces);                              
-            oppPieces = convertObjectFromRecieved(req.body.pieceData.blackPieces);  
+            oppPieces = convertObjectFromRecieved(req.body.pieceData.blackPieces); 
             teamScore = req.body.whiteScore;
             oppScore = req.body.blackScore;
         }
         else
         {
             oppPieces = convertObjectFromRecieved(req.body.pieceData.whitePieces); 
-            teamPieces = convertObjectFromRecieved(req.body.pieceData.blackPieces);  
+            teamPieces = convertObjectFromRecieved(req.body.pieceData.blackPieces);
             teamScore = req.body.blackScore;
             oppScore = req.body.whiteScore;
         }
+        var teamKingPos = teamPieces.k1.getPositionObject(); 
+        var oppKingPos = oppPieces.k1.getPositionObject(); 
+        
         var deadArray = req.body.deadArray;
         var action = req.body.action;                                                  // Preparing requested move data. (Needed to find Piece Key)
         var piece = getPiece(action.selected, teamPieces);                             // Finding Moving Piece Key. 
+
         var killPiece;
         var pieceKilled = false;
+
         var teamPositions = gatherAllPositions(teamPieces);                        // Preparing two arrays with all the piece's locations.
         var oppPositions = gatherAllPositions(oppPieces);
+
         if (!isEmpty(action.move, teamPositions, oppPositions)) {killPiece = getPiece(action.move, oppPieces); pieceKilled = true; console.log("Piece to be killed: " + killPiece);}
+
         var changedSlots = [action.selected, action.move];
+
         var possibleTeamMoves = gatherPossibleMoves(teamPieces);                   // Array of all possible moves create to for check, checkmate or stalemate
         var possibleOppMoves = gatherPossibleMoves(oppPieces); 
+
         var teamBlocked = gatherBlockedMoves(teamPieces);
         var oppBlocked = gatherBlockedMoves(oppPieces);
         teamPieces.k1.removeUnsafeMoves(oppBlocked);
         oppPieces.k1.removeUnsafeMoves(teamBlocked);
-        if (teamPieces[piece].move(action.move, teamPositions, oppPositions)){                        // Requesting the Move from Piece
+
+        if (teamPieces[piece].move(action.move, teamPositions, oppPositions, oppKingPos)){                        // Requesting the Move from Piece
         moveAccepted = true; console.log("Move Approved.");}
         else {console.log("Move Denied.");}
         if (moveAccepted)                                                              // The move was valid for that piece.
         {
             if (pieceKilled) {deadArray.push(oppcolor + killPiece); teamScore += oppPieces[killPiece].kill(); }                // If a piece is killed in the movement, it's set to dead and it's score value is added.
+            if (piece.charAt(0) == p && teamPieces[piece].checkPromotion())
+            {
+                var position = teamPieces[piece].getPositionObject();
+                var keys = Object.keys(teamPieces);
+                var queenNum = 0;
+                for (var i = 0; i < keys.length; i++)
+                {
+                    if (keys[i].charAt(0) == "q")
+                    {
+                        queenNum += 1;
+                    }
+                }
+                delete teamPieces[piece];
+                teamPieces["q" + (queenNum + 1)] = new Queen(position.row, position.col, (queenNum + 1), req.body.team, [], [], [], 0);
+                teamPositions = gatherAllPositions(teamPieces);
+                oppPositions = gatherAllPositions(oppPieces);
+                teamPieces["q" + (queenNum + 1)].findPossibleMoves(teamPositions, oppPositions, oppKingPos);
+            }
             teamPositions = gatherAllPositions(teamPieces);
             oppPositions = gatherAllPositions(oppPieces);
             var keyArray = Object.keys(teamPieces);                     // Getting key values to iterate through pieces object.
@@ -106,8 +134,8 @@ router.put('/:idNum', async (req, res) => {                                     
             {
                 if (teamPieces[keyArray[i]].getStatus())
                 {
-                    teamPieces[keyArray[i]].checkForRefresh(action.selected, teamPositions, oppPositions);
-                    teamPieces[keyArray[i]].checkForRefresh(action.move, teamPositions, oppPositions);
+                    teamPieces[keyArray[i]].checkForRefresh(action.selected, teamPositions, oppPositions, oppKingPos);
+                    teamPieces[keyArray[i]].checkForRefresh(action.move, teamPositions, oppPositions, oppKingPos);
                 }
             }
             keyArray = Object.keys(oppPieces);
@@ -115,8 +143,8 @@ router.put('/:idNum', async (req, res) => {                                     
             {
                 if (oppPieces[keyArray[i]].getStatus())
                 {
-                    oppPieces[keyArray[i]].checkForRefresh(action.selected, oppPositions, teamPositions);
-                    oppPieces[keyArray[i]].checkForRefresh(action.move, oppPositions, teamPositions);
+                    oppPieces[keyArray[i]].checkForRefresh(action.selected, oppPositions, teamPositions, teamKingPos);
+                    oppPieces[keyArray[i]].checkForRefresh(action.move, oppPositions, teamPositions, teamKingPos);
                 }
             }                                                                          // We now have a clear idea of where each team can move and only updated the ones nessisary.
             
@@ -303,8 +331,13 @@ function gatherBlockedMoves(pieces){
     var pieceKeys = Object.keys(pieces);
     for (var i = 0; i < pieceKeys.length; i++){
         if (!(pieces[pieceKeys[i]].getStatus())) {continue;}
-        else {var pieceMoves = (pieces[pieceKeys[i]]).getblockBlocks();
-            blockedMoves = blockedMoves.concat(pieceMoves);}}
+        else 
+        {
+            var pieceMoves = (pieces[pieceKeys[i]]).getblockBlocks();
+            var continuedPath = (pieces[pieceKeys[i]]).getpathBlocks();
+            blockedMoves = blockedMoves.concat(pieceMoves);
+            blockedMoves = blockedMoves.concat(continuedPath);
+        }}
     return blockedMoves;}
 
 function checkMate(kingPossibleMoves, teamPossibleMoves, oppPossibleMoves, dangeringBlock, dangeringPath){
@@ -332,22 +365,36 @@ function checkMate(kingPossibleMoves, teamPossibleMoves, oppPossibleMoves, dange
 
 function convertObjectFromRecieved(recievedData){
     var pieces = new Object();
-    pieces.k1 = new King(recievedData.k1.row, recievedData.k1.col, recievedData.k1.num, recievedData.k1.team, recievedData.k1.possibleMoves, recievedData.k1.blockBlocks, recievedData.k1.isDead, recievedData.k1.hasMoved);
-    pieces.q1 = new Queen(recievedData.q1.row, recievedData.q1.col, recievedData.q1.num, recievedData.q1.team, recievedData.q1.possibleMoves, recievedData.q1.blockBlocks, recievedData.q1.isDead);
-    pieces.r1 = new Rook(recievedData.r1.row, recievedData.r1.col, recievedData.r1.num, recievedData.r1.team, recievedData.r1.possibleMoves, recievedData.r1.blockBlocks, recievedData.r1.isDead);
-    pieces.r2 = new Rook(recievedData.r2.row, recievedData.r2.col, recievedData.r2.num, recievedData.r2.team, recievedData.r2.possibleMoves, recievedData.r2.blockBlocks, recievedData.r2.isDead);
-    pieces.b1 = new Bishop(recievedData.b1.row, recievedData.b1.col, recievedData.b1.num, recievedData.b1.team, recievedData.b1.possibleMoves, recievedData.b1.blockBlocks, recievedData.b1.isDead);
-    pieces.b2 = new Bishop(recievedData.b2.row, recievedData.b2.col, recievedData.b2.num, recievedData.b2.team, recievedData.b2.possibleMoves, recievedData.b2.blockBlocks, recievedData.b2.isDead);
-    pieces.n1 = new Knight(recievedData.n1.row, recievedData.n1.col, recievedData.n1.num, recievedData.n1.team, recievedData.n1.possibleMoves, recievedData.n1.blockBlocks, recievedData.n1.isDead);
-    pieces.n2 = new Knight(recievedData.n2.row, recievedData.n2.col, recievedData.n2.num, recievedData.n2.team, recievedData.n2.possibleMoves, recievedData.n2.blockBlocks, recievedData.n2.isDead);
-    pieces.p1 = new Pawn(recievedData.p1.row, recievedData.p1.col, recievedData.p1.num, recievedData.p1.team, recievedData.p1.possibleMoves, recievedData.p1.blockBlocks, recievedData.p1.isDead, recievedData.p1.hasMoved);
-    pieces.p2 = new Pawn(recievedData.p2.row, recievedData.p2.col, recievedData.p2.num, recievedData.p2.team, recievedData.p2.possibleMoves, recievedData.p2.blockBlocks, recievedData.p2.isDead, recievedData.p2.hasMoved);
-    pieces.p3 = new Pawn(recievedData.p3.row, recievedData.p3.col, recievedData.p3.num, recievedData.p3.team, recievedData.p3.possibleMoves, recievedData.p3.blockBlocks, recievedData.p3.isDead, recievedData.p3.hasMoved);
-    pieces.p4 = new Pawn(recievedData.p4.row, recievedData.p4.col, recievedData.p4.num, recievedData.p4.team, recievedData.p4.possibleMoves, recievedData.p4.blockBlocks, recievedData.p4.isDead, recievedData.p4.hasMoved);
-    pieces.p5 = new Pawn(recievedData.p5.row, recievedData.p5.col, recievedData.p5.num, recievedData.p5.team, recievedData.p5.possibleMoves, recievedData.p5.blockBlocks, recievedData.p5.isDead, recievedData.p5.hasMoved);
-    pieces.p6 = new Pawn(recievedData.p6.row, recievedData.p6.col, recievedData.p6.num, recievedData.p6.team, recievedData.p6.possibleMoves, recievedData.p6.blockBlocks, recievedData.p6.isDead, recievedData.p6.hasMoved);
-    pieces.p7 = new Pawn(recievedData.p7.row, recievedData.p7.col, recievedData.p7.num, recievedData.p7.team, recievedData.p7.possibleMoves, recievedData.p7.blockBlocks, recievedData.p7.isDead, recievedData.p7.hasMoved);
-    pieces.p8 = new Pawn(recievedData.p8.row, recievedData.p8.col, recievedData.p8.num, recievedData.p8.team, recievedData.p8.possibleMoves, recievedData.p8.blockBlocks, recievedData.p8.isDead, recievedData.p8.hasMoved);
+    var keys = Object.keys(recievedData);
+    for (var i = 0; i < keys.length; i++)
+    {
+        switch (recievedData[keys[i]].type) {
+            case "k":
+                pieces[keys[i]] = new King(recievedData[keys[i]].row, recievedData[keys[i]].col, recievedData[keys[i]].num, recievedData[keys[i]].team, recievedData[keys[i]].possibleMoves, 
+                    recievedData[keys[i]].blockBlocks, recievedData[keys[i]].pathBlocks, recievedData[keys[i]].isDead, recievedData[keys[i]].hasMoved);
+                break;
+            case "q":
+                pieces[keys[i]] = new Queen(recievedData[keys[i]].row, recievedData[keys[i]].col, recievedData[keys[i]].num, recievedData[keys[i]].team, recievedData[keys[i]].possibleMoves, 
+                    recievedData[keys[i]].blockBlocks, recievedData[keys[i]].pathBlocks, recievedData[keys[i]].isDead);
+                break;
+            case "r":
+                pieces[keys[i]] = new Rook(recievedData[keys[i]].row, recievedData[keys[i]].col, recievedData[keys[i]].num, recievedData[keys[i]].team, recievedData[keys[i]].possibleMoves, 
+                    recievedData[keys[i]].blockBlocks, recievedData[keys[i]].pathBlocks, recievedData[keys[i]].isDead);
+                break;
+            case "b":
+                pieces[keys[i]] = new Bishop(recievedData[keys[i]].row, recievedData[keys[i]].col, recievedData[keys[i]].num, recievedData[keys[i]].team, recievedData[keys[i]].possibleMoves, 
+                    recievedData[keys[i]].blockBlocks, recievedData[keys[i]].pathBlocks, recievedData[keys[i]].isDead);
+                break;
+            case "n":
+                pieces[keys[i]] = new Knight(recievedData[keys[i]].row, recievedData[keys[i]].col, recievedData[keys[i]].num, recievedData[keys[i]].team, recievedData[keys[i]].possibleMoves, 
+                    recievedData[keys[i]].blockBlocks, recievedData[keys[i]].pathBlocks, recievedData[keys[i]].isDead);
+                break;
+            case "p":
+                pieces[keys[i]] = new Pawn(recievedData[keys[i]].row, recievedData[keys[i]].col, recievedData[keys[i]].num, recievedData[keys[i]].team, recievedData[keys[i]].possibleMoves, 
+                    recievedData[keys[i]].blockBlocks, recievedData[keys[i]].pathBlocks, recievedData[keys[i]].isDead);
+                break;
+        }
+    }
     return pieces;};
 
 function convertObjectToSend(piecesData){
@@ -420,7 +467,7 @@ function isKnight(a, b)
 
 
 class Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
         this.row = row;
         this.col = col;
         this.team = team;
@@ -428,6 +475,7 @@ class Piece {
         this.num = num;
         this.possibleMoves = possibleMoves;
         this.blockBlocks = blockBlocks;
+        this.pathBlocks = pathBlocks;
         this.isDead = isDead;
         }
 
@@ -440,6 +488,7 @@ class Piece {
         data.num = this.num;
         data.possibleMoves = this.possibleMoves;
         data.blockBlocks = this.blockBlocks;
+        data.pathBlocks = this.pathBlocks;
         data.isDead = this.isDead;
         return data;
     }
@@ -454,15 +503,18 @@ class Piece {
     getblockBlocks() {
         return this.blockBlocks;}
 
-    move(newPos, teamPositions, oppPositions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
-        this.findPossibleMoves(teamPositions, oppPositions);
+    getpathBlocks(){
+        return this.pathBlocks;}
+
+    move(newPos, teamPositions, oppPositions, enemyKingPos) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
+        this.findPossibleMoves(teamPositions, oppPositions, enemyKingPos);
         for (var i = 0; i < this.possibleMoves.length; i++)
         {
             if (this.isEqual(this.possibleMoves[i], newPos))
             {
                 this.row = newPos.row;
                 this.col = newPos.col;
-                this.findPossibleMoves(teamPositions, oppPositions);
+                this.findPossibleMoves(teamPositions, oppPositions, enemyKingPos);
                 return true;}
         }
         console.log("MOVE FAILED");
@@ -481,14 +533,14 @@ class Piece {
         return true;
     }
 
-    checkForRefresh(changeBlock, teamPositions, oppPositions)
+    checkForRefresh(changeBlock, teamPositions, oppPositions, enemyKingPos)
     {
         for (var i = 0; i < this.possibleMoves.length; i++)
         {
             if (this.isEqual(this.possibleMoves[i], changeBlock))
             {
                 console.log("FINDING NEW POSITIONS");
-                this.findPossibleMoves(teamPositions, oppPositions);
+                this.findPossibleMoves(teamPositions, oppPositions, enemyKingPos);
                 return true;
             }
         }
@@ -497,14 +549,23 @@ class Piece {
             if (this.isEqual(this.blockBlocks[i], changeBlock))
             {
                 console.log("UNBLOCKED");
-                this.findPossibleMoves(teamPositions, oppPositions);
+                this.findPossibleMoves(teamPositions, oppPositions, enemyKingPos);
+                return true;
+            }
+        }
+        for (var i = 0; i < this.pathBlocks.length; i++)
+        {
+            if (this.isEqual(this.pathBlocks[i], changeBlock))
+            {
+                console.log("PATH CHANGED");
+                this.findPossibleMoves(teamPositions, oppPositions, enemyKingPos);
                 return true;
             }
         }
         return false;
     }
 
-    checkRecursive (xDirection, yDirection, teamPositions, oppPositions, inputBlock)
+    checkRecursive (xDirection, yDirection, teamPositions, oppPositions, inputBlock, enemyKingPos)
     {
         var testBlock = this.addValues(inputBlock, xDirection, yDirection);
         if (!(this.isInBoard(testBlock))) {return true;}
@@ -522,11 +583,16 @@ class Piece {
             if (this.isEqual(testBlock, oppPositions[i]))
             {
                 this.possibleMoves.push(testBlock);
+                if (this.isEqual(testBlock, enemyKingPos))
+                {
+                    var onePast = this.addValues(inputBlock, xDirection, yDirection);
+                    this.pathBlocks.push(onePast);
+                }
                 return true;
             }
         }
         this.possibleMoves.push(testBlock);
-        if (this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, testBlock))
+        if (this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, testBlock, enemyKingPos))
         {return true;}
     }
 
@@ -578,32 +644,40 @@ class Piece {
     {
         return {row: block.row + y, col: block.col + x};
     }
+
+    findPossibleMoves()
+    {
+        this.possibleMoves = [];
+        this.blockBlocks = [];
+        this.pathBlocks = [];
+    }
 }
 
 class Bishop extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
-        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
+        this.type = "b";
         this.points = 3;
         }
 
-    findPossibleMoves(teamPositions, oppPositions) {
-        this.possibleMoves = [];
-        this.blockBlocks = [];
-        this.checkDiagonal(1, 1, teamPositions, oppPositions);
-        this.checkDiagonal(-1, -1, teamPositions, oppPositions);
-        this.checkDiagonal(-1, 1, teamPositions, oppPositions);
-        this.checkDiagonal(1, -1, teamPositions, oppPositions);
+    findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
+        super.findPossibleMoves();
+        this.checkDiagonal(1, 1, teamPositions, oppPositions, enemyKingPos);
+        this.checkDiagonal(-1, -1, teamPositions, oppPositions, enemyKingPos);
+        this.checkDiagonal(-1, 1, teamPositions, oppPositions, enemyKingPos);
+        this.checkDiagonal(1, -1, teamPositions, oppPositions, enemyKingPos);
     }
     
-    checkDiagonal(xDirection, yDirection, teamPositions, oppPositions)
+    checkDiagonal(xDirection, yDirection, teamPositions, oppPositions, enemyKingPos)
     {
-        this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
+        this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col}, enemyKingPos);
     }
 }
 
 class King extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead, hasMoved) {
-        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead, hasMoved) {
+        super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
+        this.type = "k";
         this.hasMoved = hasMoved;
         this.points = 100;
         }
@@ -615,9 +689,8 @@ class King extends Piece {
         return data;
     }
 
-    findPossibleMoves(teamPositions, oppPositions) {
-        this.possibleMoves = [];
-        this.blockBlocks = [];
+    findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
+        super.findPossibleMoves();
         this.checkDiagonal(1, 1, teamPositions, oppPositions);
         this.checkDiagonal(-1, -1, teamPositions, oppPositions);
         this.checkDiagonal(-1, 1, teamPositions, oppPositions);
@@ -673,14 +746,14 @@ class King extends Piece {
 }
 
 class Knight extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
-        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
+        this.type = "n";
         this.points = 3;
         }
 
-    findPossibleMoves(teamPositions, oppPositions) {
-        this.possibleMoves = [];
-        this.blockBlocks = [];
+    findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
+        super.findPossibleMoves();
         this.checkKnightL(1, 2, teamPositions, oppPositions);
         this.checkKnightL(2, 1, teamPositions, oppPositions);
         this.checkKnightL(2, -1, teamPositions, oppPositions);
@@ -698,37 +771,25 @@ class Knight extends Piece {
 }
 
 class Pawn extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead, hasMoved) {
-        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
         if (team) this.rowDirection = -1;
         else this.rowDirection = 1;
-        this.hasMoved = hasMoved;
+        this.type = "p";
         this.points = 1;}
 
     getSendObject()
     {
         var data = super.getSendObject();
-        data.hasMoved = this.hasMoved;
         data.rowDirection = this.rowDirection;
         return data;
     }
 
-    checkPromotion()
-    {
-        if (this.rowDirection < 0 && row == 0)
-        {
-            return true;
-        }
-        if (this.rowDirection > 0 && row == 7)
-        {
-            return true;
-        }
-        return false;
-    }
+    checkPromotion(){
+        if ((this.rowDirection < 0 && row == 0) || (this.rowDirection > 0 && row == 7)){return true;}return false;}
 
-    findPossibleMoves(teamPositions, oppPositions) {
-        this.possibleMoves = [];
-        this.blockBlocks = [];
+    findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
+        super.findPossibleMoves();
         this.checkForwardPawn(0, this.rowDirection, teamPositions, oppPositions);
         if ((this.team && this.row == 6) || (!this.team && this.row == 1))
         {
@@ -793,62 +854,60 @@ class Pawn extends Piece {
     }
 }
 
-
 class Queen extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
-        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
+        this.type = "q";
         this.points = 9;
         }
 
-    findPossibleMoves(teamPositions, oppPositions) {
-        this.possibleMoves = [];
-        this.blockBlocks = [];
-        this.checkDiagonal(1, 1, teamPositions, oppPositions);
-        this.checkDiagonal(-1, -1, teamPositions, oppPositions);
-        this.checkDiagonal(-1, 1, teamPositions, oppPositions);
-        this.checkDiagonal(1, -1, teamPositions, oppPositions);
-        this.checkStraight(1, 0, teamPositions, oppPositions);
-        this.checkStraight(-1, 0, teamPositions, oppPositions);
-        this.checkStraight(0, 1, teamPositions, oppPositions);
-        this.checkStraight(0, -1, teamPositions, oppPositions);
+    findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
+        super.findPossibleMoves();
+        this.checkDiagonal(1, 1, teamPositions, oppPositions, enemyKingPos);
+        this.checkDiagonal(-1, -1, teamPositions, oppPositions, enemyKingPos);
+        this.checkDiagonal(-1, 1, teamPositions, oppPositions, enemyKingPos);
+        this.checkDiagonal(1, -1, teamPositions, oppPositions, enemyKingPos);
+        this.checkStraight(1, 0, teamPositions, oppPositions, enemyKingPos);
+        this.checkStraight(-1, 0, teamPositions, oppPositions, enemyKingPos);
+        this.checkStraight(0, 1, teamPositions, oppPositions, enemyKingPos);
+        this.checkStraight(0, -1, teamPositions, oppPositions, enemyKingPos);
     }
     
-    checkStraight(xDirection, yDirection, teamPositions, oppPositions)
+    checkStraight(xDirection, yDirection, teamPositions, oppPositions, enemyKingPos)
     {
-        this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
+        this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col}, enemyKingPos);
     }
     
-    checkDiagonal(xDirection, yDirection, teamPositions, oppPositions)
+    checkDiagonal(xDirection, yDirection, teamPositions, oppPositions, enemyKingPos)
     {
-        this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
+        this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col}, enemyKingPos);
     }
 }
 
 class Rook extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead) {
-        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
+        this.type = "r";
         this.points = 5;
         }
 
     getSendObject()
     {
         var data = super.getSendObject();
-        data.hasMoved = this.hasMoved;
         return data;
     }
 
-    findPossibleMoves(teamPositions, oppPositions) {
-        this.possibleMoves = [];
-        this.blockBlocks = [];
-        this.checkStraight(1, 0, teamPositions, oppPositions);
-        this.checkStraight(-1, 0, teamPositions, oppPositions);
-        this.checkStraight(0, 1, teamPositions, oppPositions);
-        this.checkStraight(0, -1, teamPositions, oppPositions);
+    findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
+        super.findPossibleMoves();
+        this.checkStraight(1, 0, teamPositions, oppPositions, enemyKingPos);
+        this.checkStraight(-1, 0, teamPositions, oppPositions, enemyKingPos);
+        this.checkStraight(0, 1, teamPositions, oppPositions, enemyKingPos);
+        this.checkStraight(0, -1, teamPositions, oppPositions, enemyKingPos);
     }
     
-    checkStraight(xDirection, yDirection, teamPositions, oppPositions)
+    checkStraight(xDirection, yDirection, teamPositions, oppPositions, enemyKingPos)
     {
-        this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
+        this.checkRecursive(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col}, enemyKingPos);
     }
 }
 

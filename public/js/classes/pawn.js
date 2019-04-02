@@ -1,23 +1,16 @@
 class Pawn extends Piece {
-    constructor (row, col, num, team, possibleMoves, blockBlocks, isDead, hasMoved) {
-        super(row, col, num, team, possibleMoves, blockBlocks, isDead);
+    constructor (row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead) {
+        super(row, col, num, team, possibleMoves, blockBlocks, pathBlocks, isDead);
         if (team) this.rowDirection = -1;
         else this.rowDirection = 1;
-        this.hasMoved = hasMoved;
+        this.type = "p";
         this.points = 1;}
 
     getSendObject()
     {
         var data = super.getSendObject();
-        data.hasMoved = this.hasMoved;
         data.rowDirection = this.rowDirection;
         return data;
-    }
-
-    move(newPos, teamPositions, oppPositions) { // Checks if possibleMoves includes new position, then sends it there. Refinds possoible moves
-        if (super.move(newPos, teamPositions, oppPositions)){
-        this.hasMoved = 1; return true;}
-        else return false;
     }
 
     checkPromotion()
@@ -33,19 +26,18 @@ class Pawn extends Piece {
         return false;
     }
 
-    findPossibleMoves(teamPositions, oppPositions) {
-        this.possibleMoves = [];
-        this.blockBlocks = [];
-        this.checkForward(0, this.rowDirection, teamPositions, oppPositions);
-        if (!((this.row > 1 && !this.team) || (this.row < 6 && this.team)))
+    findPossibleMoves(teamPositions, oppPositions, enemyKingPos) {
+        super.findPossibleMoves();
+        this.checkForwardPawn(0, this.rowDirection, teamPositions, oppPositions);
+        if ((this.team && this.row == 6) || (!this.team && this.row == 1))
         {
-            this.checkForward(0, this.rowDirection * 2, teamPositions, oppPositions);
+            this.checkForwardPawn(0, this.rowDirection * 2, teamPositions, oppPositions);
         }
         this.checkKillDiag(1, this.rowDirection, teamPositions, oppPositions);
         this.checkKillDiag(-1, this.rowDirection, teamPositions, oppPositions);
     }
 
-    checkForward(xDirection, yDirection, teamPositions, oppPositions)
+    checkForwardPawn(xDirection, yDirection, teamPositions, oppPositions)
     {
         this.checkOncePawn(xDirection, yDirection, teamPositions, oppPositions, {row: this.row, col: this.col});
     }
@@ -58,7 +50,6 @@ class Pawn extends Piece {
         {
             if (this.isEqual(testBlock, teamPositions[i]))
             {
-                teamPositions.splice(i, 1);
                 this.blockBlocks.push(testBlock);
                 return true;
             }
@@ -67,11 +58,11 @@ class Pawn extends Piece {
         {
             if (this.isEqual(testBlock, oppPositions[i]))
             {
-                oppPositions.splice(i, 1);
                 this.possibleMoves.push(testBlock);
                 return true;
             }
         }  
+	this.blockBlocks.push(testBlock);
         return true;
     }
 
