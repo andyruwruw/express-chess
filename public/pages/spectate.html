@@ -66,10 +66,9 @@
     <source src="../sounds/stalemate.wav" type="audio/wav">
   </audio>
 </head>
-<div id="loading"></div>
-<body onclick="playMusic();" onload="loading()">
+<body>
   <a href="http://andrewdanielyoung.com/" id="homeButton"> </a>
-
+  <a class="button add-margin" v-if="!matchData.rejoin" href="./pages/spectate.html">SPECTATE</a>
 <div id="app">
     <div class="header" v-if="matchData.startGame">
       <div class="title">
@@ -90,6 +89,7 @@
         <a class="button add-margin" v-if="!matchData.rejoin" href="./pages/spectate.html">SPECTATE</a>
         <a class="button add-margin" v-if="!matchData.rejoin"href="./pages/about.html">ABOUT</a>
     </div>
+    <p v-if="!matchData.startGame">Open Two Browser Windows if Opponent's Aren't Available.</p>
  
     <div id="topDiv" class="container" v-if="matchData.startGame">
       <div class="third">

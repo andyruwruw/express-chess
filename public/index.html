@@ -87,9 +87,9 @@
     <div id="menuButtons" v-if="!matchData.startGame">
         <button class="add-margin" v-if="!matchData.rejoin" @click="getMatchMakers">{{findMatchButtonText}}</button>
         <button class="add-margin" @click="matchData.rejoin = !matchData.rejoin;">{{notDone}}</button>
-        <a class="button add-margin" v-if="!matchData.rejoin" href="./pages/spectate.html">SPECTATE</a>
         <a class="button add-margin" v-if="!matchData.rejoin"href="./pages/about.html">ABOUT</a>
     </div>
+    <p v-if="!matchData.startGame" style="display: block; color: grey; margin: 0 auto; text-align: center; margin-top: 300px;">Open Two Browser Windows if Opponent's Aren't Available.</p>
  
     <div id="topDiv" class="container" v-if="matchData.startGame">
       <div class="third">
