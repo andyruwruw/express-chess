@@ -6,63 +6,338 @@
   <link rel="stylesheet" href="../css/style.css" />
   <title>Express Chess</title>
   <audio id="orionstheme">
-      <source src="sounds/orionstheme.mp3" type="audio/mpeg">
+      <source src="../../sounds/orionstheme.mp3" type="audio/mpeg">
   </audio>
   <audio id="chopin">
-    <source src="sounds/chopin.mp3" type="audio/mpeg">
+    <source src="../../sounds/chopin.mp3" type="audio/mpeg">
   </audio>
   <audio id="bach">
-    <source src="sounds/bach.mp3" type="audio/mpeg">
+    <source src="../sounds/bach.mp3" type="audio/mpeg">
   </audio>
   <audio id="minecraft">
-    <source src="sounds/minecraft.mp3" type="audio/mpeg">
+    <source src="../sounds/minecraft.mp3" type="audio/mpeg">
   </audio>
   <audio id="lowfi">
-    <source src="sounds/lowfi.mp3" type="audio/mpeg">
-  </audio>
-  <audio id="bluemantique">
-    <source src="sounds/bluemantique.mp3" type="audio/mpeg">
-  </audio>
-  <audio id="outkast">
-    <source src="sounds/outkast.mp3" type="audio/mpeg">
-  </audio>
-  <audio id="wouh">
-    <source src="sounds/wouh.mp3" type="audio/mpeg">
-  </audio>
-  <audio id="select">
-    <source src="sounds/select.wav" type="audio/wav">
-  </audio>
-  <audio id="unselect">
-    <source src="sounds/unselect.wav" type="audio/wav">
-  </audio>
-  <audio id="error">
-    <source src="sounds/error.wav" type="audio/wav">
+    <source src="../sounds/lowfi.mp3" type="audio/mpeg">
   </audio>
   <audio id="check">
-    <source src="sounds/check.wav" type="audio/wav">
+    <source src="../sounds/check.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="chat">
+    <source src="../sounds/chat.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="sendchat">
+    <source src="../sounds/sendchat.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="bluemantique">
+    <source src="../sounds/bluemantique.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="outkast">
+    <source src="../sounds/outkast.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="wouh">
+    <source src="../sounds/wouh.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="select">
+    <source src="../sounds/select.wav" type="audio/wav">
+  </audio>
+  <audio id="unselect">
+    <source src="../sounds/unselect.wav" type="audio/wav">
+  </audio>
+  <audio id="error">
+    <source src="../sounds/error.wav" type="audio/wav">
   </audio>
   <audio id="checkmate">   
-    <source src="sounds/checkmate.wav" type="audio/wav">
+    <source src="../sounds/checkmate.wav" type="audio/wav">
   </audio>
   <audio id="move">
-    <source src="sounds/move.wav" type="audio/wav">
+    <source src="../sounds/move.wav" type="audio/wav">
   </audio>
   <audio id="matchfound">    
-    <source src="sounds/matchfound.wav" type="audio/wav">
+    <source src="../sounds/matchfound.wav" type="audio/wav">
   </audio>
   <audio id="turn">
-    <source src="sounds/turn.wav" type="audio/wav">
+    <source src="../sounds/turn.wav" type="audio/wav">
   </audio>
   <audio id="end">
-    <source src="sounds/end.wav" type="audio/wav">
+    <source src="../sounds/end.wav" type="audio/wav">
   </audio>
   <audio id="stalemate">
-    <source src="sounds/stalemate.wav" type="audio/wav">
+    <source src="../sounds/stalemate.wav" type="audio/wav">
   </audio>
 </head>
-<body>
-    <h1 style="display: block; margin: 0 auto; margin-top: 20%; font-size: 300%; text-align: center;">SORRY, STILL WORKING ON THIS!</h1>
-    <div id="menuButtons">
-    <a class="add-bottom button add-margin" href="../index.html">BACK</a>
+<div id="loading"></div>
+<body onclick="playMusic();" onload="loading()">
+  <a href="http://andrewdanielyoung.com/" id="homeButton"> </a>
+
+<div id="app">
+    <div class="header" v-if="matchData.startGame">
+      <div class="title">
+        <h1>Express Chess</h1>
+      </div>
     </div>
+    <h1 id="menuTitle" v-if="!matchData.startGame">Express Chess</h1>
+    <div id="addid" v-if="matchData.rejoin">
+      <h1>{{this.trackerData.rejoinText}}</h1>
+      <div class="form">
+        <input v-model="serverData.gameID" id="gameidtext" placeholder="Game ID">
+        <button @click="rejoin" id="send">Join</button>
+      </div>
+    </div>
+    <div id="menuButtons" v-if="!matchData.startGame">
+        <button class="add-margin" v-if="!matchData.rejoin" @click="getMatchMakers">{{findMatchButtonText}}</button>
+        <button class="add-margin" @click="matchData.rejoin = !matchData.rejoin;">{{notDone}}</button>
+        <a class="button add-margin" v-if="!matchData.rejoin" href="./pages/spectate.html">SPECTATE</a>
+        <a class="button add-margin" v-if="!matchData.rejoin"href="./pages/about.html">ABOUT</a>
+    </div>
+ 
+    <div id="topDiv" class="container" v-if="matchData.startGame">
+      <div class="third">
+          <h1>Current Turn</h1>
+          <h1 id="turn">{{gameData.displayedTurn}}</h1>
+          <h2>{{playerTurnCalc}}</h2>
+      </div>
+      <div class="third">
+          <h1>{{winningCalc}}</h1>
+          <h2 class="less-margin">White Score: {{gameData.whiteScore}}</h2>
+          <h2 class="less-margin">Black Score: {{gameData.blackScore}}</h2>
+      </div>
+      <div class="third">
+          <h1>Selected</h1>
+          <div class="wt" id="selected"></div>
+      </div>
+      
+    </div>
+    <div class="container wrap" v-if="matchData.startGame">
+      <div class="two sideDiv" id="stats">
+        <h2 class="center">Captures</h2>
+        <div class="add-top-margin container">
+          <div class="col">
+            <div class="deadcontainer" id="wDead">
+                <div id="dead-wq" class="dead off wq"></div>
+                <div id="dead-wr" class="dead off wr"></div>
+                <div id="dead-wb" class="dead off wb"></div>
+                <div id="dead-wn" class="dead off wn"></div>
+                <div id="dead-wp" class="dead off wp"></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="deadcontainer" id="bDead">
+                <div id="dead-bq" class="dead off bq"></div>
+                <div id="dead-br" class="dead off br"></div>
+                <div id="dead-bb" class="dead off bb"></div>
+                <div id="dead-bn" class="dead off bn"></div>
+                <div id="dead-bp" class="dead off bp"></div>
+            </div>
+          </div>
+        </div>
+        <h2 class="center add-more-top-margin">From Server</h2>
+        <h3 id="serverMessage">{{serverData.serverMessageText}}</h3>
+        <div id="bottom">
+          <button @click="toggleAssistSelect" class="optionButton" id="moveAssist">Move Assist</button>
+          <button @click="changeSong" @mouseover="selectData.showSong = true" @mouseleave="selectData.showSong = false" class="optionButton" style="color: white">{{currmusic}}</button>
+        </div>
+        <div id="top-bottom" class="container">
+        <button id="gameID">{{gameIDButton}}</button>
+        </div>
+      </div>
+      <div class="one" id="board" v-if="!gameData.team">
+        <div class="container">
+          <div @click="clickBlock('7-0')" class="br block white" id="7-0"></div>
+          <div @click="clickBlock('7-1')" class="bn block black" id="7-1"></div>
+          <div @click="clickBlock('7-2')" class="bb block white" id="7-2"></div>
+          <div @click="clickBlock('7-3')" class="bq block black" id="7-3"></div>
+          <div @click="clickBlock('7-4')" class="bk block white" id="7-4"></div>
+          <div @click="clickBlock('7-5')" class="bb block black" id="7-5"></div>
+          <div @click="clickBlock('7-6')" class="bn block white" id="7-6"></div>
+          <div @click="clickBlock('7-7')" class="br block black" id="7-7"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('6-0')" class="bp block black" id="6-0"></div>
+          <div @click="clickBlock('6-1')" class="bp block white" id="6-1"></div>
+          <div @click="clickBlock('6-2')" class="bp block black" id="6-2"></div>
+          <div @click="clickBlock('6-3')" class="bp block white" id="6-3"></div>
+          <div @click="clickBlock('6-4')" class="bp block black" id="6-4"></div>
+          <div @click="clickBlock('6-5')" class="bp block white" id="6-5"></div>
+          <div @click="clickBlock('6-6')" class="bp block black" id="6-6"></div>
+          <div @click="clickBlock('6-7')" class="bp block white" id="6-7"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('5-0')" class="block white" id="5-0"></div>
+          <div @click="clickBlock('5-1')" class="block black" id="5-1"></div>
+          <div @click="clickBlock('5-2')" class="block white" id="5-2"></div>
+          <div @click="clickBlock('5-3')" class="block black" id="5-3"></div>
+          <div @click="clickBlock('5-4')" class="block white" id="5-4"></div>
+          <div @click="clickBlock('5-5')" class="block black" id="5-5"></div>
+          <div @click="clickBlock('5-6')" class="block white" id="5-6"></div>
+          <div @click="clickBlock('5-7')" class="block black" id="5-7"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('4-0')" class="block black" id="4-0"></div>
+          <div @click="clickBlock('4-1')" class="block white" id="4-1"></div>
+          <div @click="clickBlock('4-2')" class="block black" id="4-2"></div>
+          <div @click="clickBlock('4-3')" class="block white" id="4-3"></div>
+          <div @click="clickBlock('4-4')" class="block black" id="4-4"></div>
+          <div @click="clickBlock('4-5')" class="block white" id="4-5"></div>
+          <div @click="clickBlock('4-6')" class="block black" id="4-6"></div>
+          <div @click="clickBlock('4-7')" class="block white" id="4-7"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('3-0')" class="block white" id="3-0"></div>
+          <div @click="clickBlock('3-1')" class="block black" id="3-1"></div>
+          <div @click="clickBlock('3-2')" class="block white" id="3-2"></div>
+          <div @click="clickBlock('3-3')" class="block black" id="3-3"></div>
+          <div @click="clickBlock('3-4')" class="block white" id="3-4"></div>
+          <div @click="clickBlock('3-5')" class="block black" id="3-5"></div>
+          <div @click="clickBlock('3-6')" class="block white" id="3-6"></div>
+          <div @click="clickBlock('3-7')" class="block black" id="3-7"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('2-0')" class="block black" id="2-0"></div>
+          <div @click="clickBlock('2-1')" class="block white" id="2-1"></div>
+          <div @click="clickBlock('2-2')" class="block black" id="2-2"></div>
+          <div @click="clickBlock('2-3')" class="block white" id="2-3"></div>
+          <div @click="clickBlock('2-4')" class="block black" id="2-4"></div>
+          <div @click="clickBlock('2-5')" class="block white" id="2-5"></div>
+          <div @click="clickBlock('2-6')" class="block black" id="2-6"></div>
+          <div @click="clickBlock('2-7')" class="block white" id="2-7"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('1-0')" class="wp block white" id="1-0"></div>
+          <div @click="clickBlock('1-1')" class="wp block black" id="1-1"></div>
+          <div @click="clickBlock('1-2')" class="wp block white" id="1-2"></div>
+          <div @click="clickBlock('1-3')" class="wp block black" id="1-3"></div>
+          <div @click="clickBlock('1-4')" class="wp block white" id="1-4"></div>
+          <div @click="clickBlock('1-5')" class="wp block black" id="1-5"></div>
+          <div @click="clickBlock('1-6')" class="wp block white" id="1-6"></div>
+          <div @click="clickBlock('1-7')" class="wp block black" id="1-7"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('0-0')" class="wr block black" id="0-0"></div>
+          <div @click="clickBlock('0-1')" class="wn block white" id="0-1"></div>
+          <div @click="clickBlock('0-2')" class="wb block black" id="0-2"></div>
+          <div @click="clickBlock('0-3')" class="wq block white" id="0-3"></div>
+          <div @click="clickBlock('0-4')" class="wk block black" id="0-4"></div>
+          <div @click="clickBlock('0-5')" class="wb block white" id="0-5"></div>
+          <div @click="clickBlock('0-6')" class="wn block black" id="0-6"></div>
+          <div @click="clickBlock('0-7')" class="wr block white" id="0-7"></div>
+        </div>
+      </div>
+      <div class="one" id="board" v-if="gameData.team">
+        <div class="container">
+          <div @click="clickBlock('0-7')" class="wr block white" id="0-7"></div>
+          <div @click="clickBlock('0-6')" class="wn block black" id="0-6"></div>
+          <div @click="clickBlock('0-5')" class="wb block white" id="0-5"></div>
+          <div @click="clickBlock('0-4')" class="wk block black" id="0-4"></div>
+          <div @click="clickBlock('0-3')" class="wq block white" id="0-3"></div>
+          <div @click="clickBlock('0-2')" class="wb block black" id="0-2"></div>
+          <div @click="clickBlock('0-1')" class="wn block white" id="0-1"></div>
+          <div @click="clickBlock('0-0')" class="wr block black" id="0-0"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('1-7')" class="wp block black" id="1-7"></div>
+          <div @click="clickBlock('1-6')" class="wp block white" id="1-6"></div>
+          <div @click="clickBlock('1-5')" class="wp block black" id="1-5"></div>
+          <div @click="clickBlock('1-4')" class="wp block white" id="1-4"></div>
+          <div @click="clickBlock('1-3')" class="wp block black" id="1-3"></div>
+          <div @click="clickBlock('1-2')" class="wp block white" id="1-2"></div>
+          <div @click="clickBlock('1-1')" class="wp block black" id="1-1"></div>
+          <div @click="clickBlock('1-0')" class="wp block white" id="1-0"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('2-7')" class="block white" id="2-7"></div>
+          <div @click="clickBlock('2-6')" class="block black" id="2-6"></div>
+          <div @click="clickBlock('2-5')" class="block white" id="2-5"></div>
+          <div @click="clickBlock('2-4')" class="block black" id="2-4"></div>
+          <div @click="clickBlock('2-3')" class="block white" id="2-3"></div>
+          <div @click="clickBlock('2-2')" class="block black" id="2-2"></div>
+          <div @click="clickBlock('2-1')" class="block white" id="2-1"></div>
+          <div @click="clickBlock('2-0')" class="block black" id="2-0"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('3-7')" class="block black" id="3-7"></div>
+          <div @click="clickBlock('3-6')" class="block white" id="3-6"></div>
+          <div @click="clickBlock('3-5')" class="block black" id="3-5"></div>
+          <div @click="clickBlock('3-4')" class="block white" id="3-4"></div>
+          <div @click="clickBlock('3-3')" class="block black" id="3-3"></div>
+          <div @click="clickBlock('3-2')" class="block white" id="3-2"></div>
+          <div @click="clickBlock('3-1')" class="block black" id="3-1"></div>
+          <div @click="clickBlock('3-0')" class="block white" id="3-0"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('4-7')" class="block white" id="4-7"></div>
+          <div @click="clickBlock('4-6')" class="block black" id="4-6"></div>
+          <div @click="clickBlock('4-5')" class="block white" id="4-5"></div>
+          <div @click="clickBlock('4-4')" class="block black" id="4-4"></div>
+          <div @click="clickBlock('4-3')" class="block white" id="4-3"></div>
+          <div @click="clickBlock('4-2')" class="block black" id="4-2"></div>
+          <div @click="clickBlock('4-1')" class="block white" id="4-1"></div>
+          <div @click="clickBlock('4-0')" class="block black" id="4-0"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('5-7')" class="block black" id="5-7"></div>
+          <div @click="clickBlock('5-6')" class="block white" id="5-6"></div>
+          <div @click="clickBlock('5-5')" class="block black" id="5-5"></div>
+          <div @click="clickBlock('5-4')" class="block white" id="5-4"></div>
+          <div @click="clickBlock('5-3')" class="block black" id="5-3"></div>
+          <div @click="clickBlock('5-2')" class="block white" id="5-2"></div>
+          <div @click="clickBlock('5-1')" class="block black" id="5-1"></div>
+          <div @click="clickBlock('5-0')" class="block white" id="5-0"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('6-7')" class="bp block white" id="6-7"></div>
+          <div @click="clickBlock('6-6')" class="bp block black" id="6-6"></div>
+          <div @click="clickBlock('6-5')" class="bp block white" id="6-5"></div>
+          <div @click="clickBlock('6-4')" class="bp block black" id="6-4"></div>
+          <div @click="clickBlock('6-3')" class="bp block white" id="6-3"></div>
+          <div @click="clickBlock('6-2')" class="bp block black" id="6-2"></div>
+          <div @click="clickBlock('6-1')" class="bp block white" id="6-1"></div>
+          <div @click="clickBlock('6-0')" class="bp block black" id="6-0"></div>
+        </div>
+        <div class="container">
+          <div @click="clickBlock('7-7')" class="br block black" id="7-7"></div>
+          <div @click="clickBlock('7-6')" class="bn block white" id="7-6"></div>
+          <div @click="clickBlock('7-5')" class="bb block black" id="7-5"></div>
+          <div @click="clickBlock('7-4')" class="bk block white" id="7-4"></div>
+          <div @click="clickBlock('7-3')" class="bq block black" id="7-3"></div>
+          <div @click="clickBlock('7-2')" class="bb block white" id="7-2"></div>
+          <div @click="clickBlock('7-1')" class="bn block black" id="7-1"></div>
+          <div @click="clickBlock('7-0')" class="br block white" id="7-0"></div>
+        </div>
+      </div>
+      <div class="three sideDiv" id="chat">
+        <h2 class="center">Chat</h2>
+        <div v-if="!chatData.messages.length" id="noplayermessages"></div>
+        <div class="message" v-for="message in chatData.messages">  
+          <div class="messageDetails">
+              <h4>{{message.usr}}</h4>
+              <h5>{{message.time}}</h5>
+          </div>
+          <p style="font-family: 'Cairo', sans-serif">{{message.text}}</p>
+        </div>
+        <div class="form">
+          <input v-model="chatData.messageText" id="textbox" placeholder="Send Message">
+          <button @click="messageChatRoom" id="send">Send</button>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+    <div class="footer">
+        <a href="https://github.com/andyruwruw/Express-Chess.git" id="git">Git Repository</a>
+    </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.7/vue.js" integrity="sha256-g+Q8DFAmG5+eyRPSydX0LY4TfjsL11XSDrIGerbbEdA=" crossorigin="anonymous"></script>
+  <script src="../js/classes/piece.js"></script>
+  <script src="../js/classes/king.js"></script>
+  <script src="../js/classes/queen.js"></script>
+  <script src="../js/classes/bishop.js"></script>
+  <script src="../js/classes/knight.js"></script>
+  <script src="../js/classes/pawn.js"></script>
+  <script src="../js/startingdata.js"></script>
+  <script src="../js/classes/rook.js"></script>
+  <script src="../js/spectate.js"></script>
 </body>
+
+</html>
