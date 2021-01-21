@@ -9,10 +9,9 @@ let io = require('socket.io')(http);
 io.on('connection', function(socket: any) {
   console.log(socket);
 
-  
   socket.on('message', function(message: any) {
     console.log(message);
-  })
+  });
 });
 
 const server = http.listen(3000, function() {
